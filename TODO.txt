@@ -1,29 +1,33 @@
-1. Deploy to AWS
-
-2. curl requests and capture logs from Cloudwatch
-
-3. Develop and test locally and continue deploying until operations all work - build up curl requests:
+1. Skeleton of all operations with tests and curl requests:
    completeLogin
    refreshAccessToken
    getAccessToken
    expireRefreshToken
    expireAuthCookie
+   Then Write the GitHub README and 
 
-4. Write a new anti forgery token after every refresh for better OWASP reviews
-   But think about this from a multi tab browser viewpoint
-   Are there any 401 race conditions that will cause SPA errors
+2. Implement API code until good enough for SPA to connect to
+   Do so by pulling code out of webreverseproxy repo
+   Unit tested operations via curl
 
-5. Branch of SPA called feature/oauthwebproxy
+3. Branch of SPA called feature/oauthwebproxy
    Remove oidc client completely
-   Deployed as /spa2 with a different OAuth Client in AWS
-   
-6. SPA productive setup
-   Node script to download and also run the proxy API when npm start is called
+   Can connect to OAuth proxy on local PC
+   Remove reverse proxy stuff from README and emphasize use of 'back end for front end'
 
-7. New SPA code to write
+4. New SPA code to write
    Form the OpenID Connect URL
    Calculate the state and the PKCE details
    Add withCredentials to axios calls
 
-8. New API code to write
+5. Deploy branch as /spa2 with a new temporary OAuth Client in AWS
+   
+6. SPA by default calls the OAuth proxy in the cloud
+   Articles need to explain how to switch to local
+
+7. New API code to write
    Validate id token and check AT hash - cf oidc client library
+
+8. API to write a new anti forgery token after every refresh for better OWASP reviews
+   But think about this from a multi tab browser viewpoint
+   Are there any 401 race conditions that the SPA cannot handle?

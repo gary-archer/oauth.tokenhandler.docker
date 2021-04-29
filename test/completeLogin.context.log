@@ -1,0 +1,16 @@
+{
+  callbackWaitsForEmptyEventLoop: [Getter/Setter],
+  succeed: [Function (anonymous)],
+  fail: [Function (anonymous)],
+  done: [Function (anonymous)],
+  functionVersion: '$LATEST',
+  functionName: 'oauthwebproxy-deployed-completeLogin',
+  memoryLimitInMB: '1024',
+  logGroupName: '/aws/lambda/oauthwebproxy-deployed-completeLogin',
+  logStreamName: '2021/04/29/[$LATEST]d8ddeb12de3c469b94099f7e863136e3',
+  clientContext: undefined,
+  identity: undefined,
+  invokedFunctionArn: 'arn:aws:lambda:eu-west-2:090109105180:function:oauthwebproxy-deployed-completeLogin',
+  awsRequestId: '8f00e1e2-94ef-4e36-b9f9-0e0e631ee7e8',
+  getRemainingTimeInMillis: [Function: getRemainingTimeInMillis]
+}

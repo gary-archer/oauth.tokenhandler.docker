@@ -1,10 +1,12 @@
 const handler = async (event: any, context: any) => {
 
     console.log('AUTHORIZATION CODE GRANT');
-    console.log(event);
-    console.log(context);
+    console.log(event.body);
+    
+    // Client
     const data = {
         message: 'AUTHORIZATION CODE GRANT',
+        data: event.body,
     };
 
     return {

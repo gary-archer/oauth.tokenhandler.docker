@@ -1,0 +1,36 @@
+{
+  "name": "webproxyapi",
+  "version": "1.0.0",
+  "description": "An OAuth secured API that manages translation from SameSite cookies to tokens",
+  "scripts": {
+    "lint": "npx eslint . --ext .ts,.tsx && npx eslint deployment --ext .ts,.tsx",
+    "build": "rimraf dist && tsc --sourceMap true",
+    "completeLogin": "sls invoke local -f completeLogin -p test/completeLogin.json",
+    "refreshAccessToken": "sls invoke local -f refreshAccessToken -p test/refreshAccessToken.json",
+    "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
+    "buildRelease": "rimraf dist && tsc",
+    "deploy": "sls deploy --package .serverless --stage deployed",
+    "remove": "sls remove --stage deployed"
+  },
+  "author": "Gary Archer",
+  "license": "MIT",
+  "dependencies": {
+    "@middy/core": "1.4.0",
+    "@middy/http-cors": "^1.4.0",
+    "fs-extra": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.64",
+    "@types/fs-extra": "^9.0.4",
+    "@types/node": "^14.14.10",
+    "@typescript-eslint/eslint-plugin": "^4.16.1",
+    "@typescript-eslint/parser": "^4.16.1",
+    "eslint": "^7.21.0",
+    "rimraf": "^3.0.2",
+    "serverless": "^2.33.0",
+    "serverless-domain-manager": "4.1.0",
+    "serverless-plugin-scripts": "^1.0.2",
+    "tunnel-agent": "^0.6.0",
+    "typescript": "^4.2.2"
+  }
+}

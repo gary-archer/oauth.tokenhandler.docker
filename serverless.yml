@@ -1,0 +1,90 @@
+service: oauthwebproxy
+
+# Base details for AWS deployment
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-2
+  profile: default
+  stage: ${self:custom.config.settings.stage}
+  lambdaHashingVersion: '20201221'
+  apiGateway:
+    shouldStartNameWithService: true
+
+custom:
+  # Each environment can have its own configuration file
+  config: ${file(environments/${opt:stage, 'local'}.yml)}
+  
+  # AWS deployed details
+  customDomain:
+    domainName: ${self:custom.config.settings.apiHostName}
+    certificateName: '*.${self:custom.config.settings.certificateDomainName}'
+    basePath: oauthwebproxy
+    stage: ${self:custom.config.settings.stage}
+    endpointType: regional
+
+  # CORS headers allowed
+  allowedHeaders:
+    - Content-Type
+    - X-Amz-Date
+    - Authorization
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
+
+functions:
+  
+  completeLogin:
+    handler: dist/lambda/completeLogin.handler
+    events:
+      - http: 
+          path: /login
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+
+  refreshAccessToken:
+    handler: dist/lambda/refreshAccessToken.handler
+    events:
+      - http: 
+          path: /refresh
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+
+# By default all files are included so remove files we don't need for any lambda
+# The custom packager does the rest of the work in code, including adding node_modules
+package:
+  patterns:
+  - '!.vscode/**'
+  - '!environments/**'
+  - '!node_modules/**'
+  - '!src/**'
+  - '!test/**'
+  - '!ts*.json'
+  - '!package*.json'
+  - '!README.md'
+  - '!LICENSE.txt'
+
+plugins:
+  - serverless-plugin-scripts
+  - serverless-domain-manager
+
+resources:
+  Resources:
+
+    # Limit cloudwatch log retention 
+    CompleteLoginLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    RefreshAccessTokenLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'

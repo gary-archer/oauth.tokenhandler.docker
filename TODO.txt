@@ -1,0 +1,18 @@
+1. Deploy to AWS
+
+2. POSTS to get payloads logged
+
+3. Develop and test locally and continue deploying until operations all work
+   completeLogin
+   refreshAccessToken
+   expireRefreshToken
+   expireAuthCookie
+
+4. Write a new anti forgery token after every refresh
+   But think about this from a multi tab browser viewpoint
+   Are there some 401 race conditions here?
+
+5. Branch of SPA called feature/oauthwebproxy
+   Remove oidc client completely
+   Deployed as /spa2 with a different OAuth Client in AWS
+   Node script to download and also run the proxy API when npm start is called

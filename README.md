@@ -1,2 +1,2 @@
 # oauth.webproxy
-An API that issues Same Site cookies for SPAs, containing the refresh token
+An API that issues SameSite cookies for SPAs as part of a Back End for Front End solution

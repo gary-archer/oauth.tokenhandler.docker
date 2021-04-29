@@ -21,6 +21,8 @@
    Add withCredentials to axios calls
 
 5. Deploy branch as /spa2 with a new temporary OAuth Client in AWS
+   Remove SPA strategies and always show all header buttons
+   Only ever use a single strategy of proxying, for a clearer message
    
 6. SPA by default calls the OAuth proxy in the cloud
    Articles need to explain how to switch to local

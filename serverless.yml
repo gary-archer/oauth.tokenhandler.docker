@@ -59,12 +59,10 @@ functions:
             headers: ${self:custom.allowedHeaders}
 
 # By default all files are included so remove files we don't need for any lambda
-# The custom packager does the rest of the work in code, including adding node_modules
 package:
   patterns:
   - '!.vscode/**'
   - '!environments/**'
-  - '!node_modules/**'
   - '!src/**'
   - '!test/**'
   - '!ts*.json'

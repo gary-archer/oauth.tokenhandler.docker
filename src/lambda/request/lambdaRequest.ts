@@ -1,9 +1,9 @@
 import cookie from 'cookie';
 
 /*
- * Encapsulate the lambda edge specific request format
+ * Encapsulate the lambda request
  */
-export class LambdaEdgeRequest {
+export class LambdaRequest {
 
     private readonly _request: any;
     private readonly _body: any;

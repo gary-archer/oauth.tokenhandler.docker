@@ -1,9 +1,9 @@
-import {ClientError} from '../errors/clientError';
+import {ClientError} from '../../core/errors/clientError';
 
 /*
- * Encapsulate a lambda edge response
+ * Encapsulate a lambda response
  */
-export class LambdaEdgeResponse {
+export class LambdaResponse {
 
     private readonly _data: any;
     private readonly _headers: [string, string[]][];
@@ -22,7 +22,7 @@ export class LambdaEdgeResponse {
     }
 
     /*
-     * In lambda edge, headers are arrays of objects containing 'key' and 'value' fields
+     * Headers are arrays of objects containing 'key' and 'value' fields
      */
     public addHeader(name: string, value: string): void {
 
@@ -47,7 +47,7 @@ export class LambdaEdgeResponse {
     }
 
     /*
-     * Output in Lambda Edge's particular format, where headers are an array of objects
+     * Output in Lambda's particular format, where headers are an array of objects
      *
      * headers: {
          'set-cookie': [{
@@ -60,7 +60,7 @@ export class LambdaEdgeResponse {
          }]
        }
      */
-    public toLambdaEdgeFormat(): any {
+    public toLambdaFormat(): any {
 
         const data: any = {
             status: this._data.statusCode ?? 200,

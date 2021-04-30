@@ -1,37 +1,56 @@
-1. Get rid of the word edge
+API REVAMP PART 1
+-----------------
+1. Add Request interfaces and ensure that core code is neutral
 
-1. Skeleton of all operations with tests and curl requests:
-   completeLogin
-   refreshAccessToken
-   getAccessToken
-   expireRefreshToken
-   expireAuthCookie
-   Then Write the GitHub README and 
-
-2. Implement API code until good enough for SPA to connect to
-   Do so by pulling code out of webreverseproxy repo
-   Unit tested operations via curl
-
-3. Branch of SPA called feature/oauthwebproxy
-   Remove oidc client completely
-   Can connect to OAuth proxy on local PC
-   Remove reverse proxy stuff from README and emphasize use of 'back end for front end'
-
-4. New SPA code to write
-   Form the OpenID Connect URL
-   Calculate the state and the PKCE details
-   Add withCredentials to axios calls
-
-5. Deploy branch as /spa2 with a new temporary OAuth Client in AWS
-   Remove SPA strategies and always show all header buttons
-   Only ever use a single strategy of proxying, for a clearer message
+2. Implement methods for Serverless with clean code
+   Test via 'npm run' commands
    
-6. SPA by default calls the OAuth proxy in the cloud
-   Articles need to explain how to switch to local
+3. Deploy to AWS and test via curl commands
 
-7. New API code to write
-   Validate id token and check AT hash - cf oidc client library
+4. Implement methods for Express and add an 'npm start' command
+   Rerest via curl commands
+   
+5. Include CORS headers in request and write allow-credentials in response
 
-8. API to write a new anti forgery token after every refresh for better OWASP reviews
-   But think about this from a multi tab browser viewpoint
+6. Update README
+   Then make a public repo
+
+API REVAMP PART 2
+----------------
+1. Validate id token and check AT hash - cf oidc client library
+
+2. Write a new anti forgery token after every refresh for better OWASP reviews
+   Rename CSRF to anti forgery
+   Test this from a multi tab browser viewpoint
    Are there any 401 race conditions that the SPA cannot handle?
+
+3. Proper API logging and write to Elastic Search
+
+SPA REVAMP PART 1
+-----------------
+1. Branch of oauth.websample.final, with web reverse proxy and oidc client removed
+   Check in with very clean code and a new authenticator implementation
+   Only strategies are web and mobile
+   Throw not implemented errors for operations that OIDC client implemented previously
+
+2. Get OAuth redirects and session storage working
+   Calculate the state and the PKCE details - cf oidc client and other libraries - or Auth0 web site
+
+3. Update existing web oauth proxy client to do more work and be explicit, adding these methods
+   Call them from the authenticator implementation:
+   - Authorization Code Grant
+   - Refresh Token Grant
+
+4. Get CORS and sending of credentials working locally with Express
+   Add withCredentials to axios calls
+   Test cookies on all 4 browsers including Incognito
+   Verify that a different port for API causes no problems
+
+5. Deploy to cloud and verify that it works
+
+6. Update README and mention back end for front end
+   Then merge to master
+
+SPA REVAMP PART 2
+-----------------
+1. Use acr_values

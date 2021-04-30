@@ -1,6 +1,6 @@
 {
-  "resource": "/refresh",
-  "path": "/oauthwebproxy/refresh",
+  "resource": "/refreshTokenGrant",
+  "path": "/oauthwebproxy/refreshTokenGrant",
   "httpMethod": "POST",
   "headers": {
     "content-type": "application/x-www-form-urlencoded",
@@ -9,6 +9,5 @@
   "multiValueHeaders": {
     "content-type": [ "application/x-www-form-urlencoded" ],
     "cookie": [ "auth_cookie=XXX" ]
-  },
-  "body": "grant_type=refresh_tokenm&client_id=myClientID"
+  }
 }

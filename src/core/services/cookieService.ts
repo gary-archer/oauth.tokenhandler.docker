@@ -1,7 +1,7 @@
 import cookie, {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
-import {LambdaEdgeRequest} from '../edge/lambdaEdgeRequest';
-import {LambdaEdgeResponse} from '../edge/lambdaEdgeResponse';
+import {LambdaRequest} from '../../lambda/request/lambdaRequest';
+import {LambdaResponse} from '../../lambda/request/LambdaResponse';
 import {ErrorHandler} from '../errors/errorHandler';
 
 /*
@@ -22,7 +22,7 @@ export class CookieService {
     /*
      * Write a same domain response cookie containing the refresh token
      */
-    public writeAuthCookie(clientId: string, refreshToken: string, response: LambdaEdgeResponse): void {
+    public writeAuthCookie(clientId: string, refreshToken: string, response: LambdaResponse): void {
 
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
         response.addHeader('set-cookie', this._formatCookie(`${this._authCookieName}-${clientId}`, encryptedData));
@@ -31,7 +31,7 @@ export class CookieService {
     /*
      * Read the refresh token from the request cookie
      */
-    public readAuthCookie(clientId: string, request: LambdaEdgeRequest): string {
+    public readAuthCookie(clientId: string, request: LambdaRequest): string {
 
         const cookieName = `${this._authCookieName}-${clientId}`;
         const encryptedData = request.getCookie(cookieName);
@@ -45,7 +45,7 @@ export class CookieService {
     /*
      * Write a CSRF cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeCsrfCookie(clientId: string, response: LambdaEdgeResponse, value: string): void {
+    public writeCsrfCookie(clientId: string, response: LambdaResponse, value: string): void {
 
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
         response.addHeader('set-cookie', this._formatCookie(`${this._csrfCookieName}-${clientId}`, encryptedData));
@@ -54,7 +54,7 @@ export class CookieService {
     /*
      * Write a response cookie containing a CSRF value, which we will verify during refresh token requests
      */
-    public readCsrfCookie(clientId: string, request: LambdaEdgeRequest): string {
+    public readCsrfCookie(clientId: string, request: LambdaRequest): string {
 
         const cookieName = `${this._csrfCookieName}-${clientId}`;
         const encryptedData = request.getCookie(cookieName);
@@ -72,8 +72,8 @@ export class CookieService {
     public expire(
         clientId: string,
         refreshToken: string,
-        request: LambdaEdgeRequest,
-        response: LambdaEdgeResponse): void {
+        request: LambdaRequest,
+        response: LambdaResponse): void {
 
         const expiredRefreshToken = `x${refreshToken}x`;
         this.writeAuthCookie(clientId, expiredRefreshToken, response);
@@ -82,7 +82,7 @@ export class CookieService {
     /*
      * Clear all cookies when the user session expires
      */
-    public clearAll(clientId: string, response: LambdaEdgeResponse): void {
+    public clearAll(clientId: string, response: LambdaResponse): void {
 
         response.addHeader('set-cookie', this._clearCookie(`${this._authCookieName}-${clientId}`));
         response.addHeader('set-cookie', this._clearCookie(`${this._csrfCookieName}-${clientId}`));

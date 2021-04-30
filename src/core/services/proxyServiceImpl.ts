@@ -2,11 +2,11 @@ import axios, {AxiosRequestConfig} from 'axios';
 import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
 import {Configuration} from '../configuration/configuration';
-import {LambdaEdgeRequest} from '../edge/lambdaEdgeRequest';
-import {LambdaEdgeResponse} from '../edge/lambdaEdgeResponse';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
 import {ProxyService} from './proxyService';
+import {LambdaRequest} from '../../lambda/request/lambdaRequest';
+import {LambdaResponse} from '../../lambda/request/LambdaResponse';
 
 /*
  * The proxy service class will deal with routing requests to the Authorization Server
@@ -23,8 +23,8 @@ export class ProxyServiceImpl implements ProxyService {
      * Forward the authorization code grant message to the Authorization Server
      */
     public async sendAuthorizationCodeGrant(
-        request: LambdaEdgeRequest,
-        response: LambdaEdgeResponse): Promise<any> {
+        request: LambdaRequest,
+        response: LambdaResponse): Promise<any> {
 
         // Form the body of the authorization code grant message
         const formData = new URLSearchParams();
@@ -43,8 +43,8 @@ export class ProxyServiceImpl implements ProxyService {
      */
     public async sendRefreshTokenGrant(
         refreshToken: string,
-        request: LambdaEdgeRequest,
-        response: LambdaEdgeResponse): Promise<any>  {
+        request: LambdaRequest,
+        response: LambdaResponse): Promise<any>  {
 
         const formData = new URLSearchParams();
         for (const field in request.body) {
@@ -71,7 +71,7 @@ export class ProxyServiceImpl implements ProxyService {
     /*
      * Route a message to the Authorization Server
      */
-    private async _postMessage(formData: URLSearchParams, response: LambdaEdgeResponse): Promise<void> {
+    private async _postMessage(formData: URLSearchParams, response: LambdaResponse): Promise<void> {
 
         // Define request options
         const options = {

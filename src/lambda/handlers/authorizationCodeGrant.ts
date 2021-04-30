@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const handler = async (event: any) => {
 
     console.log('AUTHORIZATION CODE GRANT');
@@ -10,8 +11,8 @@ const handler = async (event: any) => {
 
     return {
         statusCode: 200,
-        headers: 'set-cookie: xxx=yyy',
         body: JSON.stringify(data),
+        headers: 'set-cookie: xxx=yyy',
     };
 };
 

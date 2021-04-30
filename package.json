@@ -5,8 +5,10 @@
   "scripts": {
     "lint": "npx eslint . --ext .ts,.tsx && npx eslint deployment --ext .ts,.tsx",
     "build": "rimraf dist && tsc --sourceMap true",
-    "completeLogin": "sls invoke local -f completeLogin -p test/completeLogin.json",
-    "refreshAccessToken": "sls invoke local -f refreshAccessToken -p test/refreshAccessToken.json",
+    "authorizationCodeGrant": "sls invoke local -f authorizationCodeGrant -p test/lambda/authorizationCodeGrant.json",
+    "refreshTokenGrant": "sls invoke local -f refreshTokenGrant -p test/lambda/refreshTokenGrant.json",
+    "expireRefreshToken": "sls invoke local -f expireRefreshToken -p test/lambda/expireRefreshToken.json",
+    "expireSession": "sls invoke local -f expireSession -p test/lambda/expireSession.json",
     "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
     "buildRelease": "rimraf dist && tsc",
     "deploy": "sls deploy --package .serverless --stage deployed",

@@ -1,6 +1,6 @@
+import {LambdaRequest} from '../../lambda/request/lambdaRequest';
+import {LambdaResponse} from '../../lambda/request/lambdaResponse';
 import {Configuration} from '../configuration/configuration';
-import {LambdaEdgeRequest} from '../edge/lambdaEdgeRequest';
-import {LambdaEdgeResponse} from '../edge/lambdaEdgeResponse';
 import {Logger} from '../utilities/logger';
 import {CookieService} from './cookieService';
 import {ProxyService} from './proxyService';
@@ -29,7 +29,7 @@ export class AuthService {
     /*
      * Process an authorization code grant message
      */
-    public async authorizationCodeGrant(request: LambdaEdgeRequest, response: LambdaEdgeResponse): Promise<void> {
+    public async authorizationCodeGrant(request: LambdaRequest, response: LambdaResponse): Promise<void> {
 
         // Proxy the request to the authorization server
         const clientId = this._validateAndGetClientId(request, false);
@@ -57,7 +57,7 @@ export class AuthService {
     /*
      * Process a refresh token grant message
      */
-    public async refreshTokenGrant(request: LambdaEdgeRequest, response: LambdaEdgeResponse): Promise<void> {
+    public async refreshTokenGrant(request: LambdaRequest, response: LambdaResponse): Promise<void> {
 
         // Get the refresh token from the auth cookie
         const clientId = this._validateAndGetClientId(request, true);
@@ -84,7 +84,7 @@ export class AuthService {
     /*
      * Make the refresh token act expired
      */
-    public async expireRefreshToken(request: LambdaEdgeRequest, response: LambdaEdgeResponse): Promise<void> {
+    public async expireRefreshToken(request: LambdaRequest, response: LambdaResponse): Promise<void> {
 
         const clientId = this._validateAndGetClientId(request, true);
         Logger.info(`Expiring Refresh Token for client ${clientId}`);
@@ -100,7 +100,7 @@ export class AuthService {
     /*
      * An operation to clear cookies when the user session ends
      */
-    public async clearCookies(request: LambdaEdgeRequest, response: LambdaEdgeResponse): Promise<void> {
+    public async clearCookies(request: LambdaRequest, response: LambdaResponse): Promise<void> {
 
         // Validate and get client details
         const clientId = this._validateAndGetClientId(request, true);
@@ -114,7 +114,7 @@ export class AuthService {
     /*
      * Do some initial verification and then return the client id from the request body
      */
-    private _validateAndGetClientId(request: LambdaEdgeRequest, requireCsrfCookie: boolean): string {
+    private _validateAndGetClientId(request: LambdaRequest, requireCsrfCookie: boolean): string {
 
         // Check the HTTP request has the expected web origin
         this._validateOrigin(request);
@@ -133,7 +133,7 @@ export class AuthService {
     /*
      * If there is a web origin, make sure it matches the expected value
      */
-    private _validateOrigin(request: LambdaEdgeRequest): void {
+    private _validateOrigin(request: LambdaRequest): void {
 
         const origin = request.getHeader('origin');
         if (origin) {
@@ -147,7 +147,7 @@ export class AuthService {
     /*
      * All requests include a client id in the request body
      */
-    private _getClientId(request: LambdaEdgeRequest): string {
+    private _getClientId(request: LambdaRequest): string {
 
         if (request.body) {
             if (request.body.client_id) {
@@ -163,7 +163,7 @@ export class AuthService {
      * Extra mitigation in the event of malicious code trying to POST a refresh token grant request via a scripted form
      * https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
      */
-    private _validateCsrfCookie(clientId: string, request: LambdaEdgeRequest) {
+    private _validateCsrfCookie(clientId: string, request: LambdaRequest) {
 
         // Get the CSRF cookie value
         const cookieValue = this._cookieService.readCsrfCookie(clientId, request);

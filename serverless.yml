@@ -34,11 +34,11 @@ custom:
 
 functions:
   
-  completeLogin:
-    handler: dist/lambda/completeLogin.handler
+  authorizationCodeGrant:
+    handler: dist/lambda/handlers/authorizationCodeGrant.handler
     events:
       - http: 
-          path: /login
+          path: /authorization-code-grant
           method: post
           cors:
             origins:
@@ -46,12 +46,36 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
-  refreshAccessToken:
-    handler: dist/lambda/refreshAccessToken.handler
+  refreshTokenGrant:
+    handler: dist/lambda/handlers/refreshTokenGrant.handler
     events:
       - http: 
-          path: /refresh
+          path: /refresh-token-grant
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+
+  expireRefreshToken:
+    handler: dist/lambda/handlers/expireRefreshToken.handler
+    events:
+      - http: 
+          path: /expire-refresh-token
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+
+  expireSession:
+    handler: dist/lambda/handlers/expireSession.handler
+    events:
+      - http: 
+          path: /expire-session
+          method: delete
           cors:
             origins:
               - ${self:custom.config.settings.trustedOrigin}
@@ -78,11 +102,19 @@ resources:
   Resources:
 
     # Limit cloudwatch log retention 
-    CompleteLoginLogGroup:
+    AuthorizationCodeGrantLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
     RefreshAccessTokenLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    ExpireRefreshTokenLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    ExpireSessionLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'

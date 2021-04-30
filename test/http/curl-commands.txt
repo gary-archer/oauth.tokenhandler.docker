@@ -1,0 +1,16 @@
+curl -X POST https://api.authsamples.com/oauthwebproxy/authorization-code-grant \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "grant_type=authorization_code" \
+-d "client_id=myClientID" \
+-d "redirect_uri=http://example.com/oauth" \
+-d "code=362ad374-735c-4f69-aa8e-bf384f8602de" \
+-d "code_verifier=jlshdfhklwdfgd"
+
+curl -X POST https://api.authsamples.com/oauthwebproxy/refresh-token-grant \
+-H "cookie: auth_cookie=XXX"
+
+curl -X POST https://api.authsamples.com/oauthwebproxy/expire-refresh-token \
+-H "cookie: auth_cookie=XXX"
+
+curl -X DELETE https://api.authsamples.com/oauthwebproxy/expire-session \
+-H "cookie: auth_cookie=XXX"

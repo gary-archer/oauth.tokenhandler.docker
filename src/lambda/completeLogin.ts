@@ -1,9 +1,8 @@
-const handler = async (event: any, context: any) => {
+const handler = async (event: any) => {
 
     console.log('AUTHORIZATION CODE GRANT');
     console.log(event.body);
-    
-    // Client
+
     const data = {
         message: 'AUTHORIZATION CODE GRANT',
         data: event.body,
@@ -11,6 +10,7 @@ const handler = async (event: any, context: any) => {
 
     return {
         statusCode: 200,
+        headers: 'set-cookie: xxx=yyy',
         body: JSON.stringify(data),
     };
 };

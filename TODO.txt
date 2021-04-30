@@ -1,3 +1,5 @@
+1. Get rid of the word edge
+
 1. Skeleton of all operations with tests and curl requests:
    completeLogin
    refreshAccessToken

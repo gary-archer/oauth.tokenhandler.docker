@@ -2,6 +2,6 @@
     "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
     "cookieRootDomain": "mycompany.com",
     "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
-    "trustedWebOrigin": "https://web.authsamples.com",
+    "trustedWebOrigin": "https://web.mycompany.com",
     "useMockResponses": true
 }

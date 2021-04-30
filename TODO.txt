@@ -1,6 +1,8 @@
 API REVAMP PART 1
 -----------------
 1. Add Request interfaces and ensure that core code is neutral
+   - Start by listing current Serverless operations
+   - Then look at webhost and find Express operations
 
 2. Implement methods for Serverless with clean code
    Test via 'npm run' commands
@@ -8,7 +10,7 @@ API REVAMP PART 1
 3. Deploy to AWS and test via curl commands
 
 4. Implement methods for Express and add an 'npm start' command
-   Rerest via curl commands
+   Retest via curl commands
    
 5. Include CORS headers in request and write allow-credentials in response
 
@@ -24,7 +26,8 @@ API REVAMP PART 2
    Test this from a multi tab browser viewpoint
    Are there any 401 race conditions that the SPA cannot handle?
 
-3. Proper API logging and write to Elastic Search
+3. Proper API logging and write to Elastic Search from AWS
+   Logging also needs to use abstract request and response objects
 
 SPA REVAMP PART 1
 -----------------

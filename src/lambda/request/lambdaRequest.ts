@@ -1,9 +1,10 @@
 import cookie from 'cookie';
+import {AbstractRequest} from '../../core/request/abstractRequest';
 
 /*
  * Encapsulate the lambda request
  */
-export class LambdaRequest {
+export class LambdaRequest implements AbstractRequest {
 
     private readonly _request: any;
     private readonly _body: any;

@@ -1,9 +1,10 @@
 import {ClientError} from '../../core/errors/clientError';
+import {AbstractResponse} from '../../core/request/abstractResponse';
 
 /*
  * Encapsulate a lambda response
  */
-export class LambdaResponse {
+export class LambdaResponse implements AbstractResponse {
 
     private readonly _data: any;
     private readonly _headers: [string, string[]][];

@@ -11,7 +11,5 @@ export interface AbstractRequest {
 
     getHeader(name: string): string | null;
 
-    getMultiValueHeader(name: string): string[];
-
     getCookie(name: string): string | null;
 }

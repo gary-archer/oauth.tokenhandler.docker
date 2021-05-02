@@ -134,7 +134,6 @@ export class AuthService {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
-        console.log(`Origin header is ${origin}`);
         if (!origin || origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
             throw ErrorHandler.fromSecurityVerificationError(
                 'The origin header was missing or contained an untrusted value');

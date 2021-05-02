@@ -1,23 +1,24 @@
 API REVAMP PART 1
 -----------------
-1. Update curl commands and test deployed version
-   Check AWS logs
+1. Run the Duende code sample and understand messages + code
 
-2. Run the Duende code sample and understand messages + code
-   Write anti forgery token on every refresh
-
-3. Additional operations
+2. Additional operations
    Calculate login and logout URLs server side
-   Reduce params in auth code grant to just code
+   Store refresh token in auth_cookie and id token in id_cookie
+   Update the anti forgery token on every refresh
 
-5. Implement for Express and see code in webhost of Final SPA
+3. Implement the same logic for Express and use code from webhost in Final SPA
+   Add testHttpLocal.sh
  
-6. Add CORS middleware to API and write allow-credentials in response
-   Also add logging middleware
+4. SPA branch to verify cookie sending and CORS when an Expire button is clicked
+   Add CORS middleware to API and write allow-credentials in response
+   Add an OPTIONS request to curl tests
 
-7. Detailed error testing
+5. Add logging middleware and log to the Elastic Search schema
 
-8. Update README
+6. Detailed error testing
+
+7. Update README
 
 API REVAMP PART 2
 ----------------
@@ -35,12 +36,12 @@ SPA REVAMP PART 1
 1. Branch of oauth.websample.final, with web reverse proxy and oidc client removed
    Check in with very clean code and a new authenticator implementation
    Only strategies are web and mobile
-   Throw not implemented errors for operations that OIDC client implemented previously
+   Start by throwing not implemented errors for operations that OIDC client implemented previously
 
-2. Get OAuth redirects and session storage working
-   Calculate the state and the PKCE details - cf oidc client and other libraries - or Auth0 web site
+2. Get OAuth redirects and responses working, including error responses
+   Store state between requests in sesson storage
 
-3. Update existing web oauth proxy client to do more work and be explicit, adding these methods
+3. Update existing web oauth proxy client to do more Axios work and be explicit, adding these methods
    Call them from the authenticator implementation:
    - Authorization Code Grant
    - Refresh Token Grant

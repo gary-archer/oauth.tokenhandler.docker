@@ -27,7 +27,7 @@ export class LambdaRequest implements AbstractRequest {
     }
 
     /*
-     * Get a single value header
+     * Read a single value header value
      */
     public getHeader(name: string): string | null {
 
@@ -43,9 +43,28 @@ export class LambdaRequest implements AbstractRequest {
     }
 
     /*
+     * Use a library to parse incoming cookies, which are generally received in multiple headers like this:
+     * - Cookie: First=1; Second=2
+     * - Cookie: Third=3
+     */
+    public getCookie(name: string): string | null {
+
+        const headers = this._getMultiValueHeader('cookie');
+        headers.forEach((h) => {
+
+            const data = cookie.parse(h);
+            if (data[name]) {
+                return data[name];
+            }
+        });
+
+        return null;
+    }
+
+    /*
      * Get a multi value header
      */
-    public getMultiValueHeader(name: string): string[] {
+    private _getMultiValueHeader(name: string): string[] {
 
         if (this._event.headers) {
 
@@ -56,29 +75,6 @@ export class LambdaRequest implements AbstractRequest {
         }
 
         return [];
-    }
-
-    /*
-     * Parse incoming cookies, which could be received in multiple headers like this:
-     * - Cookie: First=1; Second=2
-     * - Cookie: Third=3
-     */
-    public getCookie(name: string): string | null {
-
-        let result = null;
-
-        // Look for all incoming cookie headers
-        const headers = this.getMultiValueHeader('cookie');
-        headers.forEach((h) => {
-
-            // Use a library to parse the cookie text
-            const data = cookie.parse(h);
-            if (data[name]) {
-                result = data[name];
-            }
-        });
-
-        return result;
     }
 
     /*

@@ -3,6 +3,8 @@
  */
 export interface Configuration {
 
+    name: string;
+
     clientId: string;
 
     tokenEndpoint: string;

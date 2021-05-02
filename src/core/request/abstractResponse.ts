@@ -13,5 +13,5 @@ export interface AbstractResponse {
 
     setError(error: ClientError): void;
 
-    getData(): any;
+    getPayload(statusCode: number): any;
 }

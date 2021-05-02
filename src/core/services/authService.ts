@@ -35,9 +35,11 @@ export class AuthService {
      */
     public async authorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
-        // Proxy the request to the authorization server
-        const clientId = this._validateAndGetClientId(request, false);
-        Logger.info(`Proxying Authorization Code Grant for client ${clientId}`);
+        // Check incoming details
+        Logger.info(`Sending Authorization Code Grant for ${this._configuration.name}`);
+        this._validate(request, false);
+        
+        // Send the request to the authorization server
         const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
 
         // Get the refresh token
@@ -48,11 +50,11 @@ export class AuthService {
         }
 
         // Write the refresh token to an HTTP only cookie
-        this._cookieService.writeAuthCookie(clientId, refreshToken, response);
+        this._cookieService.writeAuthCookie(this._configuration.name, refreshToken, response);
 
         // Write a CSRF HTTP only cookie containing tokens
         const randomValue = this._oauthService.generateCsrfField();
-        this._cookieService.writeCsrfCookie(clientId, response, randomValue);
+        this._cookieService.writeCsrfCookie(this._configuration.name, response, randomValue);
         authCodeGrantData[this._responseBodyFieldName] = randomValue;
 
         // Also give the UI the CSRF field in the response body
@@ -66,10 +68,12 @@ export class AuthService {
      */
     public async refreshTokenGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
+        // Check incoming details
+        this._validate(request, false);
+
         // Get the refresh token from the auth cookie
-        const clientId = this._validateAndGetClientId(request, true);
-        Logger.info(`Proxying Refresh Token Grant for client ${clientId}`);
-        const refreshToken = this._cookieService.readAuthCookie(clientId, request);
+        Logger.info(`Sending Refresh Token Grant for ${this._configuration.name}`);
+        const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
 
         // Send it to the Authorization Server
         const refreshTokenGrantData =
@@ -79,13 +83,14 @@ export class AuthService {
         const rollingRefreshToken = refreshTokenGrantData.refresh_token;
         if (rollingRefreshToken) {
 
-            // If a new refresh token has been issued, remove it from the response to the SPA and update the cookie
-            delete refreshTokenGrantData.refresh_token;
-            this._cookieService.writeAuthCookie(clientId, rollingRefreshToken, response);
+            // If a new refresh token has been issued, update the auth cookie
+            this._cookieService.writeAuthCookie(this._configuration.name, rollingRefreshToken, response);
         }
 
-        // Send access and id tokens to the SPA
-        response.setBody(refreshTokenGrantData);
+        // Send the access token to the SPA
+        const data = {} as any;
+        data.access_token = refreshTokenGrantData.access_token;
+        response.setBody(data);
     }
 
     /*
@@ -93,48 +98,44 @@ export class AuthService {
      */
     public async expireRefreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
-        const clientId = this._validateAndGetClientId(request, true);
-        Logger.info(`Expiring Refresh Token for client ${clientId}`);
+        // Check incoming details
+        Logger.info(`Expiring refresh token for ${this._configuration.name}`);
+        this._validate(request, true);
 
         // Get the current refresh token
-        const refreshToken = this._cookieService.readAuthCookie(clientId, request);
+        const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
-        this._cookieService.expire(clientId, refreshToken, request, response);
+        this._cookieService.expire(this._configuration.name, refreshToken, request, response);
         response.setStatusCode(204);
     }
 
     /*
      * An operation to clear cookies when the user session ends
      */
-    public async clearCookies(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
-        // Validate and get client details
-        const clientId = this._validateAndGetClientId(request, true);
-        Logger.info(`Clearing Cookies for client ${clientId}`);
-
+        // Check incoming details
+        Logger.info(`Clearing cookies for ${this._configuration.name}`);
+        this._validate(request, true);
+        
         // Clear all cookies for this client
-        this._cookieService.clearAll(clientId, response);
+        this._cookieService.clearAll(this._configuration.name, response);
         response.setStatusCode(204);
     }
 
     /*
      * Do some initial verification and then return the client id from the request body
      */
-    private _validateAndGetClientId(request: AbstractRequest, requireCsrfCookie: boolean): string {
+    private _validate(request: AbstractRequest, requireCsrfCookie: boolean): void {
 
         // Check the HTTP request has the expected web origin
         this._validateOrigin(request);
 
-        // Get the client id from the request body
-        const clientId = this._getClientId(request);
-
         // For token refresh requests, also check that the HTTP request has an extra header
         if (requireCsrfCookie) {
-            this._validateCsrfCookie(clientId, request);
+            this._validateCsrfCookie(request);
         }
-
-        return clientId;
     }
 
     /*
@@ -143,47 +144,30 @@ export class AuthService {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
-        if (origin) {
-            if (origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
-                throw ErrorHandler.fromSecurityVerificationError(
-                    `The origin header had an untrusted value of ${origin}`);
-            }
+        if (!origin || origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
+            throw ErrorHandler.fromSecurityVerificationError(
+                `The origin header was missing or contained an untrusted value`);
         }
     }
 
     /*
-     * All requests include a client id in the request body
+     * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
      */
-    private _getClientId(request: AbstractRequest): string {
-
-        const body = request.getBody();
-        if (body && body.client_id) {
-            return body.client_id;
-        }
-
-        throw ErrorHandler.fromSecurityVerificationError(
-            'No client_id was found in the received form url encoded data');
-    }
-
-    /*
-     * Extra mitigation in the event of malicious code trying to POST a refresh token grant request via a scripted form
-     * https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
-     */
-    private _validateCsrfCookie(clientId: string, request: AbstractRequest) {
+    private _validateCsrfCookie(request: AbstractRequest) {
 
         // Get the CSRF cookie value
-        const cookieValue = this._cookieService.readCsrfCookie(clientId, request);
+        const cookieValue = this._cookieService.readCsrfCookie(this._configuration.name, request);
 
-        // Check there is a matching CSRF request field
+        // Check there is a matching anti forgery token field
         const headerValue = request.getHeader(this._requestHeaderFieldName);
         if (!headerValue) {
-            throw ErrorHandler.fromSecurityVerificationError('No CSRF request header field was supplied');
+            throw ErrorHandler.fromSecurityVerificationError('No anti forgery request header field was supplied');
         }
 
         // Check that the values match
         if (cookieValue !== headerValue) {
             throw ErrorHandler.fromSecurityVerificationError(
-                'The CSRF request header does not match the CSRF cookie value');
+                'The anti forgery request header does not match the anti forgery cookie value');
         }
     }
 }

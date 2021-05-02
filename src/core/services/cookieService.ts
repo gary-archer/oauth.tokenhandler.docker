@@ -22,18 +22,18 @@ export class CookieService {
     /*
      * Write a same domain response cookie containing the refresh token
      */
-    public writeAuthCookie(clientId: string, refreshToken: string, response: AbstractResponse): void {
+    public writeAuthCookie(name: string, refreshToken: string, response: AbstractResponse): void {
 
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(`${this._authCookieName}-${clientId}`, encryptedData));
+        response.addCookie(this._formatCookie(`${this._authCookieName}-${name}`, encryptedData));
     }
 
     /*
      * Read the refresh token from the request cookie
      */
-    public readAuthCookie(clientId: string, request: AbstractRequest): string {
+    public readAuthCookie(name: string, request: AbstractRequest): string {
 
-        const cookieName = `${this._authCookieName}-${clientId}`;
+        const cookieName = `${this._authCookieName}-${name}`;
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -45,18 +45,18 @@ export class CookieService {
     /*
      * Write a CSRF cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeCsrfCookie(clientId: string, response: AbstractResponse, value: string): void {
+    public writeCsrfCookie(name: string, response: AbstractResponse, value: string): void {
 
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(`${this._csrfCookieName}-${clientId}`, encryptedData));
+        response.addCookie(this._formatCookie(`${this._csrfCookieName}-${name}`, encryptedData));
     }
 
     /*
      * Write a response cookie containing a CSRF value, which we will verify during refresh token requests
      */
-    public readCsrfCookie(clientId: string, request: AbstractRequest): string {
+    public readCsrfCookie(name: string, request: AbstractRequest): string {
 
-        const cookieName = `${this._csrfCookieName}-${clientId}`;
+        const cookieName = `${this._csrfCookieName}-${name}`;
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -70,22 +70,22 @@ export class CookieService {
      * This will cause an invalid_grant error when the refresh token is next sent to the Authorization Server
      */
     public expire(
-        clientId: string,
+        name: string,
         refreshToken: string,
         request: AbstractRequest,
         response: AbstractResponse): void {
 
         const expiredRefreshToken = `x${refreshToken}x`;
-        this.writeAuthCookie(clientId, expiredRefreshToken, response);
+        this.writeAuthCookie(name, expiredRefreshToken, response);
     }
 
     /*
      * Clear all cookies when the user session expires
      */
-    public clearAll(clientId: string, response: AbstractResponse): void {
+    public clearAll(name: string, response: AbstractResponse): void {
 
-        response.addCookie(this._clearCookie(`${this._authCookieName}-${clientId}`));
-        response.addCookie(this._clearCookie(`${this._csrfCookieName}-${clientId}`));
+        response.addCookie(this._clearCookie(`${this._authCookieName}-${name}`));
+        response.addCookie(this._clearCookie(`${this._csrfCookieName}-${name}`));
     }
 
     /*
@@ -135,8 +135,8 @@ export class CookieService {
             // The cookie written by this app will be sent to other web applications
             domain: `.${this._rootDomain}`,
 
-            // The cookie is only used for OAuth token endpoint requests, and not for Web / API requests
-            path: '/reverse-proxy',
+            // The cookie is only sent during OAuth related requests, and Web / API requests are cookieless
+            path: '/oauthwebproxy',
 
             // Other domains cannot send the cookie, which reduces cross site scripting risks
             sameSite: 'strict',

@@ -1,24 +1,23 @@
 API REVAMP PART 1
 -----------------
-1. Get OAuth code grant working with lambda request objects
-   Get cookie writing properly
-   Add multi value headers to test data
-   Fix current problem
+1. Update curl commands and test deployed version
+   Check AWS logs
 
-2. Work out a test approach
-   Generic API to think about
-   Can client id securely be part of messages - probably not?
+2. Run the Duende code sample and understand messages + code
+   Rename CSRF to something better since it is mainly for XSS protection
+   Write anti forgery token on every refresh
 
-3. Deploy to AWS and add curl commands for testing
+3. Calculate login and logout URLs server side
+   Reduce params in auth code grant to just code
 
-4. Implement for Express and see code in webhost of Final SPA
+4. Update cookie path
 
-5. Add a getTokens operation to return access + id_token after login or on page load / new browser tab
-
-6. Run the Duende code sample and understand messages + code
+5. Implement for Express and see code in webhost of Final SPA
  
-7. Add CORS middleware to API and write allow-credentials in response
+6. Add CORS middleware to API and write allow-credentials in response
    Also add logging middleware
+
+7. Error testing to cover in tests
 
 8. Update README
 

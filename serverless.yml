@@ -26,8 +26,10 @@ custom:
   # CORS headers allowed
   allowedHeaders:
     - Content-Type
+    - Accept
+    - Cookie
+    - Set-Cookie
     - X-Amz-Date
-    - Authorization
     - X-Api-Key
     - X-Amz-Security-Token
     - X-Amz-User-Agent
@@ -106,7 +108,7 @@ resources:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    RefreshAccessTokenLogGroup:
+    RefreshTokenGrantLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'

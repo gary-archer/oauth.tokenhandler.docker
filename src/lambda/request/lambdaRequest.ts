@@ -47,26 +47,19 @@ export class LambdaRequest implements AbstractRequest {
      */
     public getMultiValueHeader(name: string): string[] {
 
-        const values: string[] = [];
-
-        // Iterate headers, which is an object with header names as keys, each of which have a key and value
         if (this._event.headers) {
-            for (const key in this._event.headers) {
-                if (key && key === name) {
-
-                    // Add each item to results
-                    this._event.headers[key].forEach((i: any) => {
-                        values.push(i.value);
-                    });
-                }
+            
+            const found = Object.keys(this._event.multiValueHeaders).find((h) => h.toLowerCase() === name);
+            if (found) {
+                return this._event.multiValueHeaders[found];
             }
         }
 
-        return values;
+        return [];
     }
 
     /*
-     * Parse incoming cookies, which could be received in multiple strings
+     * Parse incoming cookies, which could be received in multiple headers like this:
      * - Cookie: First=1; Second=2
      * - Cookie: Third=3
      */

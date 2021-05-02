@@ -36,8 +36,25 @@ export class LambdaResponse implements AbstractResponse {
         this._data.body = error.toResponseFormat();
     }
 
-    public getData(): any {
-        return this._data;
+    public getPayload(statusCode: number): any {
+        
+        const data = {
+            statusCode,
+        } as any;
+
+        if (this._data.headers) {
+            data.headers = this._data.headers;
+        }
+
+        if (this._data.multiValueHeaders) {
+            data.multiValueHeaders = this._data.multiValueHeaders;
+        }
+
+        if (this._data.body) {
+            data.body = JSON.stringify(this._data.body);
+        }
+
+        return data;
     }
 
     private _getCookieHeader(): string[] {

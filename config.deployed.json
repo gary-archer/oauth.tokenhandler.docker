@@ -1,5 +1,7 @@
 {
+    "name": "finalspa",
     "clientId": "4co5uvgmse68utsekh7p2sc0lg",
+    "redirectUri": "https://web.authsamples.com/spa/",
     "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
     "cookieRootDomain": "authsamples.com",
     "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",

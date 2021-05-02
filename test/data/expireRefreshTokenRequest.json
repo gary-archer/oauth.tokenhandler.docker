@@ -1,10 +1,9 @@
 {
-  "path": "/oauthwebproxy/refresh-token-grant",
+  "resource": "/expireRefreshToken",
+  "path": "/oauthwebproxy/expireRefreshToken",
   "httpMethod": "POST",
   "headers": {
     "origin": "https://web.authsamples.com",
-    "content-type": "application/x-www-form-urlencoded",
-    "accept": "application/json",
     "x-mycompany-finalspa-refresh-csrf": "pu027sP+852dOASJSJHYkKo5QPYUyw+F6mwm6lyRIJ0="
   },
   "multiValueHeaders": {

@@ -10,10 +10,6 @@ import {LambdaResponse} from '../request/lambdaResponse';
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const handler = async (event: any, context: Context) => {
 
-    console.log('*** DEBUG REQUEST ***');
-    console.log(event);
-    console.log('*** DEBUG REQUEST ***');
-
     const request = new LambdaRequest(event);
     const response = new LambdaResponse();
 
@@ -23,18 +19,16 @@ const handler = async (event: any, context: Context) => {
         const service = new AuthService(configuration);
         await service.authorizationCodeGrant(request, response);
 
+        response.addHeader('content-type', 'application/json');
+        return response.getPayload(200);
+
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
         response.setError(error);
+        response.addHeader('content-type', 'application/json');
+        return response.getPayload(error.statusCode);
     }
-
-    response.addHeader('content-type', 'application/json');
-    const data = response.getData();
-    console.log('*** DEBUG RESPONSE ***');
-    console.log(data);
-    console.log('*** DEBUG RESPONSE ***');
-    return data;
 };
 
 export {handler};

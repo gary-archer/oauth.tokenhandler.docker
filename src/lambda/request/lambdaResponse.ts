@@ -37,7 +37,7 @@ export class LambdaResponse implements AbstractResponse {
     }
 
     public getPayload(statusCode: number): any {
-        
+
         const data = {
             statusCode,
         } as any;

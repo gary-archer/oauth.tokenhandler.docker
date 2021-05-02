@@ -38,7 +38,7 @@ export class AuthService {
         // Check incoming details
         Logger.info(`Sending Authorization Code Grant for ${this._configuration.name}`);
         this._validate(request, false);
-        
+
         // Send the request to the authorization server
         const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
 
@@ -46,7 +46,7 @@ export class AuthService {
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
             throw ErrorHandler.fromSecurityVerificationError(
-                'TNo refresh token was received in the authorization code grant response from the Authorization Server');
+                'TNo refresh token was received in the authorization code grant response');
         }
 
         // Write the refresh token to an HTTP only cookie
@@ -118,7 +118,7 @@ export class AuthService {
         // Check incoming details
         Logger.info(`Clearing cookies for ${this._configuration.name}`);
         this._validate(request, true);
-        
+
         // Clear all cookies for this client
         this._cookieService.clearAll(this._configuration.name, response);
         response.setStatusCode(204);
@@ -146,7 +146,7 @@ export class AuthService {
         const origin = request.getHeader('origin');
         if (!origin || origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
             throw ErrorHandler.fromSecurityVerificationError(
-                `The origin header was missing or contained an untrusted value`);
+                'The origin header was missing or contained an untrusted value');
         }
     }
 

@@ -32,7 +32,7 @@ export class LambdaRequest implements AbstractRequest {
     public getHeader(name: string): string | null {
 
         if (this._event.headers) {
-            
+
             const found = Object.keys(this._event.headers).find((h) => h.toLowerCase() === name);
             if (found) {
                 return this._event.headers[found];
@@ -48,7 +48,7 @@ export class LambdaRequest implements AbstractRequest {
     public getMultiValueHeader(name: string): string[] {
 
         if (this._event.headers) {
-            
+
             const found = Object.keys(this._event.multiValueHeaders).find((h) => h.toLowerCase() === name);
             if (found) {
                 return this._event.multiValueHeaders[found];

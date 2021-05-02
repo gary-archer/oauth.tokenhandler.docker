@@ -4,14 +4,14 @@ import {URLSearchParams} from 'url';
 import {Configuration} from '../configuration/configuration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
-import {ProxyService} from './proxyService';
+import {OAuthService} from './oauthService';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
 /*
- * The proxy service class will deal with routing requests to the Authorization Server
+ * The OAuth service class will deal with routing requests to the Authorization Server
  */
-export class ProxyServiceImpl implements ProxyService {
+export class OAuthServiceImpl implements OAuthService {
 
     private readonly _tokenEndpoint: string;
 

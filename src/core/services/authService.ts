@@ -4,9 +4,9 @@ import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 import {Logger} from '../utilities/logger';
 import {CookieService} from './cookieService';
-import {MockProxyServiceImpl} from './mockProxyServiceImpl';
-import {ProxyService} from './proxyService';
-import {ProxyServiceImpl} from './proxyServiceImpl';
+import {MockOAuthServiceImpl} from './mockOAuthServiceImpl';
+import {OAuthService} from './oauthService';
+import {OAuthServiceImpl} from './oauthServiceImpl';
 
 /*
  * The entry point for token endpoint related operations
@@ -15,7 +15,7 @@ export class AuthService {
 
     // Worker classes
     private readonly _configuration: Configuration;
-    private readonly _proxyService: ProxyService;
+    private readonly _oauthService: OAuthService;
     private readonly _cookieService: CookieService;
 
     // CSRF constants
@@ -25,8 +25,8 @@ export class AuthService {
     public constructor(configuration: Configuration) {
 
         this._configuration = configuration;
-        // this._proxyService = configuration.useMockResponses ? new MockProxyServiceImpl() : new ProxyServiceImpl(configuration);
-        this._proxyService = new MockProxyServiceImpl();
+        //this._oauthService = configuration.useMockResponses ? new MockOAuthServiceImpl() : new OAuthServiceImpl(configuration);
+        this._oauthService = new MockOAuthServiceImpl();
         this._cookieService = new CookieService(configuration.cookieRootDomain, configuration.cookieEncryptionKey);
     }
 
@@ -38,7 +38,7 @@ export class AuthService {
         // Proxy the request to the authorization server
         const clientId = this._validateAndGetClientId(request, false);
         Logger.info(`Proxying Authorization Code Grant for client ${clientId}`);
-        const authCodeGrantData = await this._proxyService.sendAuthorizationCodeGrant(request, response);
+        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
 
         // Get the refresh token
         const refreshToken = authCodeGrantData.refresh_token;
@@ -51,7 +51,7 @@ export class AuthService {
         this._cookieService.writeAuthCookie(clientId, refreshToken, response);
 
         // Write a CSRF HTTP only cookie containing tokens
-        const randomValue = this._proxyService.generateCsrfField();
+        const randomValue = this._oauthService.generateCsrfField();
         this._cookieService.writeCsrfCookie(clientId, response, randomValue);
         authCodeGrantData[this._responseBodyFieldName] = randomValue;
 
@@ -73,7 +73,7 @@ export class AuthService {
 
         // Send it to the Authorization Server
         const refreshTokenGrantData =
-            await this._proxyService.sendRefreshTokenGrant(refreshToken, request, response);
+            await this._oauthService.sendRefreshTokenGrant(refreshToken, request, response);
 
         // Handle updated refresh tokens
         const rollingRefreshToken = refreshTokenGrantData.refresh_token;

@@ -1,12 +1,12 @@
 
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
-import {ProxyService} from './proxyService';
+import {OAuthService} from './oauthService';
 
 /*
- * Return mock responses on a developer PC
+ * Return mock responses for testing
  */
-export class MockProxyServiceImpl implements ProxyService {
+export class MockOAuthServiceImpl implements OAuthService {
 
     /*
      * For local development, return a hard coded response in line with our test JSON files

@@ -4,7 +4,7 @@ import {AbstractResponse} from '../request/abstractResponse';
 /*
  * An abstraction for getting non deterministic data, including responses from the Authorization Server
  */
-export interface ProxyService {
+export interface OAuthService {
 
     // Forward the authorization code grant to the Authorization Server to complete a login
     sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<any>;

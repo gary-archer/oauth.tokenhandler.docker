@@ -11,7 +11,7 @@ import {LambdaResponse} from '../request/lambdaResponse';
 const handler = async (event: any, context: Context) => {
 
     console.log('*** DEBUG REQUEST ***');
-    //console.log(event);
+    console.log(event);
     console.log('*** DEBUG REQUEST ***');
 
     const request = new LambdaRequest(event);
@@ -32,7 +32,7 @@ const handler = async (event: any, context: Context) => {
     response.addHeader('content-type', 'application/json');
     const data = response.getData();
     console.log('*** DEBUG RESPONSE ***');
-    //console.log(data);
+    console.log(data);
     console.log('*** DEBUG RESPONSE ***');
     return data;
 };

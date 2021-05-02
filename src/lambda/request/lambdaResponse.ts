@@ -2,44 +2,33 @@ import {ClientError} from '../../core/errors/clientError';
 import {AbstractResponse} from '../../core/request/abstractResponse';
 
 /*
- * Encapsulate a lambda response
+ * Encapsulate the lambda response format
  */
 export class LambdaResponse implements AbstractResponse {
 
     private readonly _data: any;
-    private readonly _headers: [string, string[]][];
 
     public constructor() {
         this._data = {};
-        this._headers = [];
+        this._data.headers = {};
+        this._data.multiValueHeaders = {};
     }
 
-    public set statusCode(statusCode: number) {
+    public setStatusCode(statusCode: number): void {
         this._data.statusCode = statusCode;
     }
 
-    public set body(data: any) {
-        this._data.body = data;
+    public addHeader(name: string, value: string): void {
+        this._data.headers[name] = value;
     }
 
-    /*
-     * Headers are arrays of objects containing 'key' and 'value' fields
-     */
-    public addHeader(name: string, value: string): void {
+    public addCookie(data: string): void {
+        const cookies = this._getCookieHeader();
+        cookies.push(data);
+    }
 
-        const found = this._headers.find((h) => h[0] === name);
-        if (!found) {
-
-            // Create a new key if required
-            const items: string[] = [];
-            items.push(value);
-            this._headers.push([name, items]);
-
-        } else {
-
-            // Otherwise add values to the existing key
-            found[1].push(value);
-        }
+    public setBody(data: any): void {
+        this._data.body = data;
     }
 
     public setError(error: ClientError): void {
@@ -47,50 +36,19 @@ export class LambdaResponse implements AbstractResponse {
         this._data.body = error.toResponseFormat();
     }
 
-    /*
-     * Output in Lambda's particular format, where headers are an array of objects
-     *
-     * headers: {
-         'set-cookie': [{
-           key: 'set-cookie',
-           value: 'aaa=111'
-         },
-         {
-           key: 'set-cookie',
-           value: 'bbb=222'
-         }]
-       }
-     */
-    public toLambdaFormat(): any {
+    public getData(): any {
+        return this._data;
+    }
 
-        const data: any = {
-            status: this._data.statusCode ?? 200,
-        };
+    private _getCookieHeader(): string[] {
 
-        if (this._data.body) {
-            data.body = JSON.stringify(this._data.body);
-            this.addHeader('content-type', 'application/json');
+        const found = Object.keys(this._data.multiValueHeaders).find((k) => k.toLowerCase() === 'set-cookie');
+        if (found) {
+            return this._data.multiValueHeaders[found];
         }
 
-        if (this._headers.length > 0) {
-
-            const outputHeaders: any = {};
-            this._headers.forEach((h) => {
-
-                const name = h[0];
-                const items: any[] = [];
-
-                const values = h[1];
-                values.forEach((v) => {
-                    items.push({key: name, value: v});
-                });
-
-                outputHeaders[name] = items;
-            });
-
-            data.headers = outputHeaders;
-        }
-
-        return data;
+        const cookies: string[] = [];
+        this._data.multiValueHeaders['set-cookie'] = cookies;
+        return cookies;
     }
 }

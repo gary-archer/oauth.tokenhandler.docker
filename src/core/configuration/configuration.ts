@@ -3,6 +3,8 @@
  */
 export interface Configuration {
 
+    clientId: string;
+
     tokenEndpoint: string;
 
     cookieRootDomain: string;

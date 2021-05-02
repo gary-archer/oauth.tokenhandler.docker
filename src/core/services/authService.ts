@@ -1,10 +1,12 @@
-import {LambdaRequest} from '../../lambda/request/lambdaRequest';
-import {LambdaResponse} from '../../lambda/request/lambdaResponse';
 import {Configuration} from '../configuration/configuration';
+import {ErrorHandler} from '../errors/errorHandler';
+import {AbstractRequest} from '../request/abstractRequest';
+import {AbstractResponse} from '../request/abstractResponse';
 import {Logger} from '../utilities/logger';
 import {CookieService} from './cookieService';
+import {MockProxyServiceImpl} from './mockProxyServiceImpl';
 import {ProxyService} from './proxyService';
-import {ErrorHandler} from '../errors/errorHandler';
+import {ProxyServiceImpl} from './proxyServiceImpl';
 
 /*
  * The entry point for token endpoint related operations
@@ -20,16 +22,18 @@ export class AuthService {
     private readonly _responseBodyFieldName = 'csrf_field';
     private readonly _requestHeaderFieldName = 'x-mycompany-finalspa-refresh-csrf';
 
-    public constructor(configuration: Configuration, proxyService: ProxyService) {
+    public constructor(configuration: Configuration) {
+
         this._configuration = configuration;
-        this._proxyService = proxyService;
+        // this._proxyService = configuration.useMockResponses ? new MockProxyServiceImpl() : new ProxyServiceImpl(configuration);
+        this._proxyService = new MockProxyServiceImpl();
         this._cookieService = new CookieService(configuration.cookieRootDomain, configuration.cookieEncryptionKey);
     }
 
     /*
      * Process an authorization code grant message
      */
-    public async authorizationCodeGrant(request: LambdaRequest, response: LambdaResponse): Promise<void> {
+    public async authorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Proxy the request to the authorization server
         const clientId = this._validateAndGetClientId(request, false);
@@ -38,26 +42,29 @@ export class AuthService {
 
         // Get the refresh token
         const refreshToken = authCodeGrantData.refresh_token;
-        if (refreshToken) {
-
-            // Write the refresh token to an HTTP only cookie
-            delete authCodeGrantData.refresh_token;
-            this._cookieService.writeAuthCookie(clientId, refreshToken, response);
-
-            // Write a CSRF HTTP only cookie and also give the UI the value in a response field
-            const randomValue = this._proxyService.generateCsrfField();
-            this._cookieService.writeCsrfCookie(clientId, response, randomValue);
-            authCodeGrantData[this._responseBodyFieldName] = randomValue;
+        if (!refreshToken) {
+            throw ErrorHandler.fromSecurityVerificationError(
+                'TNo refresh token was received in the authorization code grant response from the Authorization Server');
         }
 
-        // Send access and id tokens to the SPA
-        response.body = authCodeGrantData;
+        // Write the refresh token to an HTTP only cookie
+        this._cookieService.writeAuthCookie(clientId, refreshToken, response);
+
+        // Write a CSRF HTTP only cookie containing tokens
+        const randomValue = this._proxyService.generateCsrfField();
+        this._cookieService.writeCsrfCookie(clientId, response, randomValue);
+        authCodeGrantData[this._responseBodyFieldName] = randomValue;
+
+        // Also give the UI the CSRF field in the response body
+        const data = {} as any;
+        data[this._responseBodyFieldName] = randomValue;
+        response.setBody(data);
     }
 
     /*
      * Process a refresh token grant message
      */
-    public async refreshTokenGrant(request: LambdaRequest, response: LambdaResponse): Promise<void> {
+    public async refreshTokenGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Get the refresh token from the auth cookie
         const clientId = this._validateAndGetClientId(request, true);
@@ -78,13 +85,13 @@ export class AuthService {
         }
 
         // Send access and id tokens to the SPA
-        response.body = refreshTokenGrantData;
+        response.setBody(refreshTokenGrantData);
     }
 
     /*
      * Make the refresh token act expired
      */
-    public async expireRefreshToken(request: LambdaRequest, response: LambdaResponse): Promise<void> {
+    public async expireRefreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         const clientId = this._validateAndGetClientId(request, true);
         Logger.info(`Expiring Refresh Token for client ${clientId}`);
@@ -94,13 +101,13 @@ export class AuthService {
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
         this._cookieService.expire(clientId, refreshToken, request, response);
-        response.statusCode = 204;
+        response.setStatusCode(204);
     }
 
     /*
      * An operation to clear cookies when the user session ends
      */
-    public async clearCookies(request: LambdaRequest, response: LambdaResponse): Promise<void> {
+    public async clearCookies(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Validate and get client details
         const clientId = this._validateAndGetClientId(request, true);
@@ -108,13 +115,13 @@ export class AuthService {
 
         // Clear all cookies for this client
         this._cookieService.clearAll(clientId, response);
-        response.statusCode = 204;
+        response.setStatusCode(204);
     }
 
     /*
      * Do some initial verification and then return the client id from the request body
      */
-    private _validateAndGetClientId(request: LambdaRequest, requireCsrfCookie: boolean): string {
+    private _validateAndGetClientId(request: AbstractRequest, requireCsrfCookie: boolean): string {
 
         // Check the HTTP request has the expected web origin
         this._validateOrigin(request);
@@ -133,7 +140,7 @@ export class AuthService {
     /*
      * If there is a web origin, make sure it matches the expected value
      */
-    private _validateOrigin(request: LambdaRequest): void {
+    private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
         if (origin) {
@@ -147,12 +154,11 @@ export class AuthService {
     /*
      * All requests include a client id in the request body
      */
-    private _getClientId(request: LambdaRequest): string {
+    private _getClientId(request: AbstractRequest): string {
 
-        if (request.body) {
-            if (request.body.client_id) {
-                return request.body.client_id;
-            }
+        const body = request.getBody();
+        if (body && body.client_id) {
+            return body.client_id;
         }
 
         throw ErrorHandler.fromSecurityVerificationError(
@@ -163,7 +169,7 @@ export class AuthService {
      * Extra mitigation in the event of malicious code trying to POST a refresh token grant request via a scripted form
      * https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
      */
-    private _validateCsrfCookie(clientId: string, request: LambdaRequest) {
+    private _validateCsrfCookie(clientId: string, request: AbstractRequest) {
 
         // Get the CSRF cookie value
         const cookieValue = this._cookieService.readCsrfCookie(clientId, request);

@@ -1,6 +1,6 @@
 
-import {LambdaRequest} from '../../lambda/request/lambdaRequest';
-import {LambdaResponse} from '../../lambda/request/LambdaResponse';
+import {AbstractRequest} from '../request/abstractRequest';
+import {AbstractResponse} from '../request/abstractResponse';
 import {ProxyService} from './proxyService';
 
 /*
@@ -13,7 +13,7 @@ export class MockProxyServiceImpl implements ProxyService {
      */
     /* eslint-disable max-len */
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    public async sendAuthorizationCodeGrant(request: LambdaRequest, response: LambdaResponse): Promise<any> {
+    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<any> {
 
         return {
             id_token: 'eyJraWQiOiJKYkRZVVd0MVIwbUd1M0tYckJrUjNzcEpPXC9TWEprZlwvZW0weVRSZUxlZG89IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSGdUQTlTTjBuSTF3aVBNYlQwTkYtUSIsInN1YiI6IjkzNGIxODcxLTFhODEtNGI1Zi1hMTYyLTRiMjMxZjVkYzJkMCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0yLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMl9tWjNOQllwVG8iLCJjb2duaXRvOnVzZXJuYW1lIjoiOTM0YjE4NzEtMWE4MS00YjVmLWExNjItNGIyMzFmNWRjMmQwIiwiZ2l2ZW5fbmFtZSI6Ikd1ZXN0IiwiYXVkIjoiMTd0ZG1ycHJoY2M3ZmsyZHJjN240Ym12N2YiLCJldmVudF9pZCI6ImVlOTYxZmY2LTMyMGEtNDA0Mi1hMjY3LTQ1NzBjNzI2OGJkNCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNTk1MTkxOTA4LCJleHAiOjE1OTUxOTU1MDgsImlhdCI6MTU5NTE5MTkwOCwiZmFtaWx5X25hbWUiOiJVc2VyIiwiZW1haWwiOiJndWVzdHVzZXJAYXV0aGd1aWRhbmNlLmNvbSJ9.H4zLNenXKeqhZfT8pbmOQ7D-TI9Uh8FoMICb-v4FU59PdBgpmDmYCP_ehuy3HyFQuypbr5KGftFBsffLL9m-Oha65GWl2qcnn4KxI20Ir0HjpFZehkq9ti-0nVTc6zlMvN-_I0RetqLpmtwDNt3tIIzmRt0D8b7_wCwOb1OCsP-hUf6saW0lew7ksjEeKepVkHpnL0yXenhzWeD3FXQaJX3ThGLrOf-elmaBn1NXEhnYuFIDob1HDaxN1IwQlgFHqM50XmjmcKJhmQt4VcXMTDRaNplXwQNfmi-Mfk5ul3vrcFfDCn-Wo1illTIW18Fh8ywVuwiT6vJr_aGjflbWyA',
@@ -29,7 +29,7 @@ export class MockProxyServiceImpl implements ProxyService {
      */
     /* eslint-disable max-len */
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    public async sendRefreshTokenGrant(refreshToken: string, request: LambdaRequest, response: LambdaResponse): Promise<any>  {
+    public async sendRefreshTokenGrant(refreshToken: string, request: AbstractRequest, response: AbstractResponse): Promise<any>  {
 
         return {
             id_token: 'eyJraWQiOiJKYkRZVVd0MVIwbUd1M0tYckJrUjNzcEpPXC9TWEprZlwvZW0weVRSZUxlZG89IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSGdUQTlTTjBuSTF3aVBNYlQwTkYtUSIsInN1YiI6IjkzNGIxODcxLTFhODEtNGI1Zi1hMTYyLTRiMjMxZjVkYzJkMCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0yLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMl9tWjNOQllwVG8iLCJjb2duaXRvOnVzZXJuYW1lIjoiOTM0YjE4NzEtMWE4MS00YjVmLWExNjItNGIyMzFmNWRjMmQwIiwiZ2l2ZW5fbmFtZSI6Ikd1ZXN0IiwiYXVkIjoiMTd0ZG1ycHJoY2M3ZmsyZHJjN240Ym12N2YiLCJldmVudF9pZCI6ImVlOTYxZmY2LTMyMGEtNDA0Mi1hMjY3LTQ1NzBjNzI2OGJkNCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNTk1MTkxOTA4LCJleHAiOjE1OTUxOTU1MDgsImlhdCI6MTU5NTE5MTkwOCwiZmFtaWx5X25hbWUiOiJVc2VyIiwiZW1haWwiOiJndWVzdHVzZXJAYXV0aGd1aWRhbmNlLmNvbSJ9.H4zLNenXKeqhZfT8pbmOQ7D-TI9Uh8FoMICb-v4FU59PdBgpmDmYCP_ehuy3HyFQuypbr5KGftFBsffLL9m-Oha65GWl2qcnn4KxI20Ir0HjpFZehkq9ti-0nVTc6zlMvN-_I0RetqLpmtwDNt3tIIzmRt0D8b7_wCwOb1OCsP-hUf6saW0lew7ksjEeKepVkHpnL0yXenhzWeD3FXQaJX3ThGLrOf-elmaBn1NXEhnYuFIDob1HDaxN1IwQlgFHqM50XmjmcKJhmQt4VcXMTDRaNplXwQNfmi-Mfk5ul3vrcFfDCn-Wo1illTIW18Fh8ywVuwiT6vJr_aGjflbWyA',

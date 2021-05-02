@@ -1,8 +1,8 @@
 import cookie, {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
-import {LambdaRequest} from '../../lambda/request/lambdaRequest';
-import {LambdaResponse} from '../../lambda/request/LambdaResponse';
 import {ErrorHandler} from '../errors/errorHandler';
+import {AbstractRequest} from '../request/abstractRequest';
+import {AbstractResponse} from '../request/abstractResponse';
 
 /*
  * Our cookie service class will deal with cookie handling during requests to the token endpoint
@@ -22,16 +22,16 @@ export class CookieService {
     /*
      * Write a same domain response cookie containing the refresh token
      */
-    public writeAuthCookie(clientId: string, refreshToken: string, response: LambdaResponse): void {
+    public writeAuthCookie(clientId: string, refreshToken: string, response: AbstractResponse): void {
 
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
-        response.addHeader('set-cookie', this._formatCookie(`${this._authCookieName}-${clientId}`, encryptedData));
+        response.addCookie(this._formatCookie(`${this._authCookieName}-${clientId}`, encryptedData));
     }
 
     /*
      * Read the refresh token from the request cookie
      */
-    public readAuthCookie(clientId: string, request: LambdaRequest): string {
+    public readAuthCookie(clientId: string, request: AbstractRequest): string {
 
         const cookieName = `${this._authCookieName}-${clientId}`;
         const encryptedData = request.getCookie(cookieName);
@@ -45,16 +45,16 @@ export class CookieService {
     /*
      * Write a CSRF cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeCsrfCookie(clientId: string, response: LambdaResponse, value: string): void {
+    public writeCsrfCookie(clientId: string, response: AbstractResponse, value: string): void {
 
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
-        response.addHeader('set-cookie', this._formatCookie(`${this._csrfCookieName}-${clientId}`, encryptedData));
+        response.addCookie(this._formatCookie(`${this._csrfCookieName}-${clientId}`, encryptedData));
     }
 
     /*
      * Write a response cookie containing a CSRF value, which we will verify during refresh token requests
      */
-    public readCsrfCookie(clientId: string, request: LambdaRequest): string {
+    public readCsrfCookie(clientId: string, request: AbstractRequest): string {
 
         const cookieName = `${this._csrfCookieName}-${clientId}`;
         const encryptedData = request.getCookie(cookieName);
@@ -72,8 +72,8 @@ export class CookieService {
     public expire(
         clientId: string,
         refreshToken: string,
-        request: LambdaRequest,
-        response: LambdaResponse): void {
+        request: AbstractRequest,
+        response: AbstractResponse): void {
 
         const expiredRefreshToken = `x${refreshToken}x`;
         this.writeAuthCookie(clientId, expiredRefreshToken, response);
@@ -82,10 +82,10 @@ export class CookieService {
     /*
      * Clear all cookies when the user session expires
      */
-    public clearAll(clientId: string, response: LambdaResponse): void {
+    public clearAll(clientId: string, response: AbstractResponse): void {
 
-        response.addHeader('set-cookie', this._clearCookie(`${this._authCookieName}-${clientId}`));
-        response.addHeader('set-cookie', this._clearCookie(`${this._csrfCookieName}-${clientId}`));
+        response.addCookie(this._clearCookie(`${this._authCookieName}-${clientId}`));
+        response.addCookie(this._clearCookie(`${this._csrfCookieName}-${clientId}`));
     }
 
     /*

@@ -1,10 +1,14 @@
+# curl -X OPTIONS
+
 curl -X POST https://api.authsamples.com/oauthwebproxy/authorization-code-grant \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "grant_type=authorization_code" \
--d "client_id=myClientID" \
--d "redirect_uri=http://example.com/oauth" \
--d "code=362ad374-735c-4f69-aa8e-bf384f8602de" \
--d "code_verifier=jlshdfhklwdfgd"
+-H 'origin: https://web.authsamples.com' \
+-H 'content-type: application/x-www-form-urlencoded' \
+-H 'accept: application/x-www-form-urlencoded' \
+-d 'grant_type=authorization_code' \
+-d 'client_id=myClientID' \
+-d 'redirect_uri=http://example.com/oauth' \
+-d 'code=362ad374-735c-4f69-aa8e-bf384f8602de' \
+-d 'code_verifier=jlshdfhklwdfgd'
 
 curl -X POST https://api.authsamples.com/oauthwebproxy/refresh-token-grant \
 -H "cookie: auth_cookie=XXX"

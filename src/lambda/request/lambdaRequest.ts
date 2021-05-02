@@ -2,47 +2,40 @@ import cookie from 'cookie';
 import {AbstractRequest} from '../../core/request/abstractRequest';
 
 /*
- * Encapsulate the lambda request
+ * Encapsulate the lambda request format
  */
 export class LambdaRequest implements AbstractRequest {
 
-    private readonly _request: any;
+    private readonly _event: any;
     private readonly _body: any;
 
-    public constructor(request: any) {
-        this._request = request;
+    public constructor(event: any) {
+        this._event = event;
         this._body = this._parseBody();
     }
 
-    public get uri(): string {
-        return this._request.uri.toLowerCase();
+    public getUri(): string {
+        return this._event.path.toLowerCase();
     }
 
-    public get method(): string {
-        return this._request.method.toLowerCase();
+    public getMethod(): string {
+        return this._event.httpMethod.toLowerCase();
     }
 
-    public get body(): any {
+    public getBody(): any {
         return this._body;
     }
 
     /*
-     * Get a normal header that is only expected to be supplied once
-     *
-     * headers: {
-         'content-type': [{
-           key: 'content-type',
-           value: 'application/x-www-form-urlencoded'
-         }
-       }
+     * Get a single value header
      */
     public getHeader(name: string): string | null {
 
-        if (this._request.headers) {
-            for (const key in this._request.headers) {
-                if (key && key === name) {
-                    return this._request.headers[key][0].value;
-                }
+        if (this._event.headers) {
+            
+            const found = Object.keys(this._event.headers).find((h) => h.toLowerCase() === name);
+            if (found) {
+                return this._event.headers[found];
             }
         }
 
@@ -50,30 +43,19 @@ export class LambdaRequest implements AbstractRequest {
     }
 
     /*
-     * Get a header that occurs multiple times
-     *
-     * headers: {
-         'cookie': [{
-           key: 'cookie',
-           value: 'aaa=111'
-         },
-         {
-           key: 'cookie',
-           value: 'bbb=222'
-         }]
-       }
+     * Get a multi value header
      */
-    public getHeaders(name: string): string[] {
+    public getMultiValueHeader(name: string): string[] {
 
         const values: string[] = [];
 
         // Iterate headers, which is an object with header names as keys, each of which have a key and value
-        if (this._request.headers) {
-            for (const key in this._request.headers) {
+        if (this._event.headers) {
+            for (const key in this._event.headers) {
                 if (key && key === name) {
 
                     // Add each item to results
-                    this._request.headers[key].forEach((i: any) => {
+                    this._event.headers[key].forEach((i: any) => {
                         values.push(i.value);
                     });
                 }
@@ -93,11 +75,11 @@ export class LambdaRequest implements AbstractRequest {
         let result = null;
 
         // Look for all incoming cookie headers
-        const headers = this.getHeaders('cookie');
-        headers.forEach((ct) => {
+        const headers = this.getMultiValueHeader('cookie');
+        headers.forEach((h) => {
 
             // Use a library to parse the cookie text
-            const data = cookie.parse(ct);
+            const data = cookie.parse(h);
             if (data[name]) {
                 result = data[name];
             }
@@ -107,29 +89,17 @@ export class LambdaRequest implements AbstractRequest {
     }
 
     /*
-     * On a developer PC we work with data from our test JSON files that is already an object
+     * Parse the body string into an object
      */
     private _parseBody(): any {
 
-        const body = this._request.body;
-        if (!body || !body.data) {
+        const body = this._event.body;
+        if (!body) {
             return null;
         }
 
-        if (typeof body.data === 'object') {
-            return body.data;
-        }
-
-        return this._parseBase64EncodedJson(body.data);
-    }
-
-    /*
-     * When our lambda runs in AWS, request.body.data is base 64 encoded JSON text that needs parsing
-     */
-    private _parseBase64EncodedJson(input: any): any {
-
         const output: any = {};
-        const formUrlEncodedData = Buffer.from(input, 'base64').toString();
+        const formUrlEncodedData = body;
 
         // Split data such as 'grant_type=authorization_code&code=e7acecd0-6ec7-458b-b776-05a0757db30b' into fields
         const nameValuePairs = formUrlEncodedData.trim().split('&');
@@ -142,8 +112,6 @@ export class LambdaRequest implements AbstractRequest {
             }
         });
 
-        // Return results
         return output;
-
     }
 }

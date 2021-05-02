@@ -1,21 +1,27 @@
 API REVAMP PART 1
 -----------------
-1. Add Request interfaces and ensure that core code is neutral
-   - Start by listing current Serverless operations
-   - Then look at webhost and find Express operations
+1. Get OAuth code grant working with lambda request objects
+   Get cookie writing properly
+   Add multi value headers to test data
 
-2. Implement methods for Serverless with clean code
-   Test via 'npm run' commands
-   
-3. Deploy to AWS and test via curl commands
+ 2. Rename proxy service to OAuthService
 
-4. Implement methods for Express and add an 'npm start' command
-   Retest via curl commands
-   
-5. Include CORS headers in request and write allow-credentials in response
+3. Work out a test approach
+   Generic API to think about
+   Can client id securely be part of messages?
 
-6. Update README
-   Then make a public repo
+4. Deploy to AWS and add curl commands for testing
+
+5. Implement for Express and see code in webhost of Final SPA
+
+6. Add a getTokens operation to return access + id_token after login or on page load / new browser tab
+
+7. Run the Duende code sample and understand messages + code
+ 
+8. Add CORS middleware to API and write allow-credentials in response
+   Also add logging middleware
+
+9. Update README
 
 API REVAMP PART 2
 ----------------

@@ -5,8 +5,8 @@ import {Configuration} from '../configuration/configuration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
 import {ProxyService} from './proxyService';
-import {LambdaRequest} from '../../lambda/request/lambdaRequest';
-import {LambdaResponse} from '../../lambda/request/LambdaResponse';
+import {AbstractRequest} from '../request/abstractRequest';
+import {AbstractResponse} from '../request/abstractResponse';
 
 /*
  * The proxy service class will deal with routing requests to the Authorization Server
@@ -22,15 +22,14 @@ export class ProxyServiceImpl implements ProxyService {
     /*
      * Forward the authorization code grant message to the Authorization Server
      */
-    public async sendAuthorizationCodeGrant(
-        request: LambdaRequest,
-        response: LambdaResponse): Promise<any> {
+    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<any> {
 
         // Form the body of the authorization code grant message
         const formData = new URLSearchParams();
-        for (const field in request.body) {
-            if (field && request.body[field]) {
-                formData.append(field, request.body[field]);
+        const body = request.getBody();
+        for (const field in body) {
+            if (field && body[field]) {
+                formData.append(field, body[field]);
             }
         }
 
@@ -43,13 +42,14 @@ export class ProxyServiceImpl implements ProxyService {
      */
     public async sendRefreshTokenGrant(
         refreshToken: string,
-        request: LambdaRequest,
-        response: LambdaResponse): Promise<any>  {
+        request: AbstractRequest,
+        response: AbstractResponse): Promise<any>  {
 
         const formData = new URLSearchParams();
-        for (const field in request.body) {
-            if (field && request.body[field]) {
-                formData.append(field, request.body[field]);
+        const body = request.getBody();
+        for (const field in body) {
+            if (field && body[field]) {
+                formData.append(field, body[field]);
             }
         }
 
@@ -71,7 +71,7 @@ export class ProxyServiceImpl implements ProxyService {
     /*
      * Route a message to the Authorization Server
      */
-    private async _postMessage(formData: URLSearchParams, response: LambdaResponse): Promise<void> {
+    private async _postMessage(formData: URLSearchParams, response: AbstractResponse): Promise<void> {
 
         // Define request options
         const options = {
@@ -90,7 +90,7 @@ export class ProxyServiceImpl implements ProxyService {
             const authServerResponse = await axios.request(options as AxiosRequestConfig);
 
             // Update the response for the success case and return data
-            response.statusCode = authServerResponse.status;
+            response.setStatusCode(authServerResponse.status);
             return authServerResponse.data;
 
         } catch (e) {

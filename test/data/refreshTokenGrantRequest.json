@@ -1,0 +1,13 @@
+{
+  "path": "/oauthwebproxy/refresh-token-grant",
+  "httpMethod": "POST",
+  "headers": {
+    "accept": "'*/*'",
+    "content-type": "application/x-www-form-urlencoded"
+  },
+  "multiValueHeaders": {
+    "cookie": ["auth_cookie=XXX"]
+  },
+  "queryStringParameters": null,
+  "pathParameters": null
+}

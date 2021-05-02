@@ -1,4 +1,5 @@
 {
+    "clientId": "4co5uvgmse68utsekh7p2sc0lg",
     "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
     "cookieRootDomain": "authsamples.com",
     "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",

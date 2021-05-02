@@ -7,6 +7,7 @@
     "build": "rimraf dist && tsc --sourceMap true",
     "start": "node dist/express/app.js",
     "testLambdas": "./test/testLambdas.sh",
+    "testHttpRemote": "./test/testHttpRemote.sh",
     "authorizationCodeGrant": "sls invoke local -f authorizationCodeGrant -p test/data/authorizationCodeGrantRequest.json",
     "refreshTokenGrant": "sls invoke local -f refreshTokenGrant -p test/data/refreshTokenGrantRequest.json",
     "expireRefreshToken": "sls invoke local -f expireRefreshToken -p test/data/expireRefreshTokenRequest.json",

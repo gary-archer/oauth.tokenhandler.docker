@@ -9,9 +9,6 @@ import {LambdaResponse} from '../request/lambdaResponse';
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 const handler = async (event: any, context: Context) => {
 
-    console.log('EXPIRE REFRESH TOKEN');
-    console.log(event);
-
     const request = new LambdaRequest(event);
     const response = new LambdaResponse();
 

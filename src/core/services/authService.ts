@@ -13,14 +13,9 @@ import {OAuthServiceImpl} from './oauthServiceImpl';
  */
 export class AuthService {
 
-    // Worker classes
     private readonly _configuration: Configuration;
     private readonly _oauthService: OAuthService;
     private readonly _cookieService: CookieService;
-
-    // CSRF constants
-    private readonly _responseBodyFieldName = 'csrf_field';
-    private readonly _requestHeaderFieldName = 'x-mycompany-finalspa-refresh-csrf';
 
     public constructor(configuration: Configuration) {
 
@@ -36,7 +31,6 @@ export class AuthService {
     public async authorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        Logger.info(`Sending Authorization Code Grant for ${this._configuration.name}`);
         this._validate(request, false);
 
         // Send the request to the authorization server
@@ -52,14 +46,13 @@ export class AuthService {
         // Write the refresh token to an HTTP only cookie
         this._cookieService.writeAuthCookie(this._configuration.name, refreshToken, response);
 
-        // Write a CSRF HTTP only cookie containing tokens
-        const randomValue = this._oauthService.generateCsrfField();
-        this._cookieService.writeCsrfCookie(this._configuration.name, response, randomValue);
-        authCodeGrantData[this._responseBodyFieldName] = randomValue;
+        // Write an anti forgery token into an encrypted HTTP only cookie
+        const randomValue = this._oauthService.generateAntiForgeryValue();
+        this._cookieService.writeAntiForgeryCookie(this._configuration.name, response, randomValue);
 
-        // Also give the UI the CSRF field in the response body
+        // Also give the UI the anti forgery token in the response body
         const data = {} as any;
-        data[this._responseBodyFieldName] = randomValue;
+        data['anti_forgery_token'] = randomValue;
         response.setBody(data);
     }
 
@@ -69,10 +62,9 @@ export class AuthService {
     public async refreshTokenGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._validate(request, false);
+        this._validate(request, true);
 
         // Get the refresh token from the auth cookie
-        Logger.info(`Sending Refresh Token Grant for ${this._configuration.name}`);
         const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
 
         // Send it to the Authorization Server
@@ -99,7 +91,6 @@ export class AuthService {
     public async expireRefreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        Logger.info(`Expiring refresh token for ${this._configuration.name}`);
         this._validate(request, true);
 
         // Get the current refresh token
@@ -116,7 +107,6 @@ export class AuthService {
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        Logger.info(`Clearing cookies for ${this._configuration.name}`);
         this._validate(request, true);
 
         // Clear all cookies for this client
@@ -127,14 +117,14 @@ export class AuthService {
     /*
      * Do some initial verification and then return the client id from the request body
      */
-    private _validate(request: AbstractRequest, requireCsrfCookie: boolean): void {
+    private _validate(request: AbstractRequest, requireAntiForgeryCookie: boolean): void {
 
         // Check the HTTP request has the expected web origin
         this._validateOrigin(request);
 
         // For token refresh requests, also check that the HTTP request has an extra header
-        if (requireCsrfCookie) {
-            this._validateCsrfCookie(request);
+        if (requireAntiForgeryCookie) {
+            this._validateAntiForgeryCookie(request);
         }
     }
 
@@ -144,6 +134,7 @@ export class AuthService {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
+        console.log(`Origin header is ${origin}`);
         if (!origin || origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
             throw ErrorHandler.fromSecurityVerificationError(
                 'The origin header was missing or contained an untrusted value');
@@ -153,13 +144,14 @@ export class AuthService {
     /*
      * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
      */
-    private _validateCsrfCookie(request: AbstractRequest) {
+    private _validateAntiForgeryCookie(request: AbstractRequest) {
 
-        // Get the CSRF cookie value
-        const cookieValue = this._cookieService.readCsrfCookie(this._configuration.name, request);
+        // Get the cookie value
+        const cookieValue = this._cookieService.readAntiForgeryCookie(this._configuration.name, request);
 
         // Check there is a matching anti forgery token field
-        const headerValue = request.getHeader(this._requestHeaderFieldName);
+        const headerName = this._cookieService.getAntiForgeryRequestHeaderName(this._configuration.name);
+        const headerValue = request.getHeader(headerName);
         if (!headerValue) {
             throw ErrorHandler.fromSecurityVerificationError('No anti forgery request header field was supplied');
         }

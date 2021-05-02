@@ -4,20 +4,18 @@ API REVAMP PART 1
    Check AWS logs
 
 2. Run the Duende code sample and understand messages + code
-   Rename CSRF to something better since it is mainly for XSS protection
    Write anti forgery token on every refresh
 
-3. Calculate login and logout URLs server side
+3. Additional operations
+   Calculate login and logout URLs server side
    Reduce params in auth code grant to just code
-
-4. Update cookie path
 
 5. Implement for Express and see code in webhost of Final SPA
  
 6. Add CORS middleware to API and write allow-credentials in response
    Also add logging middleware
 
-7. Error testing to cover in tests
+7. Detailed error testing
 
 8. Update README
 
@@ -26,7 +24,6 @@ API REVAMP PART 2
 1. Validate id token and check AT hash - cf oidc client library
 
 2. Write a new anti forgery token after every refresh for better OWASP reviews
-   Rename CSRF to anti forgery
    Test this from a multi tab browser viewpoint
    Are there any 401 race conditions that the SPA cannot handle?
 

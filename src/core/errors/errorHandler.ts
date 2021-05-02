@@ -107,7 +107,7 @@ export class ErrorHandler {
     }
 
     /*
-     * Other security failures such as invalid CSRF requests
+     * Other security failures such as invalid anti forgery tokens
      */
     public static fromSecurityVerificationError(logContext: string): ClientError {
 

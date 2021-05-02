@@ -7,6 +7,8 @@ export interface Configuration {
 
     clientId: string;
 
+    redirectUri: string;
+
     tokenEndpoint: string;
 
     cookieRootDomain: string;

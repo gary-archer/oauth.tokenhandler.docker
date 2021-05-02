@@ -13,5 +13,5 @@ export interface OAuthService {
     sendRefreshTokenGrant(refreshToken: string, request: AbstractRequest, response: AbstractResponse): Promise<any>;
 
     // Generate a value to protect the cookie
-    generateCsrfField(): string;
+    generateAntiForgeryValue(): string;
 }

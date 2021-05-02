@@ -42,11 +42,11 @@ export class LambdaResponse implements AbstractResponse {
             statusCode,
         } as any;
 
-        if (this._data.headers) {
+        if (Object.keys(this._data.headers).length > 0) {
             data.headers = this._data.headers;
         }
 
-        if (this._data.multiValueHeaders) {
+        if (Object.keys(this._data.multiValueHeaders).length > 0) {
             data.multiValueHeaders = this._data.multiValueHeaders;
         }
 

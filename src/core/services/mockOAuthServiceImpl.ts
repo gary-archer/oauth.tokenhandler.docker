@@ -42,7 +42,7 @@ export class MockOAuthServiceImpl implements OAuthService {
     /*
      * Generate a value that matches encrypted data in our test config files
      */
-    public generateCsrfField(): string {
+    public generateAntiForgeryValue(): string {
         return 'pu027sP+852dOASJSJHYkKo5QPYUyw+F6mwm6lyRIJ0=';
     }
 }

@@ -23,16 +23,16 @@ custom:
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 
-  # CORS headers allowed
+  # Headers that will be accepted by AWS
   allowedHeaders:
     - Content-Type
     - Accept
     - Cookie
-    - Set-Cookie
     - X-Amz-Date
     - X-Api-Key
     - X-Amz-Security-Token
     - X-Amz-User-Agent
+    - x-mycompany-finalspa-aft
 
 functions:
   

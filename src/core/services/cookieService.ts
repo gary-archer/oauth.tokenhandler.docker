@@ -10,7 +10,7 @@ import {AbstractResponse} from '../request/abstractResponse';
 export class CookieService {
 
     private readonly _authCookieName = 'mycompany-auth';
-    private readonly _csrfCookieName = 'mycompany-csrf';
+    private readonly _antiForgeryCookieName = 'mycompany-aft';
     private readonly _rootDomain: string;
     private readonly _encryptionKey: Buffer;
 
@@ -43,26 +43,33 @@ export class CookieService {
     }
 
     /*
-     * Write a CSRF cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
+     * Write a cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeCsrfCookie(name: string, response: AbstractResponse, value: string): void {
+    public writeAntiForgeryCookie(name: string, response: AbstractResponse, value: string): void {
 
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(`${this._csrfCookieName}-${name}`, encryptedData));
+        response.addCookie(this._formatCookie(`${this._antiForgeryCookieName}-${name}`, encryptedData));
     }
 
     /*
-     * Write a response cookie containing a CSRF value, which we will verify during refresh token requests
+     * We also derive the request header value from this class
      */
-    public readCsrfCookie(name: string, request: AbstractRequest): string {
+    public getAntiForgeryRequestHeaderName(name: string): string {
+        return `x-${this._antiForgeryCookieName}-${name}`;
+    }
 
-        const cookieName = `${this._csrfCookieName}-${name}`;
+    /*
+     * Write a response cookie containing an anti forgery value, which we will verify during refresh token requests
+     */
+    public readAntiForgeryCookie(name: string, request: AbstractRequest): string {
+
+        const cookieName = `${this._antiForgeryCookieName}-${name}`;
         const encryptedData = request.getCookie(cookieName);
-        if (encryptedData) {
-            return this._decryptCookie(cookieName, encryptedData);
+        if (!encryptedData) {
+            throw ErrorHandler.fromMissingCookieError('No anti forgery cookie was found in the incoming request');
         }
 
-        throw ErrorHandler.fromMissingCookieError('No CSRF cookie was found in the incoming request');
+        return this._decryptCookie(cookieName, encryptedData);
     }
 
     /*
@@ -85,7 +92,7 @@ export class CookieService {
     public clearAll(name: string, response: AbstractResponse): void {
 
         response.addCookie(this._clearCookie(`${this._authCookieName}-${name}`));
-        response.addCookie(this._clearCookie(`${this._csrfCookieName}-${name}`));
+        response.addCookie(this._clearCookie(`${this._antiForgeryCookieName}-${name}`));
     }
 
     /*
@@ -120,7 +127,7 @@ export class CookieService {
     }
 
     /*
-     * Both our auth cookie and CSRF cookie use the same options
+     * Both our auth cookie and anti forgery cookie use the same options
      */
     private _getCookieOptions(): CookieSerializeOptions {
 

@@ -33,7 +33,7 @@ export class OAuthServiceImpl implements OAuthService {
             }
         }
 
-        // Send an HTTP message and get the response, then add a field for CSRF protection
+        // Send an HTTP message and get the response, then add a field for anti forgery protection
         return this._postMessage(formData, response);
     }
 
@@ -62,9 +62,9 @@ export class OAuthServiceImpl implements OAuthService {
     }
 
     /*
-     * Generate a field used for cross site request forgery protection
+     * Generate a field used to protect the auth cookie
      */
-    public generateCsrfField(): string {
+    public generateAntiForgeryValue(): string {
         return randomBytes(32).toString('base64');
     }
 

@@ -1,27 +1,25 @@
+import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {Configuration} from '../configuration/configuration';
 import {ErrorHandler} from '../errors/errorHandler';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 import {CookieService} from './cookieService';
-import {MockOAuthServiceImpl} from './mockOAuthServiceImpl';
 import {OAuthService} from './oauthService';
-import {OAuthServiceImpl} from './oauthServiceImpl';
 
 /*
- * The entry point for token endpoint related operations
+ * The entry point for authorization related operations
  */
-export class AuthService {
+export class Authorizer {
 
     private readonly _configuration: Configuration;
     private readonly _oauthService: OAuthService;
     private readonly _cookieService: CookieService;
 
-    public constructor(configuration: Configuration) {
+    public constructor(configuration: Configuration, cookieService: CookieService, oauthService: OAuthService) {
 
         this._configuration = configuration;
-        //this._oauthService = configuration.useMockResponses ? new MockOAuthServiceImpl() : new OAuthServiceImpl(configuration);
-        this._oauthService = new MockOAuthServiceImpl();
-        this._cookieService = new CookieService(configuration.cookieRootDomain, configuration.cookieEncryptionKey);
+        this._cookieService = cookieService;
+        this._oauthService = oauthService;
     }
 
     /*
@@ -31,6 +29,7 @@ export class AuthService {
 
         // Check incoming details
         this._validateOrigin(request);
+        const client = this._findClient(request);
 
         // Set the response body to the login redirect URI
         const data = {} as any;
@@ -41,10 +40,10 @@ export class AuthService {
         const cookieData = {
             state: 'xxx',
             codeVerifier: 'yyy',
-        }
+        };
 
         // Write the state cookie
-        this._cookieService.writeStateCookie(this._configuration.name, cookieData, response);
+        this._cookieService.writeStateCookie(client.name, cookieData, response);
     }
 
     /*
@@ -54,9 +53,8 @@ export class AuthService {
 
         // Check incoming details
         this._validateOrigin(request);
-        
-        // Check that the cookie state matches the state in the request body
-        const cookieState = this._cookieService.readStateCookie(this._configuration.name, request);
+        const client = this._findClient(request);
+        this._validateStateCookie(request, client);
 
         // Send the request to the authorization server
         const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
@@ -76,12 +74,12 @@ export class AuthService {
         }
 
         // Write the refresh token and id token to HTTP only cookies
-        this._cookieService.writeAuthCookie(this._configuration.name, refreshToken, response);
-        this._cookieService.writeIdCookie(this._configuration.name, idToken, response);
+        this._cookieService.writeAuthCookie(client.name, refreshToken, response);
+        this._cookieService.writeIdCookie(client.name, idToken, response);
 
         // Write an anti forgery token into an encrypted HTTP only cookie
         const randomValue = this._oauthService.generateAntiForgeryValue();
-        this._cookieService.writeAntiForgeryCookie(this._configuration.name, response, randomValue);
+        this._cookieService.writeAntiForgeryCookie(client.name, response, randomValue);
 
         // Also give the UI the anti forgery token in the response body
         const data = {} as any;
@@ -96,10 +94,11 @@ export class AuthService {
 
         // Check incoming details
         this._validateOrigin(request);
-        this._validateAntiForgeryCookie(request);
+        const client = this._findClient(request);
+        this._validateAntiForgeryCookie(request, client);
 
         // Get the refresh token from the auth cookie
-        const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
+        const refreshToken = this._cookieService.readAuthCookie(client.name, request);
 
         // Send it to the Authorization Server
         const refreshTokenGrantData =
@@ -108,18 +107,18 @@ export class AuthService {
         // Handle updated refresh tokens
         const newRefreshToken = refreshTokenGrantData.refresh_token;
         if (newRefreshToken) {
-            this._cookieService.writeAuthCookie(this._configuration.name, newRefreshToken, response);
+            this._cookieService.writeAuthCookie(client.name, newRefreshToken, response);
         }
 
         // Handle updated id tokens
         const newIdToken = refreshTokenGrantData.id_token;
         if (newIdToken) {
-            this._cookieService.writeIdCookie(this._configuration.name, newIdToken, response);
+            this._cookieService.writeIdCookie(client.name, newIdToken, response);
         }
 
         // Write an updated anti forgery cookie
         const randomValue = this._oauthService.generateAntiForgeryValue();
-        this._cookieService.writeAntiForgeryCookie(this._configuration.name, response, randomValue);
+        this._cookieService.writeAntiForgeryCookie(client.name, response, randomValue);
 
         // Return the access token and the anti forgery token in the response body
         const data = {} as any;
@@ -135,13 +134,14 @@ export class AuthService {
 
         // Check incoming details
         this._validateOrigin(request);
-        this._validateAntiForgeryCookie(request);
+        const client = this._findClient(request);
+        this._validateAntiForgeryCookie(request, client);
 
         // Get the current refresh token
-        const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
+        const refreshToken = this._cookieService.readAuthCookie(client.name, request);
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
-        this._cookieService.expireAuthCookie(this._configuration.name, refreshToken, response);
+        this._cookieService.expireAuthCookie(client.name, refreshToken, response);
         response.setStatusCode(204);
     }
 
@@ -152,11 +152,19 @@ export class AuthService {
 
         // Check incoming details
         this._validateOrigin(request);
-        this._validateAntiForgeryCookie(request);
+        const client = this._findClient(request);
+        this._validateAntiForgeryCookie(request, client);
 
         // Clear all cookies for this client
-        this._cookieService.clearAll(this._configuration.name, response);
+        this._cookieService.clearAll(client.name, response);
         response.setStatusCode(204);
+    }
+
+    /*
+     * Find the client from the path parameter on which we were called
+     */
+    private _findClient(request: AbstractRequest): ClientConfiguration {
+        return this._configuration.clients[0];
     }
 
     /*
@@ -165,7 +173,7 @@ export class AuthService {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
-        if (!origin || origin.toLowerCase() !== this._configuration.trustedWebOrigin.toLowerCase()) {
+        if (!origin || origin.toLowerCase() !== this._configuration.host.trustedWebOrigin.toLowerCase()) {
             throw ErrorHandler.fromSecurityVerificationError(
                 'The origin header was missing or contained an untrusted value');
         }
@@ -174,18 +182,23 @@ export class AuthService {
     /*
      * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
      */
-    private _validateStateCookie(request: AbstractRequest) {
+    private _validateStateCookie(request: AbstractRequest, client: ClientConfiguration): void {
+
+        // Get the state value
+        const data = this._cookieService.readStateCookie(client.name, request);
+        console.log(data);
+    }
 
     /*
      * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
      */
-    private _validateAntiForgeryCookie(request: AbstractRequest) {
+    private _validateAntiForgeryCookie(request: AbstractRequest, client: ClientConfiguration): void {
 
         // Get the cookie value
-        const cookieValue = this._cookieService.readAntiForgeryCookie(this._configuration.name, request);
+        const cookieValue = this._cookieService.readAntiForgeryCookie(client.name, request);
 
         // Check there is a matching anti forgery token field
-        const headerName = this._cookieService.getAntiForgeryRequestHeaderName(this._configuration.name);
+        const headerName = this._cookieService.getAntiForgeryRequestHeaderName(client.name);
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {
             throw ErrorHandler.fromSecurityVerificationError('No anti forgery request header field was supplied');

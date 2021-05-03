@@ -1,5 +1,6 @@
 import cookie, {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
+import {HostConfiguration} from '../configuration/hostConfiguration';
 import {ErrorHandler} from '../errors/errorHandler';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
@@ -9,13 +10,12 @@ import {AbstractResponse} from '../request/abstractResponse';
  */
 export class CookieService {
 
-    private readonly _prefix = 'mycompany';
-    private readonly _rootDomain: string;
+    private readonly _configuration: HostConfiguration;
     private readonly _encryptionKey: Buffer;
 
-    public constructor(rootDomain: string, base64encryptionKey: string) {
-        this._encryptionKey = Buffer.from(base64encryptionKey, 'base64');
-        this._rootDomain = rootDomain;
+    public constructor(configuration: HostConfiguration) {
+        this._encryptionKey = Buffer.from(configuration.cookieEncryptionKey, 'base64');
+        this._configuration = configuration;
     }
 
     /*
@@ -106,7 +106,7 @@ export class CookieService {
      * We also derive the request header value from this class
      */
     public getAntiForgeryRequestHeaderName(app: string): string {
-        
+
         const cookieName = this._getCookieName(app, 'aft');
         return `x-${cookieName}`;
     }
@@ -149,7 +149,7 @@ export class CookieService {
      * Return a cookie of the form 'mycompany-auth-finalspa'
      */
     private _getCookieName(app: string, type: string) {
-        return `${this._prefix}-${type}-${app}`;
+        return `${this._configuration.cookiePrefix}-${type}-${app}`;
     }
 
     /*
@@ -185,7 +185,7 @@ export class CookieService {
     /*
      * Both our auth cookie and anti forgery cookie use the same options
      */
-    private _getCookieOptions(path: string): CookieSerializeOptions {
+    private _getCookieOptions(): CookieSerializeOptions {
 
         return {
 
@@ -195,11 +195,11 @@ export class CookieService {
             // The cookie can only be sent over an HTTPS connection
             secure: true,
 
-            // The cookie written by this app will be sent to other web applications
-            domain: `.${this._rootDomain}`,
+            // The cookie written by this app will be usable for SPAs in a sibling web domain
+            domain: `.${this._configuration.cookieRootDomain}`,
 
             // The cookie is only sent during OAuth related requests, and all Web / API requests are cookieless
-            path,
+            path: '/spa',
 
             // Other domains cannot send the cookie, which reduces cross site scripting risks
             sameSite: 'strict',

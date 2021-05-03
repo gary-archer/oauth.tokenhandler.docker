@@ -1,7 +1,7 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
-import {Configuration} from '../configuration/configuration';
+import {HostConfiguration} from '../configuration/hostConfiguration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
 import {OAuthService} from './oauthService';
@@ -15,7 +15,7 @@ export class OAuthServiceImpl implements OAuthService {
 
     private readonly _tokenEndpoint: string;
 
-    public constructor(configuration: Configuration) {
+    public constructor(configuration: HostConfiguration) {
         this._tokenEndpoint = configuration.tokenEndpoint;
     }
 

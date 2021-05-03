@@ -1,9 +1,9 @@
 import {Context} from 'aws-lambda';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
 import {ErrorHandler} from '../../core/errors/errorHandler';
-import {AuthService} from '../../core/services/authService';
 import {LambdaRequest} from '../request/lambdaRequest';
 import {LambdaResponse} from '../request/lambdaResponse';
+import {LambdaConfiguration} from '../startup/lambdaConfiguration';
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
@@ -15,8 +15,8 @@ const handler = async (event: any, context: Context) => {
     try {
 
         const configuration = await ConfigurationLoader.load();
-        const service = new AuthService(configuration);
-        await service.startLogout(request, response);
+        const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
+        await authorizer.startLogout(request, response);
         return response.getData();
 
     } catch (e) {

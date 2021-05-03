@@ -1,34 +1,34 @@
 API REVAMP PART 1
 -----------------
-1. Update configuration to use a host and a clients connection
-   Pass a client object around such as to cookie service
-   Think about the issue of trusing clients
+1. Cookie service to use cookie path from client
+   Currently hard coded to /spa
 
-2. Use LambdaConfiguration to auto wire the auth service
-   Later this will also manage middy middleware
+2. Implement startLogin properly, to generate state / code_challenge and form full URL + write cookie
+   Update tests to use real data
 
-3. Implement startLogin properly, to generate state / code_challenge and form full URL + write cookie
+3. Implement endLogin properly, to use the state and codeVerifier in the state cookie
+   Update tests to use real data
 
-4. Implement endLogin properly, to use the state and codeVerifier in the state cookie
+4. Implement startLogout to calculate the URL and to use the config data to do it in a Cognito way
+   Update tests to use real data
 
-5. Implement startLogout to calculate the URL and to use the config data to do it in a Cognito way
+5. Get all tests working against lambdas and HTTP endpoints
 
-6. Get all tests working against lambdas and HTTP endpoints
-
-7. Implement the same logic for Express and use code from webhost in Final SPA
+6. Implement the same logic for Express and use code from webhost in Final SPA
    Add a testHttpLocal.sh
  
-8. SPA branch to verify cookie sending and CORS when an Expire button is clicked
+7. SPA branch to verify cookie sending and CORS when an Expire button is clicked
    Add CORS middleware to API and write allow-credentials in response
    Add an OPTIONS request to curl tests
 
-9. Add logging middleware and log to the Elastic Search schema
+8. Add logging middleware and log to the Elastic Search schema
    Detailed error testing of API operations to test each failure point
    Use my standard client error object
 
-10. Read up to see if I should use a nonce?
+9. Think about the issue of trusing clients
+   Read up to see if I should use a nonce?
 
-11. Update README
+10. Update README
 
 API REVAMP PART 2
 ----------------

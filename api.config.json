@@ -2,6 +2,7 @@
     "host": {
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "cookieRootDomain": "mycompany.com",
+        "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.mycompany.com",
         "provider": "cognito",
@@ -11,7 +12,7 @@
         "name": "finalspa",
         "clientId": "4co5uvgmse68utsekh7p2sc0lg",
         "redirectUri": "https://web.mycompany.com/spa/",
-        "postLogoutRedirectUri": "https://web.mycompany.com/spa#loggedout",
+        "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
         "cookiePath": "/spa"
     }]
 }

@@ -1,25 +1,12 @@
+import {ClientConfiguration} from './clientConfiguration';
+import {HostConfiguration} from './hostConfiguration';
+
 /*
  * A holder for configuration settings
  */
 export interface Configuration {
 
-    name: string;
+    host: HostConfiguration;
 
-    clientId: string;
-
-    redirectUri: string;
-
-    tokenEndpoint: string;
-
-    cookieRootDomain: string;
-
-    cookiePath: string;
-
-    cookieEncryptionKey: string;
-
-    trustedWebOrigin: string;
-
-    provider: string;
-
-    useMockResponses: boolean;
+    clients: ClientConfiguration[];
 }

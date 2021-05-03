@@ -1,0 +1,15 @@
+{
+  "path": "/spa/login/end",
+  "httpMethod": "POST",
+  "headers": {
+    "origin": "https://web.authsamples.com",
+    "content-type": "application/x-www-form-urlencoded",
+    "accept": "application/json"
+  },
+  "multiValueHeaders": {
+    "cookie": [
+      "mycompany-state-finalspa=XXX"
+    ]
+  },
+  "body": "code=e6c42e8e-fda7-4c7e-a850-b007bacd98a5&state=cc230eb95dd341d2a7f68a1defcd84da"
+}

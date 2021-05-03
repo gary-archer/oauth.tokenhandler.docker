@@ -1,0 +1,8 @@
+{
+  "path": "/spa/login/start",
+  "httpMethod": "POST",
+  "headers": {
+    "origin": "https://web.authsamples.com",
+    "accept": "application/json"
+  }
+}

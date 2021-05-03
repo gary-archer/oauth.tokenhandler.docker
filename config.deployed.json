@@ -1,10 +1,17 @@
 {
-    "name": "finalspa",
-    "clientId": "4co5uvgmse68utsekh7p2sc0lg",
-    "redirectUri": "https://web.authsamples.com/spa/",
-    "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
-    "cookieRootDomain": "authsamples.com",
-    "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
-    "trustedWebOrigin": "https://web.authsamples.com",
-    "useMockResponses": false
+    "host": {
+        "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
+        "cookieRootDomain": "authsamples.com",
+        "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
+        "trustedWebOrigin": "https://web.authsamples.com",
+        "provider": "cognito",
+        "useMockResponses": false
+    },
+    "clients": [{
+        "name": "finalspa",
+        "clientId": "4co5uvgmse68utsekh7p2sc0lg",
+        "redirectUri": "https://web.authsamples.com/spa/",
+        "postLogoutRedirectUri": "https://web.authsamples.com/spa#loggedout",
+        "cookiePath": "/spa"
+    }]
 }

@@ -13,9 +13,13 @@ export interface Configuration {
 
     cookieRootDomain: string;
 
+    cookiePath: string;
+
     cookieEncryptionKey: string;
 
     trustedWebOrigin: string;
+
+    provider: string;
 
     useMockResponses: boolean;
 }

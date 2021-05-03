@@ -1,4 +1,3 @@
-
 import {Context} from 'aws-lambda';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
 import {ErrorHandler} from '../../core/errors/errorHandler';
@@ -17,17 +16,15 @@ const handler = async (event: any, context: Context) => {
 
         const configuration = await ConfigurationLoader.load();
         const service = new AuthService(configuration);
-        await service.authorizationCodeGrant(request, response);
-
-        response.addHeader('content-type', 'application/json');
-        return response.getPayload(200);
+        await service.startLogout(request, response);
+        return response.getData();
 
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
-        response.setError(error);
         response.addHeader('content-type', 'application/json');
-        return response.getPayload(error.statusCode);
+        response.setError(error);
+        return response.getData();
     }
 };
 

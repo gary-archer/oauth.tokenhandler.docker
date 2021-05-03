@@ -1,3 +1,4 @@
+
 import {Context} from 'aws-lambda';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
 import {ErrorHandler} from '../../core/errors/errorHandler';
@@ -15,18 +16,15 @@ const handler = async (event: any, context: Context) => {
     try {
 
         const configuration = await ConfigurationLoader.load();
-        const service = new AuthService(configuration);
-        await service.refreshTokenGrant(request, response);
-
-        response.addHeader('content-type', 'application/json');
-        return response.getPayload(200);
+        const authService = new AuthService(configuration);
+        await authService.startLogin(request, response);
+        return response.getData();
 
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
         response.setError(error);
-        response.addHeader('content-type', 'application/json');
-        return response.getPayload(error.statusCode);
+        return response.getData();
     }
 };
 

@@ -1,24 +1,34 @@
 API REVAMP PART 1
 -----------------
-1. Run the Duende code sample and understand messages + code
+1. Update configuration to use a host and a clients connection
+   Pass a client object around such as to cookie service
+   Think about the issue of trusing clients
 
-2. Additional operations
-   Calculate login and logout URLs server side
-   Store refresh token in auth_cookie and id token in id_cookie
-   Update the anti forgery token on every refresh
+2. Use LambdaConfiguration to auto wire the auth service
+   Later this will also manage middy middleware
 
-3. Implement the same logic for Express and use code from webhost in Final SPA
-   Add testHttpLocal.sh
+3. Implement startLogin properly, to generate state / code_challenge and form full URL + write cookie
+
+4. Implement endLogin properly, to use the state and codeVerifier in the state cookie
+
+5. Implement startLogout to calculate the URL and to use the config data to do it in a Cognito way
+
+6. Get all tests working against lambdas and HTTP endpoints
+
+7. Implement the same logic for Express and use code from webhost in Final SPA
+   Add a testHttpLocal.sh
  
-4. SPA branch to verify cookie sending and CORS when an Expire button is clicked
+8. SPA branch to verify cookie sending and CORS when an Expire button is clicked
    Add CORS middleware to API and write allow-credentials in response
    Add an OPTIONS request to curl tests
 
-5. Add logging middleware and log to the Elastic Search schema
+9. Add logging middleware and log to the Elastic Search schema
+   Detailed error testing of API operations to test each failure point
+   Use my standard client error object
 
-6. Detailed error testing
+10. Read up to see if I should use a nonce?
 
-7. Update README
+11. Update README
 
 API REVAMP PART 2
 ----------------

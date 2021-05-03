@@ -16,15 +16,14 @@ const handler = async (event: any, context: Context) => {
 
         const configuration = await ConfigurationLoader.load();
         const service = new AuthService(configuration);
-        await service.expireRefreshToken(request, response);
-        return response.getPayload(204);
+        await service.refreshToken(request, response);
+        return response.getData();
 
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
-        response.addHeader('content-type', 'application/json');
         response.setError(error);
-        return response.getPayload(error.statusCode);
+        return response.getData();
     }
 };
 

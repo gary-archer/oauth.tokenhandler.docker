@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Simulate login completion when the API swaps the authorization code for tokens and issues an auth cookie
-npm run authorizationCodeGrant 
+# Get the authorization redirect URL and write a state cookie
+npm run startLogin
 
-# Simulate the browser UI getting an access token from the API
-npm run refreshTokenGrant
+# Send the code, state and state cookie, then write cookies and anti forgery details
+npm run endLogin 
 
-# Simulate expiry of the refresh token in the auth cookie
-npm run expireRefreshToken
+# Get an access token using the refresh token in the auth cookie
+npm run refreshToken
 
-# Expire the auth cookie when a user's session ends
+# Make the refresh token in the auth cookie act expired
 npm run expireSession
+
+# Get the logout redirect URL and remove cookies
+npm run startLogout

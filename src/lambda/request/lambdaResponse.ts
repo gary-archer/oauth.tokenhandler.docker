@@ -10,6 +10,7 @@ export class LambdaResponse implements AbstractResponse {
 
     public constructor() {
         this._data = {};
+        this._data.statusCode = 200;
         this._data.headers = {};
         this._data.multiValueHeaders = {};
     }
@@ -29,17 +30,19 @@ export class LambdaResponse implements AbstractResponse {
 
     public setBody(data: any): void {
         this._data.body = data;
+        this._setJson();
     }
 
     public setError(error: ClientError): void {
         this._data.statusCode = error.statusCode;
         this._data.body = error.toResponseFormat();
+        this._setJson();
     }
 
-    public getPayload(statusCode: number): any {
+    public getData(): any {
 
         const data = {
-            statusCode,
+            statusCode : this._data.statusCode,
         } as any;
 
         if (Object.keys(this._data.headers).length > 0) {
@@ -55,6 +58,10 @@ export class LambdaResponse implements AbstractResponse {
         }
 
         return data;
+    }
+
+    private _setJson(): void {
+        this.addHeader('content-type', 'application/json');
     }
 
     private _getCookieHeader(): string[] {

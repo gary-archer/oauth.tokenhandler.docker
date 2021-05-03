@@ -19,7 +19,6 @@ custom:
   customDomain:
     domainName: ${self:custom.config.settings.apiHostName}
     certificateName: '*.${self:custom.config.settings.certificateDomainName}'
-    basePath: oauthwebproxy
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 
@@ -36,11 +35,11 @@ custom:
 
 functions:
   
-  authorizationCodeGrant:
-    handler: dist/lambda/handlers/authorizationCodeGrant.handler
+  startLogin:
+    handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
-          path: /authorization-code-grant
+          path: /spa/login/start
           method: post
           cors:
             origins:
@@ -48,11 +47,11 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
-  refreshTokenGrant:
-    handler: dist/lambda/handlers/refreshTokenGrant.handler
+  endLogin:
+    handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
-          path: /refresh-token-grant
+          path: /spa/login/end
           method: post
           cors:
             origins:
@@ -60,11 +59,11 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
-  expireRefreshToken:
-    handler: dist/lambda/handlers/expireRefreshToken.handler
+  refreshToken:
+    handler: dist/lambda/handlers/refreshToken.handler
     events:
       - http: 
-          path: /expire-refresh-token
+          path: /spa/token
           method: post
           cors:
             origins:
@@ -76,8 +75,20 @@ functions:
     handler: dist/lambda/handlers/expireSession.handler
     events:
       - http: 
-          path: /expire-session
-          method: delete
+          path: /spa/token/expire
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+
+  startLogout:
+    handler: dist/lambda/handlers/startLogout.handler
+    events:
+      - http: 
+          path: /spa/logout/start
+          method: post
           cors:
             origins:
               - ${self:custom.config.settings.trustedOrigin}
@@ -104,19 +115,23 @@ resources:
   Resources:
 
     # Limit cloudwatch log retention 
-    AuthorizationCodeGrantLogGroup:
+    StartLoginLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    RefreshTokenGrantLogGroup:
+    EndLoginLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    ExpireRefreshTokenLogGroup:
+    RefreshTokenLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
     ExpireSessionLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    StartLogoutLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'

@@ -2,7 +2,6 @@ import {Configuration} from '../configuration/configuration';
 import {ErrorHandler} from '../errors/errorHandler';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
-import {Logger} from '../utilities/logger';
 import {CookieService} from './cookieService';
 import {MockOAuthServiceImpl} from './mockOAuthServiceImpl';
 import {OAuthService} from './oauthService';
@@ -26,12 +25,38 @@ export class AuthService {
     }
 
     /*
-     * Process an authorization code grant message
+     * Calculate the authorization redirect URL and write a state cookie
      */
-    public async authorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._validate(request, false);
+        this._validateOrigin(request);
+
+        // Set the response body to the login redirect URI
+        const data = {} as any;
+        data['authorization_uri'] = 'https://whatevar';
+        response.setBody(data);
+
+        // Form the cookie data
+        const cookieData = {
+            state: 'xxx',
+            codeVerifier: 'yyy',
+        }
+
+        // Write the state cookie
+        this._cookieService.writeStateCookie(this._configuration.name, cookieData, response);
+    }
+
+    /*
+     * Complete login by swapping the authorization code for tokens
+     */
+    public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+
+        // Check incoming details
+        this._validateOrigin(request);
+        
+        // Check that the cookie state matches the state in the request body
+        const cookieState = this._cookieService.readStateCookie(this._configuration.name, request);
 
         // Send the request to the authorization server
         const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
@@ -40,11 +65,19 @@ export class AuthService {
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
             throw ErrorHandler.fromSecurityVerificationError(
-                'TNo refresh token was received in the authorization code grant response');
+                'No refresh token was received in the authorization code grant response');
         }
 
-        // Write the refresh token to an HTTP only cookie
+        // Get the id token
+        const idToken = authCodeGrantData.id_token;
+        if (!idToken) {
+            throw ErrorHandler.fromSecurityVerificationError(
+                'No id token was received in the authorization code grant response');
+        }
+
+        // Write the refresh token and id token to HTTP only cookies
         this._cookieService.writeAuthCookie(this._configuration.name, refreshToken, response);
+        this._cookieService.writeIdCookie(this._configuration.name, idToken, response);
 
         // Write an anti forgery token into an encrypted HTTP only cookie
         const randomValue = this._oauthService.generateAntiForgeryValue();
@@ -57,12 +90,13 @@ export class AuthService {
     }
 
     /*
-     * Process a refresh token grant message
+     * Return an access token using the refresh token in the auth cookie
      */
-    public async refreshTokenGrant(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._validate(request, true);
+        this._validateOrigin(request);
+        this._validateAntiForgeryCookie(request);
 
         // Get the refresh token from the auth cookie
         const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
@@ -72,60 +106,57 @@ export class AuthService {
             await this._oauthService.sendRefreshTokenGrant(refreshToken, request, response);
 
         // Handle updated refresh tokens
-        const rollingRefreshToken = refreshTokenGrantData.refresh_token;
-        if (rollingRefreshToken) {
-
-            // If a new refresh token has been issued, update the auth cookie
-            this._cookieService.writeAuthCookie(this._configuration.name, rollingRefreshToken, response);
+        const newRefreshToken = refreshTokenGrantData.refresh_token;
+        if (newRefreshToken) {
+            this._cookieService.writeAuthCookie(this._configuration.name, newRefreshToken, response);
         }
 
-        // Send the access token to the SPA
+        // Handle updated id tokens
+        const newIdToken = refreshTokenGrantData.id_token;
+        if (newIdToken) {
+            this._cookieService.writeIdCookie(this._configuration.name, newIdToken, response);
+        }
+
+        // Write an updated anti forgery cookie
+        const randomValue = this._oauthService.generateAntiForgeryValue();
+        this._cookieService.writeAntiForgeryCookie(this._configuration.name, response, randomValue);
+
+        // Return the access token and the anti forgery token in the response body
         const data = {} as any;
         data.access_token = refreshTokenGrantData.access_token;
+        data['anti_forgery_token'] = randomValue;
         response.setBody(data);
     }
 
     /*
      * Make the refresh token act expired
      */
-    public async expireRefreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._validate(request, true);
+        this._validateOrigin(request);
+        this._validateAntiForgeryCookie(request);
 
         // Get the current refresh token
         const refreshToken = this._cookieService.readAuthCookie(this._configuration.name, request);
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
-        this._cookieService.expire(this._configuration.name, refreshToken, request, response);
+        this._cookieService.expireAuthCookie(this._configuration.name, refreshToken, response);
         response.setStatusCode(204);
     }
 
     /*
-     * An operation to clear cookies when the user session ends
+     * Return the logout URL and clear auth cookies
      */
-    public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._validate(request, true);
+        this._validateOrigin(request);
+        this._validateAntiForgeryCookie(request);
 
         // Clear all cookies for this client
         this._cookieService.clearAll(this._configuration.name, response);
         response.setStatusCode(204);
-    }
-
-    /*
-     * Do some initial verification and then return the client id from the request body
-     */
-    private _validate(request: AbstractRequest, requireAntiForgeryCookie: boolean): void {
-
-        // Check the HTTP request has the expected web origin
-        this._validateOrigin(request);
-
-        // For token refresh requests, also check that the HTTP request has an extra header
-        if (requireAntiForgeryCookie) {
-            this._validateAntiForgeryCookie(request);
-        }
     }
 
     /*
@@ -139,6 +170,11 @@ export class AuthService {
                 'The origin header was missing or contained an untrusted value');
         }
     }
+
+    /*
+     * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
+     */
+    private _validateStateCookie(request: AbstractRequest) {
 
     /*
      * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie

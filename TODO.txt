@@ -2,6 +2,7 @@ API REVAMP PART 1
 -----------------
 1. Cookie service to use cookie path from client
    Currently hard coded to /spa
+   Think about issues related to trusting clients and an attacker getting the wrong cookie somehow?
 
 2. Implement startLogin properly, to generate state / code_challenge and form full URL + write cookie
    Update tests to use real data
@@ -25,8 +26,9 @@ API REVAMP PART 1
    Detailed error testing of API operations to test each failure point
    Use my standard client error object
 
-9. Think about the issue of trusing clients
-   Read up to see if I should use a nonce?
+9. Read up to see if I should use a nonce for an SPA
+   See IETF docs for browser based apps
+   Nonce can be checked in id token to protect against replay attacks???
 
 10. Update README
 

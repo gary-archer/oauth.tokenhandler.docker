@@ -8,11 +8,11 @@
         "provider": "cognito",
         "useMockResponses": true
     },
-    "clients": [{
+    "client": {
         "name": "finalspa",
         "clientId": "4co5uvgmse68utsekh7p2sc0lg",
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
         "cookiePath": "/spa"
-    }]
+    }
 }

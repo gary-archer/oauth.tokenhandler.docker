@@ -17,7 +17,7 @@ const handler = async (event: any, context: Context) => {
 
         const configuration = await ConfigurationLoader.load();
         const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
-        await authorizer.startLogin(request, response);
+        await authorizer.endLogin(request, response);
         return response.getData();
 
     } catch (e) {

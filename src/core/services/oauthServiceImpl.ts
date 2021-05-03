@@ -9,7 +9,7 @@ import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
 /*
- * The OAuth service class will deal with routing requests to the Authorization Server
+ * A class to deal with calls to the Authorization Server and other OAuth responsibilities
  */
 export class OAuthServiceImpl implements OAuthService {
 

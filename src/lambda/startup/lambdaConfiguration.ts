@@ -23,7 +23,7 @@ export class LambdaConfiguration {
 
         return new Authorizer(
             this._configuration,
-            new CookieService(this._configuration.host),
+            new CookieService(this._configuration),
             this._getOAuthService());
     }
 

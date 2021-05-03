@@ -8,5 +8,5 @@ export interface Configuration {
 
     host: HostConfiguration;
 
-    clients: ClientConfiguration[];
+    client: ClientConfiguration;
 }

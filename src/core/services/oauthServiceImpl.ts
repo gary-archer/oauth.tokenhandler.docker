@@ -7,6 +7,7 @@ import {ErrorHandler} from '../errors/errorHandler';
 import {OAuthService} from './oauthService';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {OAuthLoginState} from '../utilities/oauthLoginState';
 
 /*
  * A class to deal with calls to the Authorization Server and other OAuth responsibilities
@@ -20,9 +21,23 @@ export class OAuthServiceImpl implements OAuthService {
     }
 
     /*
-     * Forward the authorization code grant message to the Authorization Server
+     * Generate values for the state cookie written before the authorization redirect
      */
-    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<any> {
+    public generateLoginState(): OAuthLoginState {
+        return new OAuthLoginState();
+    }
+
+    /*
+     * Generate a field used to protect the auth cookie
+     */
+    public generateAntiForgeryValue(): string {
+        return randomBytes(32).toString('base64');
+    }
+    
+    /*
+     * Send the authorization code grant message to the Authorization Server
+     */
+    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any> {
 
         // Form the body of the authorization code grant message
         const formData = new URLSearchParams();
@@ -59,13 +74,6 @@ export class OAuthServiceImpl implements OAuthService {
 
         formData.append('refresh_token', refreshToken);
         return this._postMessage(formData, response);
-    }
-
-    /*
-     * Generate a field used to protect the auth cookie
-     */
-    public generateAntiForgeryValue(): string {
-        return randomBytes(32).toString('base64');
     }
 
     /*

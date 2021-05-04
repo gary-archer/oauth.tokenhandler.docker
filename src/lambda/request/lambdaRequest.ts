@@ -49,16 +49,17 @@ export class LambdaRequest implements AbstractRequest {
      */
     public getCookie(name: string): string | null {
 
+        let result = '';
         const headers = this._getMultiValueHeader('cookie');
         headers.forEach((h) => {
 
             const data = cookie.parse(h);
             if (data[name]) {
-                return data[name];
+                result = data[name];
             }
         });
 
-        return null;
+        return result;
     }
 
     /*

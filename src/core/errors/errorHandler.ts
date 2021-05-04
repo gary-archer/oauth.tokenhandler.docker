@@ -101,7 +101,7 @@ export class ErrorHandler {
     public static fromMissingCookieError(logContext: string): ClientError {
 
         const error = new ClientError(
-            400, ErrorCodes.invalidGrant, 'A required cookie was missing from a token request');
+            400, ErrorCodes.invalidGrant, 'A required cookie was missing in an incoming request');
         error.logContext = logContext;
         return error;
     }
@@ -124,7 +124,7 @@ export class ErrorHandler {
 
         const apiError = new ApiError(
             ErrorCodes.securityVerificationFailed,
-            'A cookie supplied in a token request failed decryption',
+            'The request cookie failed decryption',
             exception.stack);
 
         apiError.statusCode = 400;

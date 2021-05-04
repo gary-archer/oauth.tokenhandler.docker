@@ -1,36 +1,38 @@
 API REVAMP PART 1
 -----------------
 
-MONDAY
-------
-1. Implement startLogin properly, to generate state / code_challenge and form full URL + write cookie
-   Update tests to use real token data
+TUESDAY
+-------
+1. Implement endLogin
+   Update tests to use one time real token data
+   Make a real request to the auth server and use that as real data where needed
 
-2. Implement endLogin properly, to use the state and codeVerifier in the state cookie
-   Update tests to use real token data
+2. Test refreshAccessToken / expireSession / startLogout
 
 3. Implement startLogout to calculate the URL and to use the config data to do it in a Cognito way
    Update tests to use real token data
 
-4. Get all tests working against lambdas and HTTP endpoints
- 
+4. Use API error responses rather than invalid_grant errors
+
+5. Deploy to AWS and get HTTP tests working
+
 LATER
 -----
-5. Implement the same logic for Express and use code from webhost in Final SPA
+6. Implement the same logic for Express and use code from webhost in Final SPA
    Add a testHttpLocal.sh
 
-6. SPA branch to verify cookie sending and CORS when an Expire button is clicked
+7. SPA branch to verify cookie sending and CORS when an Expire button is clicked
    Add CORS middleware to API and write allow-credentials in response
    Add an OPTIONS request to curl tests
 
-7. Add logging middleware and log to the Elastic Search schema
+8. Add logging middleware and log to the Elastic Search schema
    Detailed error testing of API operations to test each failure point
    Use my standard client error object
 
-8. Read up to see if I should use a nonce for an SPA
-   See IETF docs for browser based apps
+9. Read up to see if I should use a nonce for an SPA
+    See IETF docs for browser based apps
 
-9. Update README
+10. Update README
 
 API REVAMP PART 2
 ----------------

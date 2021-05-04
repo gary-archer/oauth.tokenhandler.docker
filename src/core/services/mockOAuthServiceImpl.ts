@@ -1,6 +1,6 @@
-
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {OAuthLoginState} from '../utilities/OAuthLoginState';
 import {OAuthService} from './oauthService';
 
 /*
@@ -9,11 +9,30 @@ import {OAuthService} from './oauthService';
 export class MockOAuthServiceImpl implements OAuthService {
 
     /*
+     * Use values that matches encrypted data in our test config files
+     */
+    public generateLoginState(): OAuthLoginState {
+
+        return {
+            state: 'CqI32q0zSQo6QEzloa0ISBldaNTVH80ONbKLUr8NTZE',
+            codeVerifier: 'OeF904jbf8f0b5OOnfhMOrhlsPEgV5hhQy_8xqBCdoA',
+            codeChallenge: 'soqm-DCvSEu0OatQF9NdYccKoIuiXWf4E9aFqrhKZzw',
+        } as OAuthLoginState;
+    }
+
+    /*
+     * Use the value that matches encrypted data in our test config files
+     */
+    public generateAntiForgeryValue(): string {
+        return 'pu027sP+852dOASJSJHYkKo5QPYUyw+F6mwm6lyRIJ0=';
+    }
+
+    /*
      * For local development, return a hard coded response in line with our test JSON files
      */
     /* eslint-disable max-len */
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse): Promise<any> {
+    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any> {
 
         return {
             id_token: 'eyJraWQiOiJKYkRZVVd0MVIwbUd1M0tYckJrUjNzcEpPXC9TWEprZlwvZW0weVRSZUxlZG89IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiSGdUQTlTTjBuSTF3aVBNYlQwTkYtUSIsInN1YiI6IjkzNGIxODcxLTFhODEtNGI1Zi1hMTYyLTRiMjMxZjVkYzJkMCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0yLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMl9tWjNOQllwVG8iLCJjb2duaXRvOnVzZXJuYW1lIjoiOTM0YjE4NzEtMWE4MS00YjVmLWExNjItNGIyMzFmNWRjMmQwIiwiZ2l2ZW5fbmFtZSI6Ikd1ZXN0IiwiYXVkIjoiMTd0ZG1ycHJoY2M3ZmsyZHJjN240Ym12N2YiLCJldmVudF9pZCI6ImVlOTYxZmY2LTMyMGEtNDA0Mi1hMjY3LTQ1NzBjNzI2OGJkNCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNTk1MTkxOTA4LCJleHAiOjE1OTUxOTU1MDgsImlhdCI6MTU5NTE5MTkwOCwiZmFtaWx5X25hbWUiOiJVc2VyIiwiZW1haWwiOiJndWVzdHVzZXJAYXV0aGd1aWRhbmNlLmNvbSJ9.H4zLNenXKeqhZfT8pbmOQ7D-TI9Uh8FoMICb-v4FU59PdBgpmDmYCP_ehuy3HyFQuypbr5KGftFBsffLL9m-Oha65GWl2qcnn4KxI20Ir0HjpFZehkq9ti-0nVTc6zlMvN-_I0RetqLpmtwDNt3tIIzmRt0D8b7_wCwOb1OCsP-hUf6saW0lew7ksjEeKepVkHpnL0yXenhzWeD3FXQaJX3ThGLrOf-elmaBn1NXEhnYuFIDob1HDaxN1IwQlgFHqM50XmjmcKJhmQt4VcXMTDRaNplXwQNfmi-Mfk5ul3vrcFfDCn-Wo1illTIW18Fh8ywVuwiT6vJr_aGjflbWyA',
@@ -37,12 +56,5 @@ export class MockOAuthServiceImpl implements OAuthService {
             expires_in: 3600,
             token_type: 'Bearer',
         };
-    }
-
-    /*
-     * Generate a value that matches encrypted data in our test config files
-     */
-    public generateAntiForgeryValue(): string {
-        return 'pu027sP+852dOASJSJHYkKo5QPYUyw+F6mwm6lyRIJ0=';
     }
 }

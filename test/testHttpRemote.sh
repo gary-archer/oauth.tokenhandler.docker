@@ -21,9 +21,9 @@ curl -i -X POST https://api.authsamples.com/spa/login/end \
 -H 'origin: https://web.authsamples.com' \
 -H 'content-type: application/x-www-form-urlencoded' \
 -H 'accept: application/json' \
--H 'cookie: mycompany-state-finalspa=XXX' \
+-H 'cookie: mycompany-state-finalspa=caed7546fd8d0fc13f475cdde7b72460%3Aa2ff425d0b8af91459e5688a08b210bc8d47431f46531295eeb785516da21efea70447aec2ac64172f976c5e402b45bad85943d4e0c8bd7680d4d15e29aa1b5f67b6c346be07d9e524799686ffc9e3f32ce403990b41391ef12f6cbd424bd4283379a75998384feb064962968fbb65008130716ad51c74fa8925b1ef19de7d98' \
 --data-urlencode 'code=e6c42e8e-fda7-4c7e-a850-b007bacd98a5' \
---data-urlencode 'state=cc230eb95dd341d2a7f68a1defcd84da'
+--data-urlencode 'state=CqI32q0zSQo6QEzloa0ISBldaNTVH80ONbKLUr8NTZE'
 
 #
 # Get an access token using the refresh token in the auth cookie

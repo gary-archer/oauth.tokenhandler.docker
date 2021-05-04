@@ -2,11 +2,12 @@ import {Configuration} from '../configuration/configuration';
 import {ErrorHandler} from '../errors/errorHandler';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {UrlHelper} from '../utilities/urlHelper';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point for authorization related operations
+ * The entry point for OAuth related operations
  */
 export class Authorizer {
 
@@ -29,32 +30,53 @@ export class Authorizer {
         // Check incoming details
         this._validateOrigin(request);
 
-        // Set the response body to the login redirect URI
+        // First create a random login state
+        const loginState = this._oauthService.generateLoginState();
+
+        // Next form the authorization redirect URI
+        let url = this._configuration.host.authorizeEndpoint;
+        url += '?';
+        url += UrlHelper.queryParameter('client_id', this._configuration.client.clientId);
+        url += '&';
+        url += UrlHelper.queryParameter('redirect_uri', this._configuration.client.redirectUri);
+        url += '&';
+        url += UrlHelper.queryParameter('response_type', 'code');
+        url += '&';
+        url += UrlHelper.queryParameter('scope', this._configuration.client.scope);
+        url += '&';
+        url += UrlHelper.queryParameter('state', loginState.state);
+        url += '&';
+        url += UrlHelper.queryParameter('code_challenge', loginState.codeChallenge);
+        url += '&';
+        url += UrlHelper.queryParameter('code_challenge_method', 'S256');
+        console.log(url);
+
+        // Write the full URL to the response body
         const data = {} as any;
-        data['authorization_uri'] = 'https://whatevar';
+        data['authorization_uri'] = url;
         response.setBody(data);
 
-        // Form the cookie data
+        // Also write the state cookie to response headers
         const cookieData = {
-            state: 'xxx',
-            codeVerifier: 'yyy',
+            state: loginState.state,
+            codeVerifier: loginState.codeVerifier,
         };
-
-        // Write the state cookie
         this._cookieService.writeStateCookie(cookieData, response);
     }
 
     /*
-     * Complete login by swapping the authorization code for tokens
+     * Complete login by swapping the authorization code for tokens and writing them to cookies
      */
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
         this._validateOrigin(request);
-        this._validateStateCookie(request);
 
-        // Send the request to the authorization server
-        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response);
+        // Ensure that the state query parameter matches that in the cookie and get the verifier
+        const codeVerifier = this._validateStateCookie(request);
+
+        // Send the authorization code grant request
+        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response, codeVerifier);
 
         // Get the refresh token
         const refreshToken = authCodeGrantData.refresh_token;
@@ -70,11 +92,11 @@ export class Authorizer {
                 'No id token was received in the authorization code grant response');
         }
 
-        // Write the refresh token and id token to HTTP only cookies
+        // Write the refresh token and id token to HTTP only encrypted same site cookies
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
 
-        // Write an anti forgery token into an encrypted HTTP only cookie
+        // Also write an anti forgery token into an encrypted HTTP only cookie
         const randomValue = this._oauthService.generateAntiForgeryValue();
         this._cookieService.writeAntiForgeryCookie(response, randomValue);
 
@@ -85,7 +107,7 @@ export class Authorizer {
     }
 
     /*
-     * Return an access token using the refresh token in the auth cookie
+     * Return a new access token using the refresh token in the auth cookie
      */
     public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
@@ -124,7 +146,7 @@ export class Authorizer {
     }
 
     /*
-     * Make the refresh token act expired
+     * Make the refresh token act expired for test purposes
      */
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
@@ -169,11 +191,14 @@ export class Authorizer {
     /*
      * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
      */
-    private _validateStateCookie(request: AbstractRequest): void {
+    private _validateStateCookie(request: AbstractRequest): string {
 
         // Get the state value
         const data = this._cookieService.readStateCookie(request);
         console.log(data);
+        
+        /* TODO: verify against state and then return the code verifier to use during the authoriztion code grant */
+        return '';
     }
 
     /*

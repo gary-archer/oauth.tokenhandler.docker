@@ -2,7 +2,7 @@
   "path": "/spa/token/expire",
   "httpMethod": "POST",
   "headers": {
-    "origin": "https://web.authsamples.com",
+    "origin": "https://web.mycompany.com",
     "x-mycompany-aft-finalspa": "pu027sP+852dOASJSJHYkKo5QPYUyw+F6mwm6lyRIJ0="
   },
   "multiValueHeaders": {

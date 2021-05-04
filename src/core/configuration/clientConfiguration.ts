@@ -11,5 +11,7 @@ export interface ClientConfiguration {
 
     postLogoutRedirectUri: string;
 
+    scope: string;
+
     cookiePath: string;
 }

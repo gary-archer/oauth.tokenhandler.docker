@@ -34,6 +34,7 @@ export class CookieService {
     public readStateCookie(request: AbstractRequest): any {
 
         const cookieName = this._getCookieName('state');
+        console.log(`Looking for cookie ${cookieName}`);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
 

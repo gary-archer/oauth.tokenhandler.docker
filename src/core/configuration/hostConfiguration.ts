@@ -3,6 +3,8 @@
  */
 export interface HostConfiguration {
 
+    authorizeEndpoint: string;
+
     tokenEndpoint: string;
 
     cookieRootDomain: string,

@@ -12,9 +12,9 @@ export interface HostConfiguration {
     // The SSL certificate's private key password
     sslCertificatePassword: string;
 
-    // Whether to use an HTTPS proxy
-    useProxy: boolean;
+    // Whether to use an HTTPS proxy for debugging of OAuth requests
+    useHttpProxy: boolean;
 
     // The proxy URL when used
-    proxyUrl: string;
+    httpProxyUrl: string;
 }

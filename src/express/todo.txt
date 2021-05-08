@@ -1,3 +1,0 @@
-1. Fix errors and add proxy from nodejs
-
-2. Request and response objects, copied from WebHost in Final SPA

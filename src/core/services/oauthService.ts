@@ -1,22 +1,124 @@
+import axios, {AxiosRequestConfig} from 'axios';
+import {randomBytes} from 'crypto';
+import {URLSearchParams} from 'url';
+import {ApiConfiguration} from '../configuration/apiConfiguration';
+import {ClientError} from '../errors/clientError';
+import {ErrorHandler} from '../errors/errorHandler';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {HttpProxy} from '../utilities/httpProxy';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
 
 /*
- * An abstraction for getting non deterministic data, including responses from the Authorization Server
+ * A class to deal with calls to the Authorization Server and other OAuth responsibilities
  */
-export interface OAuthService {
+export class OAuthService {
 
-    // Generate random values to protect against pasted login responses
-    generateLoginState(): OAuthLoginState;
+    private readonly _configuration: ApiConfiguration;
+    private readonly _httpProxy: HttpProxy;
 
-    // Generate a value to protect the auth cookie
-    generateAntiForgeryValue(): string;
+    public constructor(configuration: ApiConfiguration, httpProxy: HttpProxy) {
+        this._configuration = configuration;
+        this._httpProxy = httpProxy;
+    }
 
-    // Forward the authorization code grant to the Authorization Server to complete a login
-    sendAuthorizationCodeGrant(
-        request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any>;
+    /*
+     * Generate values for the state cookie written before the authorization redirect
+     */
+    public generateLoginState(): OAuthLoginState {
+        return new OAuthLoginState();
+    }
 
-    // Forward the refresh token grant to the Authorization Server to get a new access token
-    sendRefreshTokenGrant(refreshToken: string, request: AbstractRequest, response: AbstractResponse): Promise<any>;
+    /*
+     * Generate a field used to protect the auth cookie
+     */
+    public generateAntiForgeryValue(): string {
+        return randomBytes(32).toString('base64');
+    }
+
+    /*
+     * Send the authorization code grant message to the Authorization Server
+     */
+    public async sendAuthorizationCodeGrant(
+        request: AbstractRequest,
+        response: AbstractResponse,
+        codeVerifier: string): Promise<any> {
+
+        // Form the body of the authorization code grant message
+        const formData = new URLSearchParams();
+        const body = request.getBody();
+        for (const field in body) {
+            if (field && body[field]) {
+                formData.append(field, body[field]);
+            }
+        }
+
+        // Send an HTTP message and get the response, then add a field for anti forgery protection
+        return this._postMessage(formData, response);
+    }
+
+    /*
+     * Forward the refresh token grant message to the Authorization Server
+     */
+    public async sendRefreshTokenGrant(
+        refreshToken: string,
+        request: AbstractRequest,
+        response: AbstractResponse): Promise<any>  {
+
+        const formData = new URLSearchParams();
+        const body = request.getBody();
+        for (const field in body) {
+            if (field && body[field]) {
+                formData.append(field, body[field]);
+            }
+        }
+
+        if (formData.has('refresh_token')) {
+            formData.delete('refresh_token');
+        }
+
+        formData.append('refresh_token', refreshToken);
+        return this._postMessage(formData, response);
+    }
+
+    /*
+     * Route a message to the Authorization Server
+     */
+    private async _postMessage(formData: URLSearchParams, response: AbstractResponse): Promise<void> {
+
+        // Define request options
+        const options = {
+            url: this._configuration.tokenEndpoint,
+            method: 'POST',
+            data: formData,
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded',
+                'accept': 'application/json',
+            },
+        };
+
+        try {
+
+            // Call the Authorization Server
+            const authServerResponse = await axios.request(options as AxiosRequestConfig);
+
+            // Update the response for the success case and return data
+            response.setStatusCode(authServerResponse.status);
+            return authServerResponse.data;
+
+        } catch (e) {
+
+            // Handle OAuth error responses
+            if (e.response && e.response.status && e.response.data) {
+                const errorData = e.response.data;
+                if (errorData.error) {
+                    const description = errorData.error_description ?? 'The Authorization Server rejected the request';
+                    throw new ClientError(e.response.status, errorData.error, description);
+                }
+            }
+
+            // Handle client connectivity errors
+            throw ErrorHandler.fromHttpRequestError(e, options.url);
+        }
+    }
 }

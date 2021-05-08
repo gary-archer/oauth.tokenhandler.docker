@@ -1,7 +1,8 @@
 import {Configuration} from '../../core/configuration/configuration';
 import {Authorizer} from '../../core/services/authorizer';
 import {CookieService} from '../../core/services/cookieService';
-import {OAuthServiceImpl} from '../../core/services/oauthServiceImpl';
+import {OAuthService} from '../../core/services/oauthService';
+import {HttpProxy} from '../../core/utilities/httpProxy';
 
 /*
  * A class to wire up dependencies and middleware
@@ -19,9 +20,13 @@ export class LambdaConfiguration {
      */
     public getAuthorizer(): Authorizer {
 
+        const httpProxy = new HttpProxy(
+            this._configuration.host.useHttpProxy,
+            this._configuration.host.httpProxyUrl);
+
         return new Authorizer(
             this._configuration,
             new CookieService(this._configuration),
-            new OAuthServiceImpl(this._configuration.oauth));
+            new OAuthService(this._configuration.api, httpProxy));
     }
 }

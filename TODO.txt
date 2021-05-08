@@ -1,8 +1,12 @@
 API PHASE 1
 -----------
 1. Get Express working locally for productivity reasons
+   Define routes that point to the authorizer implementations and run with an error
+   Fill in request objects
+   Create source maps for debug builds
 
 2. Complete core operations - with a configuration flag to control login URL handling
+   Test first against Express
 
 3. Complete HTTP tests both locally and in AWS
 

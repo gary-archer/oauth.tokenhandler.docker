@@ -1,17 +1,18 @@
 API PHASE 1
 -----------
 1. Get Express working locally for productivity reasons
-   Define routes that point to the authorizer implementations and run with an error
-   Fill in request objects
-   Create source maps for debug builds
+   Fill in request objects from old Web Reverse Proxy solution - start with getHeader
+   Get HTTP tests working again and fix endLogin problem
 
-2. Complete core operations - with a configuration flag to control login URL handling
-   Test first against Express
+2. Complete core operations while testing against Express
+   Use a configuration flag to control Cognito specific login URL handling
 
-3. Complete HTTP tests both locally and in AWS
+3. Test strategy for Serverless without mock data
+   Ideally I want to run bash scripts and test all at once, but also have options to test individually
+   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up
 
-4. Test strategy for Serverless - preferably get rid of mock data
-   Perhaps run tests from NodeJS code
+4. Deploy to AWS without any Express code or dependencies
+   Deploy to Kubetneres without any Serverless code or dependencies
 
 SPA PHASE 1
 -----------
@@ -25,7 +26,7 @@ SPA PHASE 1
    Add CORS middleware to API and write allow-credentials in response
    Add OPTIONS requests to curl tests
 
-3. Test in all 4 browsers including Incognito mode   
+3. Test in all 4 browsers including Incognito mode
 
 FINALIZATION
 ------------
@@ -48,3 +49,5 @@ FINALIZATION
 
 7. Use acr_values
    Manage redirect URI and idp parameter via a server side strategy if needed
+
+8. Think about paths and multiple SPAs

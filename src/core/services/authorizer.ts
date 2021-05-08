@@ -20,6 +20,7 @@ export class Authorizer {
         this._configuration = configuration;
         this._cookieService = cookieService;
         this._oauthService = oauthService;
+        this._setupCallbacks();
     }
 
     /*
@@ -224,5 +225,17 @@ export class Authorizer {
             throw ErrorHandler.fromSecurityVerificationError(
                 'The anti forgery request header does not match the anti forgery cookie value');
         }
+    }
+
+    /*
+     * Make the this parameter available for when the API is called
+     */
+    private _setupCallbacks(): void {
+        this.startLogin = this.startLogin.bind(this);
+        this.endLogin = this.endLogin.bind(this);
+        this.refreshToken = this.refreshToken.bind(this);
+        this.expireSession = this.expireSession.bind(this);
+        this.startLogout = this.startLogout.bind(this);
+
     }
 }

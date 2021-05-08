@@ -1,11 +1,22 @@
-import {Application} from 'express';
+import cors from 'cors';
+import {Application, Request, Response} from 'express';
 import fs from 'fs-extra';
 import https from 'https';
 import {Configuration} from '../../core/configuration/configuration';
+import {ErrorHandler } from '../../core/errors/errorHandler';
+import {AbstractRequest } from '../../core/request/abstractRequest';
+import {AbstractResponse } from '../../core/request/abstractResponse';
 import {Authorizer} from '../../core/services/authorizer';
 import {CookieService} from '../../core/services/cookieService';
 import {OAuthService} from '../../core/services/oauthService';
 import {HttpProxy} from '../../core/utilities/httpProxy';
+import {ExpressRequestAdapter} from '../request/expressRequestAdapter';
+import {ExpressResponseAdapter} from '../request/expressResponseAdapter';
+
+/*
+ * An internal type for readability
+ */
+type AbstractRequestHandler = (request: AbstractRequest, response: AbstractResponse) => Promise<any>;
 
 /*
  * Configure Express API behaviour
@@ -34,6 +45,18 @@ export class HttpServerConfiguration {
      * Set up routes for the API's OAuth operations
      */
     public async initializeRoutes(): Promise<void> {
+
+        // Set generic behaviour
+        const corsOptions = { origin: this._configuration.api.trustedWebOrigin };
+        this._expressApp.set('etag', false);
+        this._expressApp.use('/spa/*', cors(corsOptions) as any);
+
+        // Route requests through to the authorizer
+        this._expressApp.post('/spa/login/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
+        this._expressApp.post('/spa/login/end', (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
+        this._expressApp.post('/spa/token', (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
+        this._expressApp.post('/spa/token/expire', (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
+        this._expressApp.post('/spa/logout/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
     }
 
     /*
@@ -63,5 +86,32 @@ export class HttpServerConfiguration {
                 console.log(`OAuth Web Proxy API is listening on HTTP port ${this._configuration.host.port}`);
             });
         }
+    }
+
+    /*
+     * Adapt the request to technology neutral classes also used by Serverless lambdas
+     */
+    private async _adapt(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
+
+        try {
+            await fn(new ExpressRequestAdapter(rq), new ExpressResponseAdapter(rs));
+
+        } catch (e) {
+            this._unhandledExceptionHandler(e, rq, rs);
+        }
+    }
+
+    /*
+     * The entry point for handling exceptions forwards all exceptions to our handler class
+     */
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    private _unhandledExceptionHandler(
+        unhandledException: any,
+        request: Request,
+        response: Response): void {
+
+        const clientError = ErrorHandler.handleError(unhandledException);
+        response.setHeader('content-type', 'application/json');
+        response.status(clientError.statusCode).send(JSON.stringify(clientError));
     }
 }

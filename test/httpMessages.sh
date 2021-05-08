@@ -8,16 +8,22 @@
 export HTTPS_PROXY=http://127.0.0.1:8888
 
 #
-# Variables to point to the environment
+# Variables to point to the OAuth Proxy API
 #
-API_BASE_URL=https://api.authsamples.com
-WEB_BASE_URL=https://web.authsamples.com
+API_BASE_URL=https://api.mycompany.com:444
+WEB_BASE_URL=https://web.mycompany.com
 LOGIN_BASE_URL=https://login.authsamples.com
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
 TEST_USERNAME=guestuser@mycompany.com
 TEST_PASSWORD=GuestPassword1
 RESPONSE_FILE=test/response.txt
+
+#
+# Use these overrides to test AWS deployed endpoints
+#
+#API_BASE_URL=https://api.authsamples.com
+#WEB_BASE_URL=https://web.authsamples.com
 
 #
 # A simple routine to get a header value from an HTTP response file

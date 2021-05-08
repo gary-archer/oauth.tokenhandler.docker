@@ -1,3 +1,4 @@
+import {Response} from 'express';
 import {ClientError} from '../../core/errors/clientError';
 import {AbstractResponse} from '../../core/request/abstractResponse';
 
@@ -5,6 +6,12 @@ import {AbstractResponse} from '../../core/request/abstractResponse';
  * Adapt Express to our common base interface that also works for AWS Serverless
  */
 export class ExpressResponseAdapter implements AbstractResponse {
+
+    private readonly _response: Response;
+
+    public constructor(response: Response) {
+        this._response = response;
+    }
 
     public setStatusCode(statusCode: number): void {
         throw new Error('Method not implemented.');

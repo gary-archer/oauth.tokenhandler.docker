@@ -8,7 +8,7 @@
     "build": "ts-node --files src/express/app.ts",
     "buildRelease": "rimraf dist && tsc --outDir dist --sourceMap false",
     "startRelease": "node dist/express/app.js",
-    "testHttp": "./test/testHttp.sh",
+    "testHttp": "./test/httpMessages.sh",
     "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
     "customPackager": "ts-node deployment/customPackager.ts",
     "deploy": "sls deploy --stage deployed --package .serverless",
@@ -22,12 +22,14 @@
     "axios": "^0.21.1",
     "cookie": "^0.4.1",
     "cookie-encrypter": "^1.0.1",
+    "cors": "^2.8.5",
     "fs-extra": "^9.0.1"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.4.34",
     "@types/aws-lambda": "^8.10.64",
     "@types/cookie": "^0.4.0",
+    "@types/cors": "^2.8.9",
     "@types/express": "^4.17.11",
     "@types/fs-extra": "^9.0.4",
     "@types/node": "^14.14.10",

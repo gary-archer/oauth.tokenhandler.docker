@@ -5,28 +5,39 @@
 #
 # Set an HTTP proxy if required
 #
-#export HTTPS_PROXY=http://127.0.0.1:8888
+export HTTPS_PROXY=http://127.0.0.1:8888
 
 #
 # Set environment details
 #
 API_BASE_URL=https://api.authsamples.com
 WEB_BASE_URL=https://web.authsamples.com
+LOGIN_BASE_URL=https://login.authsamples.com
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
-TEST_USER=guestuser@mycompany.com
+TEST_USERNAME=guestuser@mycompany.com
 TEST_PASSWORD=GuestPassword1
 
 #
 # Work variables
 #
 RESPONSE_FILE=test/response.txt
+HEADER_NAME=''
+HEADER_VALUE=''
 COOKIE_NAME=''
 COOKIE_VALUE=''
 
 #
-# A primitive cookie parsing function that currently only supports a single cookie in each set-cookie header
-# The first group matches everything until the first semicolon, after which we return the first group
+# A simple routine to get a header value from a response file
+# The sed expression matches everything after the colon, after which we return this in group 1
+#
+getHeaderValue(){
+  HEADER_VALUE=$(cat $RESPONSE_FILE | grep "^$HEADER_NAME" | sed -r "s/^$HEADER_NAME: (.*)$/\1/")
+}
+
+#
+# Similar to the above except that we read a cookie value
+# This currently only supports a single cookie in each set-cookie header, which is good enough for my purposes
 #
 getCookieValue(){
   COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $COOKIE_NAME" | sed -r "s/^set-cookie: $COOKIE_NAME=(.[^;]*)(.*)$/\1/")
@@ -36,12 +47,12 @@ getCookieValue(){
 # Make an API call to start a login
 #
 echo "*** Creating login URL ..."
-HTTP_STATUS=$(curl -i -s -X POST https://api.authsamples.com/spa/login/start \
--H 'origin: https://web.authsamples.com' \
+HTTP_STATUS=$(curl -i -s -X POST $API_BASE_URL/spa/login/start \
+-H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
-  echo "Problem encountered, status: $HTTP_STATUS"
+  echo "Problem encountered starting a login, status: $HTTP_STATUS"
   exit
 fi
 
@@ -60,21 +71,38 @@ STATE_COOKIE=$COOKIE_VALUE
 echo "*** Following login redirect ..."
 HTTP_STATUS=$(curl -i -L -s $AUTHORIZE_URL -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
-  echo "Problem encountered, status: $HTTP_STATUS"
+  echo "Problem encountered using the OpenID Connect authorization URL, status: $HTTP_STATUS"
   exit
 fi
 
 #
+# Get data we will use in order to post test credentials and automate a login
 # The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
 #
+HEADER_NAME='location'
+getHeaderValue
+LOGIN_POST_LOCATION=$HEADER_VALUE
 COOKIE_NAME='XSRF-TOKEN'
 getCookieValue
-COGNITO_XSRF_COOKIE=$(echo $COOKIE_VALUE | cut -d ' ' -f 2)
+COGNITO_XSRF_TOKEN=$(echo $COOKIE_VALUE | cut -d ' ' -f 2)
+
+# PROBLEM: LOGIN_POST_LOCATION not interpreted as a string by curl
 
 #
-# We can now post a credential
+# We can now post a password credential, and form fields used are vendor specific
 #
-AUTHORIZE_RESPONSE=$(curl -i -s -X POST )
+echo "*** Posting credentials to sign in the test user ..."
+HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
+-H "origin: $LOGIN_BASE_URL" \
+-H "cookie: XSRF-TOKEN=$COGNITO_XSRF_TOKEN" \
+--data-urlencode "_csrf=$COGNITO_XSRF_TOKEN" \
+--data-urlencode "username=$TEST_USERNAME" \
+--data-urlencode "password=$TEST_PASSWORD" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '302' ]; then
+  echo "Problem encountered posting a credential to AWS Cognito, status: $HTTP_STATUS"
+  exit
+fi
 exit
 
 #

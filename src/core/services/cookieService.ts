@@ -6,7 +6,7 @@ import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
 /*
- * Our cookie service class will deal with cookie handling during requests to the token endpoint
+ * A class to deal with cookie sopecific responsibilities
  */
 export class CookieService {
 

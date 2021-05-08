@@ -4,9 +4,9 @@
 export class UrlHelper {
 
     /*
-     * Return URL encoded query parameters
+     * Return a URL encoded query parameter
      */
-    public static queryParameter(key: string, value: string): string {
+    public static createQueryParameter(key: string, value: string): string {
         return `${key}=${encodeURIComponent(value)}`;
     }
 }

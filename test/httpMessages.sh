@@ -8,7 +8,7 @@
 export HTTPS_PROXY=http://127.0.0.1:8888
 
 #
-# Variables to point to the OAuth Proxy API
+# Client configuration, most of which is handled by the browser for a real SPA
 #
 API_BASE_URL=https://api.mycompany.com:444
 WEB_BASE_URL=https://web.mycompany.com

@@ -7,7 +7,7 @@ import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point for OAuth related operations
+ * The entry point class for the OAuth Proxy API's logic
  */
 export class Authorizer {
 
@@ -34,22 +34,22 @@ export class Authorizer {
         // First create a random login state
         const loginState = this._oauthService.generateLoginState();
 
-        // Next form the authorization redirect URI
+        // Next form the OpenID Connect authorization redirect URI
         let url = this._configuration.api.authorizeEndpoint;
         url += '?';
-        url += UrlHelper.queryParameter('client_id', this._configuration.client.clientId);
+        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
         url += '&';
-        url += UrlHelper.queryParameter('redirect_uri', this._configuration.client.redirectUri);
+        url += UrlHelper.createQueryParameter('redirect_uri', this._configuration.client.redirectUri);
         url += '&';
-        url += UrlHelper.queryParameter('response_type', 'code');
+        url += UrlHelper.createQueryParameter('response_type', 'code');
         url += '&';
-        url += UrlHelper.queryParameter('scope', this._configuration.client.scope);
+        url += UrlHelper.createQueryParameter('scope', this._configuration.client.scope);
         url += '&';
-        url += UrlHelper.queryParameter('state', loginState.state);
+        url += UrlHelper.createQueryParameter('state', loginState.state);
         url += '&';
-        url += UrlHelper.queryParameter('code_challenge', loginState.codeChallenge);
+        url += UrlHelper.createQueryParameter('code_challenge', loginState.codeChallenge);
         url += '&';
-        url += UrlHelper.queryParameter('code_challenge_method', 'S256');
+        url += UrlHelper.createQueryParameter('code_challenge_method', 'S256');
         console.log(url);
 
         // Write the full URL to the response body
@@ -178,7 +178,7 @@ export class Authorizer {
     }
 
     /*
-     * If there is a web origin, make sure it matches the expected value
+     * Make sure there is a web origin, as supported by the 4 main browsers, and make sure it matches the expected value
      */
     private _validateOrigin(request: AbstractRequest): void {
 
@@ -190,7 +190,7 @@ export class Authorizer {
     }
 
     /*
-     * Check that the state value in the authorization response matches that in the state cookie
+     * Check that the state value in the authorization response matches that produced for the authorization request
      */
     private _validateStateCookie(request: AbstractRequest): string {
 
@@ -213,7 +213,7 @@ export class Authorizer {
         // Get the cookie value
         const cookieValue = this._cookieService.readAntiForgeryCookie(request);
 
-        // Check there is a matching anti forgery token field
+        // Check the client has sent a matching anti forgery request header
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {

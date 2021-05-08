@@ -1,14 +1,14 @@
 #
-# A script to test HTTP messages for a back end for front end workflow, with AWS Cognito as the provider
+# A script to test all HTTP messages for a back end for front end workflow, with AWS Cognito as the provider
 #
 
 #
-# Set an HTTP proxy if required
+# Configure an HTTP proxy if required
 #
 export HTTPS_PROXY=http://127.0.0.1:8888
 
 #
-# Set environment details
+# Variables to point to the environment
 #
 API_BASE_URL=https://api.authsamples.com
 WEB_BASE_URL=https://web.authsamples.com
@@ -17,36 +17,32 @@ COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
 TEST_USERNAME=guestuser@mycompany.com
 TEST_PASSWORD=GuestPassword1
-
-#
-# Work variables
-#
 RESPONSE_FILE=test/response.txt
-HEADER_NAME=''
-HEADER_VALUE=''
-COOKIE_NAME=''
-COOKIE_VALUE=''
 
 #
 # A simple routine to get a header value from a response file and ensure no trailing newlines
 # The sed expression matches everything after the colon, after which we return this in group 1
 #
-getHeaderValue(){
-  HEADER_VALUE=$(cat $RESPONSE_FILE | grep "^$HEADER_NAME" | sed -r "s/^$HEADER_NAME: (.*)$/\1/")
-  HEADER_VALUE=${HEADER_VALUE%$'\r'}
+function getHeaderValue(){
+  local _HEADER_NAME=$1
+  local _HEADER_VALUE=$(cat $RESPONSE_FILE | grep "^$_HEADER_NAME" | sed -r "s/^$_HEADER_NAME: (.*)$/\1/")
+  local _HEADER_VALUE=${_HEADER_VALUE%$'\r'}
+  echo $_HEADER_VALUE
 }
 
 #
 # Similar to the above except that we read a cookie value and ensure no trailing newlines
 # This currently only supports a single cookie in each set-cookie header, which is good enough for my purposes
 #
-getCookieValue(){
-  COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $COOKIE_NAME" | sed -r "s/^set-cookie: $COOKIE_NAME=(.[^;]*)(.*)$/\1/")
-  COOKIE_VALUE=${COOKIE_VALUE%$'\r'}
+function getCookieValue(){
+  local _COOKIE_NAME=$1
+  local _COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $_COOKIE_NAME" | sed -r "s/^set-cookie: $_COOKIE_NAME=(.[^;]*)(.*)$/\1/")
+  local _COOKIE_VALUE=${_COOKIE_VALUE%$'\r'}
+  echo $_COOKIE_VALUE
 }
 
 #
-# Make an API call to start a login
+# Act as the SPA by calling the OAuth proxy API to start a login and get the redirect URI
 #
 echo "*** Creating login URL ..."
 HTTP_STATUS=$(curl -i -s -X POST $API_BASE_URL/spa/login/start \
@@ -62,16 +58,14 @@ fi
 # Get data we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-AUTHORIZE_URL=$(jq -r .authorization_uri <<< "$JSON")
-COOKIE_NAME="$COOKIE_PREFIX-state-$APP_NAME"
-getCookieValue
-STATE_COOKIE=$COOKIE_VALUE
+AUTHORIZATION_REQUEST_URL=$(jq -r .authorization_uri <<< "$JSON")
+STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
 
 #
 # Next invoke the redirect URI to start a login
 #
 echo "*** Following login redirect ..."
-HTTP_STATUS=$(curl -i -L -s $AUTHORIZE_URL -o $RESPONSE_FILE -w '%{http_code}')
+HTTP_STATUS=$(curl -i -L -s $AUTHORIZATION_REQUEST_URL -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "Problem encountered using the OpenID Connect authorization URL, status: $HTTP_STATUS"
   exit
@@ -81,12 +75,8 @@ fi
 # Get data we will use in order to post test credentials and automate a login
 # The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
 #
-HEADER_NAME='location'
-getHeaderValue
-LOGIN_POST_LOCATION=$HEADER_VALUE
-COOKIE_NAME='XSRF-TOKEN'
-getCookieValue
-COGNITO_XSRF_TOKEN=$(echo $COOKIE_VALUE | cut -d ' ' -f 2)
+LOGIN_POST_LOCATION=$(getHeaderValue 'location')
+COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 
 #
 # We can now post a password credential, and form fields used are vendor specific
@@ -103,12 +93,21 @@ if [ $HTTP_STATUS != '302' ]; then
   echo "Problem encountered posting a credential to AWS Cognito, status: $HTTP_STATUS"
   exit
 fi
+
+#
+# Next get the code and state from the redirect response's query parameters, but without following the redirect
+#
+AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
+echo $AUTHORIZATION_RESPONSE_URL
+
+# Next parse the query string and post the values, along with the state parameter
+# https://web.authsamples.com/spa/?code=ca98d851-96d0-40c8-b222-bc10c2008e16&state=YoRTSq8EK00sDjdAr_wCiaVZV64tPjZQsBwPX2OCqT8
 exit
 
 #
-# Complete a login by swapping the code for tokens, which will write auth cookies
+# Call the end login endpoint with the code and state parameters, to write the final auth cookie
 #
-curl -i -X POST https://api.authsamples.com/spa/login/end \
+curl -i -s -X POST https://api.authsamples.com/spa/login/end \
 -H 'origin: https://web.authsamples.com' \
 -H 'content-type: application/x-www-form-urlencoded' \
 -H 'accept: application/json' \

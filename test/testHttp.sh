@@ -28,19 +28,21 @@ COOKIE_NAME=''
 COOKIE_VALUE=''
 
 #
-# A simple routine to get a header value from a response file
+# A simple routine to get a header value from a response file and ensure no trailing newlines
 # The sed expression matches everything after the colon, after which we return this in group 1
 #
 getHeaderValue(){
   HEADER_VALUE=$(cat $RESPONSE_FILE | grep "^$HEADER_NAME" | sed -r "s/^$HEADER_NAME: (.*)$/\1/")
+  HEADER_VALUE=${HEADER_VALUE%$'\r'}
 }
 
 #
-# Similar to the above except that we read a cookie value
+# Similar to the above except that we read a cookie value and ensure no trailing newlines
 # This currently only supports a single cookie in each set-cookie header, which is good enough for my purposes
 #
 getCookieValue(){
   COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $COOKIE_NAME" | sed -r "s/^set-cookie: $COOKIE_NAME=(.[^;]*)(.*)$/\1/")
+  COOKIE_VALUE=${COOKIE_VALUE%$'\r'}
 }
 
 #
@@ -85,8 +87,6 @@ LOGIN_POST_LOCATION=$HEADER_VALUE
 COOKIE_NAME='XSRF-TOKEN'
 getCookieValue
 COGNITO_XSRF_TOKEN=$(echo $COOKIE_VALUE | cut -d ' ' -f 2)
-
-# PROBLEM: LOGIN_POST_LOCATION not interpreted as a string by curl
 
 #
 # We can now post a password credential, and form fields used are vendor specific

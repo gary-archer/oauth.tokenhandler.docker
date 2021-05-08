@@ -34,7 +34,7 @@ export class Authorizer {
         const loginState = this._oauthService.generateLoginState();
 
         // Next form the authorization redirect URI
-        let url = this._configuration.host.authorizeEndpoint;
+        let url = this._configuration.api.authorizeEndpoint;
         url += '?';
         url += UrlHelper.queryParameter('client_id', this._configuration.client.clientId);
         url += '&';
@@ -182,7 +182,7 @@ export class Authorizer {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
-        if (!origin || origin.toLowerCase() !== this._configuration.host.trustedWebOrigin.toLowerCase()) {
+        if (!origin || origin.toLowerCase() !== this._configuration.api.trustedWebOrigin.toLowerCase()) {
             throw ErrorHandler.fromSecurityVerificationError(
                 'The origin header was missing or contained an untrusted value');
         }

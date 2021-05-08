@@ -4,9 +4,10 @@
   "description": "An OAuth secured API that manages translation from SameSite cookies to tokens",
   "scripts": {
     "lint": "npx eslint . --ext .ts,.tsx",
-    "build": "rimraf dist && tsc --sourceMap true",
-    "start": "node dist/express/app.js",
-    "testLambdas": "./test/testLambdas.sh",
+    "start": "nodemon -e ts --exec \"npm run build\"",
+    "build": "ts-node --files src/express/app.ts",
+    "buildRelease": "rimraf dist && tsc",
+    "startRelease": "node dist/express/app.js",
     "testHttp": "./test/testHttp.sh",
     "startLogin": "sls invoke local -f startLogin -p test/data/startLoginRequest.json",
     "endLogin": "sls invoke local -f endLogin -p test/data/endLoginRequest.json",
@@ -14,7 +15,6 @@
     "expireSession": "sls invoke local -f expireSession -p test/data/expireSessionRequest.json",
     "startLogout": "sls invoke local -f startLogout -p test/data/startLogoutRequest.json",
     "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
-    "buildRelease": "rimraf dist && tsc",
     "customPackager": "ts-node deployment/customPackager.ts",
     "deploy": "sls deploy --stage deployed --package .serverless",
     "remove": "sls remove --stage deployed"

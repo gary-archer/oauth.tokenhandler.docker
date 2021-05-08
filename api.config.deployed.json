@@ -1,5 +1,12 @@
 {
     "host": {
+        "port": 0,
+        "sslCertificateFileName": "",
+        "sslCertificatePassword": "",
+        "useHttpProxy": false,
+        "httpProxyUrl": "http://127.0.0.1:8888"
+    },
+    "api": {
         "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "cookieRootDomain": "authsamples.com",

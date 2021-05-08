@@ -1,21 +1,20 @@
 /*
- * Configuration for the host process
+ * Configuration for the host details of the API
  */
 export interface HostConfiguration {
 
-    authorizeEndpoint: string;
+    // The port to listen on
+    port: number;
 
-    tokenEndpoint: string;
+    // The path to the SSL certificate P12 file
+    sslCertificateFileName: string;
 
-    cookieRootDomain: string,
+    // The SSL certificate's private key password
+    sslCertificatePassword: string;
 
-    cookiePrefix: string,
+    // Whether to use an HTTPS proxy
+    useProxy: boolean;
 
-    cookieEncryptionKey: string;
-
-    trustedWebOrigin: string;
-
-    provider: string;
-
-    useMockResponses: boolean;
+    // The proxy URL when used
+    proxyUrl: string;
 }

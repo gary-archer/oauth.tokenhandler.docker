@@ -1,7 +1,7 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
-import {HostConfiguration} from '../configuration/hostConfiguration';
+import {OAuthConfiguration} from '../configuration/oauthConfiguration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
 import {OAuthService} from './oauthService';
@@ -16,7 +16,7 @@ export class OAuthServiceImpl implements OAuthService {
 
     private readonly _tokenEndpoint: string;
 
-    public constructor(configuration: HostConfiguration) {
+    public constructor(configuration: OAuthConfiguration) {
         this._tokenEndpoint = configuration.tokenEndpoint;
     }
 
@@ -33,11 +33,14 @@ export class OAuthServiceImpl implements OAuthService {
     public generateAntiForgeryValue(): string {
         return randomBytes(32).toString('base64');
     }
-    
+
     /*
      * Send the authorization code grant message to the Authorization Server
      */
-    public async sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any> {
+    public async sendAuthorizationCodeGrant(
+        request: AbstractRequest,
+        response: AbstractResponse,
+        codeVerifier: string): Promise<any> {
 
         // Form the body of the authorization code grant message
         const formData = new URLSearchParams();

@@ -14,7 +14,8 @@ export interface OAuthService {
     generateAntiForgeryValue(): string;
 
     // Forward the authorization code grant to the Authorization Server to complete a login
-    sendAuthorizationCodeGrant(request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any>;
+    sendAuthorizationCodeGrant(
+        request: AbstractRequest, response: AbstractResponse, codeVerifier: string): Promise<any>;
 
     // Forward the refresh token grant to the Authorization Server to get a new access token
     sendRefreshTokenGrant(refreshToken: string, request: AbstractRequest, response: AbstractResponse): Promise<any>;

@@ -1,8 +1,6 @@
 import {Configuration} from '../../core/configuration/configuration';
 import {Authorizer} from '../../core/services/authorizer';
 import {CookieService} from '../../core/services/cookieService';
-import {MockOAuthServiceImpl} from '../../core/services/mockOAuthServiceImpl';
-import {OAuthService} from '../../core/services/oauthService';
 import {OAuthServiceImpl} from '../../core/services/oauthServiceImpl';
 
 /*
@@ -24,18 +22,6 @@ export class LambdaConfiguration {
         return new Authorizer(
             this._configuration,
             new CookieService(this._configuration),
-            this._getOAuthService());
-    }
-
-    /*
-     * Return the OAuth service depending on the strategy
-     */
-    private _getOAuthService(): OAuthService {
-
-        if (this._configuration.host.useMockResponses) {
-            return new MockOAuthServiceImpl();
-        } else {
-            return new OAuthServiceImpl(this._configuration.host);
-        }
+            new OAuthServiceImpl(this._configuration.oauth));
     }
 }

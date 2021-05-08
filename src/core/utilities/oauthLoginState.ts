@@ -14,7 +14,7 @@ export class OAuthLoginState {
      * Generate the login state when constructed
      */
     public constructor() {
-        
+
         const verifierBytes = this._getBytes();
         this._state = this._base64UrlEncode(this._getBytes());
         this._codeVerifier = this._base64UrlEncode(verifierBytes);
@@ -55,6 +55,6 @@ export class OAuthLoginState {
      * Convert a previously generated buffer to a string
      */
     private _sha256(input: string): Buffer {
-        return createHash('sha256').update(input).digest()
+        return createHash('sha256').update(input).digest();
     }
 }

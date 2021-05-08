@@ -14,7 +14,7 @@ export class CookieService {
     private readonly _encryptionKey: Buffer;
 
     public constructor(configuration: Configuration) {
-        this._encryptionKey = Buffer.from(configuration.host.cookieEncryptionKey, 'base64');
+        this._encryptionKey = Buffer.from(configuration.api.cookieEncryptionKey, 'base64');
         this._configuration = configuration;
     }
 
@@ -150,7 +150,7 @@ export class CookieService {
      * Return a cookie of the form 'mycompany-auth-finalspa'
      */
     private _getCookieName(type: string) {
-        return `${this._configuration.host.cookiePrefix}-${type}-${this._configuration.client.name}`;
+        return `${this._configuration.api.cookiePrefix}-${type}-${this._configuration.client.name}`;
     }
 
     /*
@@ -197,7 +197,7 @@ export class CookieService {
             secure: true,
 
             // The cookie written will be usable for the SPA in a sibling web domain
-            domain: `.${this._configuration.host.cookieRootDomain}`,
+            domain: `.${this._configuration.api.cookieRootDomain}`,
 
             // The cookie is only sent during OAuth related requests, and all Web / API requests are cookieless
             path: this._configuration.client.cookiePath,

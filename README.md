@@ -4,5 +4,19 @@
 
 An API that issues SameSite cookies for SPAs as part of a `Back End for Front End` solution
 
-- Runs as a Serverless Lambda when deployed to AWS
-- Run in Express on a Developer PC to support local development
+## Operations
+
+Table
+
+## Calling APIs
+
+Wording on justification - could be adapted to proxy calls to APIs - but I'm not doing this in my blog
+Find a NodeJS API proxy option
+
+## Local PC Solution
+
+Runs in Express alongside the SPA, to enable a productive local setup
+
+## Deployed Solution
+
+Runs as a Serverless lambda for low cost hosting

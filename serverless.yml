@@ -32,9 +32,18 @@ custom:
     - X-Amz-Security-Token
     - X-Amz-User-Agent
     - x-mycompany-aft-finalspa
+    - x-mycompany-api-client
+    - x-mycompany-correlation-id
+    - x-mycompany-session-id
+    - x-mycompany-test-exception
+
+  # Scripts used when building the AWS deployment package
+  scripts:
+    hooks:
+      'after:package:createDeploymentArtifacts': npm run customPackager
 
 functions:
-  
+  # Get the authorization URL and store state
   startLogin:
     handler: dist/lambda/handlers/startLogin.handler
     events:
@@ -47,6 +56,7 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
+  # Verify state and send the authorization code grant message
   endLogin:
     handler: dist/lambda/handlers/endLogin.handler
     events:
@@ -59,6 +69,7 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
+  # Return a new access token to the Browser UI
   refreshToken:
     handler: dist/lambda/handlers/refreshToken.handler
     events:
@@ -71,6 +82,7 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
+  # Make the refresh token in the auth cookie act expired, for test purposes
   expireSession:
     handler: dist/lambda/handlers/expireSession.handler
     events:
@@ -83,6 +95,7 @@ functions:
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
 
+  # Get the end session URL and remove cookies
   startLogout:
     handler: dist/lambda/handlers/startLogout.handler
     events:
@@ -96,8 +109,11 @@ functions:
             headers: ${self:custom.allowedHeaders}
 
 # By default all files are included so remove files we don't need for any lambda
+# The custom packager does further work in code
 package:
   patterns:
+  - '!api.config**'
+  - '!.vscode/**'
   - '!.vscode/**'
   - '!environments/**'
   - '!src/**'

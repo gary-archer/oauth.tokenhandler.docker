@@ -1,11 +1,19 @@
 #
-# Helper commands to test the back end for front end OAuth workflow
+# Helper commands to test a back end for front end OAuth workflow
 #
 
 #
 # Set an HTTP proxy if required
 #
-export HTTPS_PROXY=http://127.0.0.1:8888
+# export HTTPS_PROXY=http://127.0.0.1:8888
+
+#
+# Set environment details
+#
+API_BASE_URL=https://api.authsamples.com
+WEB_BASE_URL=https://web.authsamples.com
+COOKIE_PREFIX=mycompany
+APP_NAME=finaspa
 
 #
 # Get an authorization redirect URL, which will also set a temporary cookie containing the state and code verifier
@@ -13,6 +21,7 @@ export HTTPS_PROXY=http://127.0.0.1:8888
 curl -i -X POST https://api.authsamples.com/spa/login/start \
 -H 'origin: https://web.authsamples.com' \
 -H 'accept: application/json'
+exit
 
 #
 # Complete a login by swapping the code for tokens, which will write auth cookies

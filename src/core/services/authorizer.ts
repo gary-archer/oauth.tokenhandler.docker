@@ -189,16 +189,19 @@ export class Authorizer {
     }
 
     /*
-     * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
+     * Check that the state value in the authorization response matches that in the state cookie
      */
     private _validateStateCookie(request: AbstractRequest): string {
 
-        // Get the state value
-        const data = this._cookieService.readStateCookie(request);
-        console.log(data);
-        
-        /* TODO: verify against state and then return the code verifier to use during the authoriztion code grant */
-        return '';
+        const cookieData = this._cookieService.readStateCookie(request);
+        const formData = request.getBody();
+
+        if (cookieData.state !== formData.state) {
+            throw ErrorHandler.fromSecurityVerificationError(
+                'The state parameter to end the login did not match that in the state cooki');
+        }
+
+        return cookieData.codeVerifier;
     }
 
     /*

@@ -104,12 +104,12 @@ LOGIN_POST_LOCATION=$(getHeaderValue 'location')
 COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 
 #
-# We can now post a password credential, and form fields used are vendor specific
+# We can now post a password credential, and the form fields used are vendor specific
 #
 echo "*** Posting credentials to sign in the test user ..."
 HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
 -H "origin: $LOGIN_BASE_URL" \
--H "cookie: XSRF-TOKEN=$COGNITO_XSRF_TOKEN" \
+--cookie "XSRF-TOKEN=$COGNITO_XSRF_TOKEN" \
 --data-urlencode "_csrf=$COGNITO_XSRF_TOKEN" \
 --data-urlencode "username=$TEST_USERNAME" \
 --data-urlencode "password=$TEST_PASSWORD" \
@@ -124,7 +124,7 @@ fi
 #
 AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
 AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
-RESPONSE_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
+AUTH_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
 
 #
 # Next we end the login by asking the server to do an authorization code grant
@@ -133,14 +133,15 @@ echo "*** Ending the login by processing the authorization code ..."
 HTTP_STATUS=$(curl -i -s -X POST $API_BASE_URL/spa/login/end \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+--cookie "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE" \
+--data-urlencode "code=$AUTH_CODE" \
+--data-urlencode "state=$AUTH_STATE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered ending a login, status: $HTTP_STATUS"
   apiError
   exit
 fi
-
-#--data-urlencode "_csrf=$COGNITO_XSRF_TOKEN" \
 exit
 
 #

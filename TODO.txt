@@ -1,75 +1,46 @@
-API REVAMP PART 1
------------------
+API PHASE 1
+-----------
+1. Get Express working locally for productivity reasons
 
-TUESDAY
--------
-1. Implement endLogin
-   Update tests to use one time real token data
-   Make a real request to the auth server and use that as real data where needed
+2. Complete core operations - with a configuration flag to control login URL handling
 
-2. Test refreshAccessToken / expireSession / startLogout
+3. Complete HTTP tests both locally and in AWS
 
-3. Implement startLogout to calculate the URL and to use the config data to do it in a Cognito way
-   Update tests to use real token data
+4. Test strategy for Serverless - preferably get rid of mock data
+   Perhaps run tests from NodeJS code
 
-4. Use API error responses rather than invalid_grant errors
+SPA PHASE 1
+-----------
+1. Branch of oauth.websample.final, with web reverse proxy and oidc client removed
+   Check in with very clean code and a new authenticator implementation
+   Use / rename / revamp existing web reverse proxy client but extend it with explicit operations
+   Start by throwing not implemented errors for operations that OIDC client implemented previously
 
-5. Deploy to AWS and get HTTP tests working
-
-LATER
------
-6. Implement the same logic for Express and use code from webhost in Final SPA
-   Add a testHttpLocal.sh
-
-7. SPA branch to verify cookie sending and CORS when an Expire button is clicked
+2. SPA branch to get browser calls working
+   Store state between requests in sesson storage
    Add CORS middleware to API and write allow-credentials in response
-   Add an OPTIONS request to curl tests
+   Add OPTIONS requests to curl tests
 
-8. Add logging middleware and log to the Elastic Search schema
-   Detailed error testing of API operations to test each failure point
-   Use my standard client error object
+3. Test in all 4 browsers including Incognito mode   
 
-9. Read up to see if I should use a nonce for an SPA
-    See IETF docs for browser based apps
-
-10. Update README
-
-API REVAMP PART 2
-----------------
+FINALIZATION
+------------
 1. Validate id token and check AT hash - cf oidc client library
    Should I use a nonce? - and properly understand its role from IETF docs
 
-2. Test this from a multi tab browser viewpoint
+2. Use API error responses rather than invalid_grant errors
+
+3. Add logging middleware and log to the Elastic Search schema
+   Detailed error testing of API operations to test each failure point
+   Use my standard client error object
+
+4. Update READMEs
+
+5. Test this from a multi tab browser viewpoint
    Are there any 401 race conditions that the SPA cannot handle?
 
-3. Proper API logging and write to Elastic Search from AWS
+6. Proper API logging and write to Elastic Search from AWS
    Logging also needs to use abstract request and response objects
 
-SPA REVAMP PART 1
------------------
-1. Branch of oauth.websample.final, with web reverse proxy and oidc client removed
-   Check in with very clean code and a new authenticator implementation
-   Only strategies are web and mobile
-   Start by throwing not implemented errors for operations that OIDC client implemented previously
-
-2. Get OAuth redirects and responses working, including error responses
-   Store state between requests in sesson storage
-
-3. Update existing web oauth proxy client to do more Axios work and be explicit, adding these methods
-   Call them from the authenticator implementation:
-   - Authorization Code Grant
-   - Refresh Token Grant
-
-4. Get CORS and sending of credentials working locally with Express
-   Add withCredentials to axios calls
-   Test cookies on all 4 browsers including Incognito
-   Verify that a different port for API causes no problems
-
-5. Deploy to cloud and verify that it works
-
-6. Update README and mention back end for front end
-   Then merge to master
-
-SPA REVAMP PART 2
------------------
-1. Use acr_values
+7. Use acr_values
+   Manage redirect URI and idp parameter via a server side strategy if needed

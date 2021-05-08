@@ -1,11 +1,11 @@
 #
-# Helper commands to test a back end for front end OAuth workflow
+# A script to test HTTP messages for a back end for front end workflow, with AWS Cognito as the provider
 #
 
 #
 # Set an HTTP proxy if required
 #
-# export HTTPS_PROXY=http://127.0.0.1:8888
+#export HTTPS_PROXY=http://127.0.0.1:8888
 
 #
 # Set environment details
@@ -13,14 +13,68 @@
 API_BASE_URL=https://api.authsamples.com
 WEB_BASE_URL=https://web.authsamples.com
 COOKIE_PREFIX=mycompany
-APP_NAME=finaspa
+APP_NAME=finalspa
+TEST_USER=guestuser@mycompany.com
+TEST_PASSWORD=GuestPassword1
 
 #
-# Get an authorization redirect URL, which will also set a temporary cookie containing the state and code verifier
+# Work variables
 #
-curl -i -X POST https://api.authsamples.com/spa/login/start \
+RESPONSE_FILE=test/response.txt
+COOKIE_NAME=''
+COOKIE_VALUE=''
+
+#
+# A primitive cookie parsing function that currently only supports a single cookie in each set-cookie header
+# The first group matches everything until the first semicolon, after which we return the first group
+#
+getCookieValue(){
+  COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $COOKIE_NAME" | sed -r "s/^set-cookie: $COOKIE_NAME=(.[^;]*)(.*)$/\1/")
+}
+
+#
+# Make an API call to start a login
+#
+echo "*** Creating login URL ..."
+HTTP_STATUS=$(curl -i -s -X POST https://api.authsamples.com/spa/login/start \
 -H 'origin: https://web.authsamples.com' \
--H 'accept: application/json'
+-H 'accept: application/json' \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "Problem encountered, status: $HTTP_STATUS"
+  exit
+fi
+
+#
+# Get data we will use later
+#
+JSON=$(tail -n 1 $RESPONSE_FILE)
+AUTHORIZE_URL=$(jq -r .authorization_uri <<< "$JSON")
+COOKIE_NAME="$COOKIE_PREFIX-state-$APP_NAME"
+getCookieValue
+STATE_COOKIE=$COOKIE_VALUE
+
+#
+# Next invoke the redirect URI to start a login
+#
+echo "*** Following login redirect ..."
+HTTP_STATUS=$(curl -i -L -s $AUTHORIZE_URL -o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "Problem encountered, status: $HTTP_STATUS"
+  exit
+fi
+
+#
+# The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
+#
+COOKIE_NAME='XSRF-TOKEN'
+getCookieValue
+COGNITO_XSRF_COOKIE=$(echo $COOKIE_VALUE | cut -d ' ' -f 2)
+
+#
+# We can now post a credential
+#
+AUTHORIZE_RESPONSE=$(curl -i -s -X POST )
 exit
 
 #

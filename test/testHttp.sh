@@ -20,7 +20,7 @@ TEST_PASSWORD=GuestPassword1
 RESPONSE_FILE=test/response.txt
 
 #
-# A simple routine to get a header value from a response file and ensure no trailing newlines
+# A simple routine to get a header value from an HTTP response file
 # The sed expression matches everything after the colon, after which we return this in group 1
 #
 function getHeaderValue(){
@@ -31,7 +31,7 @@ function getHeaderValue(){
 }
 
 #
-# Similar to the above except that we read a cookie value and ensure no trailing newlines
+# Similar to the above except that we read a cookie value from an HTTP response file
 # This currently only supports a single cookie in each set-cookie header, which is good enough for my purposes
 #
 function getCookieValue(){
@@ -39,6 +39,31 @@ function getCookieValue(){
   local _COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $_COOKIE_NAME" | sed -r "s/^set-cookie: $_COOKIE_NAME=(.[^;]*)(.*)$/\1/")
   local _COOKIE_VALUE=${_COOKIE_VALUE%$'\r'}
   echo $_COOKIE_VALUE
+}
+
+#
+# Read until we get to the parameter and then return everything up to the next query parameter
+# We then return the value of the query parameter by returning the match in group 2
+#
+function getQueryParameterValue(){
+  local _URL=$1
+  local _PARAM_NAME=$2
+  local _PARAM_VALUE=$(echo $_URL | sed -r "s/^(.*)$_PARAM_NAME=(.[^&]*)(.*)$/\2/")
+  echo $_PARAM_VALUE
+}
+
+#
+# Render an error result returned from the API
+#
+function apiError() {
+
+  local _JSON=$(tail -n 1 $RESPONSE_FILE)
+  local _CODE=$(jq -r .error <<< "$_JSON")
+  local _DESC=$(jq -r .error_description <<< "$_JSON")
+  
+  if [ ! "$_CODE" = 'null'  ] && [ ! "$_DESC" = 'null' ]; then
+    echo "*** Code: $_CODE, Description: $_DESC"
+  fi
 }
 
 #
@@ -98,10 +123,24 @@ fi
 # Next get the code and state from the redirect response's query parameters, but without following the redirect
 #
 AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
-echo $AUTHORIZATION_RESPONSE_URL
+AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
+RESPONSE_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
 
-# Next parse the query string and post the values, along with the state parameter
-# https://web.authsamples.com/spa/?code=ca98d851-96d0-40c8-b222-bc10c2008e16&state=YoRTSq8EK00sDjdAr_wCiaVZV64tPjZQsBwPX2OCqT8
+#
+# Next we end the login by asking the server to do an authorization code grant
+#
+echo "*** Ending the login by processing the authorization code ..."
+HTTP_STATUS=$(curl -i -s -X POST $API_BASE_URL/spa/login/end \
+-H "origin: $WEB_BASE_URL" \
+-H 'accept: application/json' \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered ending a login, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+
+#--data-urlencode "_csrf=$COGNITO_XSRF_TOKEN" \
 exit
 
 #

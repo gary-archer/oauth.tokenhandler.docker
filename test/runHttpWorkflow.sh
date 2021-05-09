@@ -1,5 +1,6 @@
 #
-# A script to test all HTTP messages for a back end for front end workflow, with AWS Cognito as the provider
+# A script to send messages that the SPA and browser together will send to the OAuth Web Proxy API
+# The cookies are handled automatically by the browser to the API since it is in the same domain
 #
 
 #
@@ -148,18 +149,16 @@ if [ $HTTP_STATUS != '200' ]; then
   apiError
   exit
 fi
-exit
 
 #
-# Call the end login endpoint with the code and state parameters, to write the final auth cookie
+# Get data that we will use later
 #
-curl -i -s -X POST https://api.authsamples.com/spa/login/end \
--H 'origin: https://web.authsamples.com' \
--H 'content-type: application/x-www-form-urlencoded' \
--H 'accept: application/json' \
--H 'cookie: mycompany-state-finalspa=caed7546fd8d0fc13f475cdde7b72460%3Aa2ff425d0b8af91459e5688a08b210bc8d47431f46531295eeb785516da21efea70447aec2ac64172f976c5e402b45bad85943d4e0c8bd7680d4d15e29aa1b5f67b6c346be07d9e524799686ffc9e3f32ce403990b41391ef12f6cbd424bd4283379a75998384feb064962968fbb65008130716ad51c74fa8925b1ef19de7d98' \
---data-urlencode 'code=e6c42e8e-fda7-4c7e-a850-b007bacd98a5' \
---data-urlencode 'state=CqI32q0zSQo6QEzloa0ISBldaNTVH80ONbKLUr8NTZE'
+JSON=$(tail -n 1 $RESPONSE_FILE)
+ANTI_FORGERY_TOKEN=$(jq -r .anti_forgery_token <<< "$JSON")
+AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
+ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
+AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
+exit
 
 #
 # Get an access token using the refresh token in the auth cookie

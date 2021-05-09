@@ -1,7 +1,7 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
-import {ApiConfiguration} from '../configuration/apiConfiguration';
+import {Configuration} from '../configuration/configuration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
 import {HttpProxy} from '../utilities/httpProxy';
@@ -12,10 +12,10 @@ import {OAuthLoginState} from '../utilities/oauthLoginState';
  */
 export class OAuthService {
 
-    private readonly _configuration: ApiConfiguration;
+    private readonly _configuration: Configuration;
     private readonly _httpProxy: HttpProxy;
 
-    public constructor(configuration: ApiConfiguration, httpProxy: HttpProxy) {
+    public constructor(configuration: Configuration, httpProxy: HttpProxy) {
         this._configuration = configuration;
         this._httpProxy = httpProxy;
     }
@@ -39,13 +39,13 @@ export class OAuthService {
      */
     public async sendAuthorizationCodeGrant(code: string, codeVerifier: string): Promise<any> {
 
-        // Use the client configuration
         const formData = new URLSearchParams();
+        formData.append('grant_type', 'authorization_code');
+        formData.append('client_id', this._configuration.client.clientId);
         formData.append('code', code);
+        formData.append('redirect_uri', this._configuration.client.redirectUri);
         formData.append('code_verifier', codeVerifier);
-
-        // Send an HTTP message and get the response, then add a field for anti forgery protection
-        return this._postMessage(formData);
+        return this._postGrantMessage(formData);
     }
 
     /*
@@ -54,29 +54,20 @@ export class OAuthService {
     public async sendRefreshTokenGrant(refreshToken: string): Promise<any>  {
 
         const formData = new URLSearchParams();
-        /*const body = request.getBody();
-        for (const field in body) {
-            if (field && body[field]) {
-                formData.append(field, body[field]);
-            }
-        }
-
-        if (formData.has('refresh_token')) {
-            formData.delete('refresh_token');
-        }
-
-        formData.append('refresh_token', refreshToken);*/
-        return this._postMessage(formData);
+        formData.append('grant_type', 'refresh_token');
+        formData.append('client_id', this._configuration.client.clientId);
+        formData.append('refresh_token', refreshToken);
+        return this._postGrantMessage(formData);
     }
 
     /*
-     * Route a message to the Authorization Server
+     * Send a grant message to the Authorization Server
      */
-    private async _postMessage(formData: URLSearchParams): Promise<any> {
+    private async _postGrantMessage(formData: URLSearchParams): Promise<any> {
 
         // Define request options
         const options = {
-            url: this._configuration.tokenEndpoint,
+            url: this._configuration.api.tokenEndpoint,
             method: 'POST',
             data: formData,
             headers: {
@@ -94,16 +85,21 @@ export class OAuthService {
 
         } catch (e) {
 
-            // Handle OAuth error responses
+            // See if we have a response body
             if (e.response && e.response.status && e.response.data) {
+
+                // Process error data and include the 'error' and 'error_description' fields
                 const errorData = e.response.data;
                 if (errorData.error) {
-                    const description = errorData.error_description ?? 'The Authorization Server rejected the request';
+
+                    // Throw an error with Authorization Server details
+                    const description =
+                        errorData.error_description ?? 'An error response was received from the Authorization Server';
                     throw new ClientError(e.response.status, errorData.error, description);
                 }
             }
 
-            // Handle client connectivity errors
+            // Throw a generic client connectivity error
             throw ErrorHandler.fromHttpRequestError(e, options.url);
         }
     }

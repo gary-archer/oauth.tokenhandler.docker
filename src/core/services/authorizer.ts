@@ -29,6 +29,7 @@ export class Authorizer {
     public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        console.log('API startLogin called ...');
         this._validateOrigin(request);
 
         // First create a random login state
@@ -70,30 +71,44 @@ export class Authorizer {
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        console.log('API endLogin called ...');
         this._validateOrigin(request);
 
-        // Ensure that the state query parameter matches that in the cookie and get the verifier
-        const codeVerifier = this._validateStateCookie(request);
+        // Read the state cookie
+        const stateCookie = this._cookieService.readStateCookie(request);
+        if (!stateCookie) {
+            throw ErrorHandler.fromMissingCookieError('No state cookie was found in the incoming request');
+        }
 
-        // Send the authorization code grant request
-        const code = request.getBody()['code'];
-        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(code, codeVerifier);
+        // Check that the value posted matches
+        const state = request.getFormField('state');
+        if (state !== stateCookie.state) {
+            throw ErrorHandler.fromInvalidDataError(
+                'The end login state parameter did not match the state cookie value');
+        }
 
-        // Get the refresh token
+        // Get the code value
+        const code = request.getFormField('code');
+        if (!code) {
+            throw ErrorHandler.fromMissingFieldError('No code value was supplied in the endLogin request');
+        }
+
+        // Send the Authorization Code Grant message
+        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(code, stateCookie.codeVerifier);
+
+        // Get the refresh token from the response
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
-            throw ErrorHandler.fromSecurityVerificationError(
-                'No refresh token was received in the authorization code grant response');
+            throw ErrorHandler.fromMessage('No refresh token was received in the authorization code grant response');
         }
 
-        // Get the id token
+        // Get the id token from the response
         const idToken = authCodeGrantData.id_token;
         if (!idToken) {
-            throw ErrorHandler.fromSecurityVerificationError(
-                'No id token was received in the authorization code grant response');
+            throw ErrorHandler.fromMessage('No id token was received in the authorization code grant response');
         }
 
-        // Write the refresh token and id token to HTTP only encrypted same site cookies
+        // Write both the refresh token and id token to HTTP only encrypted same site cookies
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
 
@@ -113,11 +128,15 @@ export class Authorizer {
     public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        console.log('API refreshToken called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
         // Get the refresh token from the auth cookie
         const refreshToken = this._cookieService.readAuthCookie(request);
+        if (!refreshToken) {
+            throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
+        }
 
         // Send it to the Authorization Server
         const refreshTokenGrantData =
@@ -152,11 +171,15 @@ export class Authorizer {
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        console.log('API expireSession called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
         // Get the current refresh token
         const refreshToken = this._cookieService.readAuthCookie(request);
+        if (!refreshToken) {
+            throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
+        }
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
         this._cookieService.expireAuthCookie(refreshToken, response);
@@ -169,6 +192,7 @@ export class Authorizer {
     public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        console.log('API startLogout called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -183,26 +207,13 @@ export class Authorizer {
     private _validateOrigin(request: AbstractRequest): void {
 
         const origin = request.getHeader('origin');
-        if (!origin || origin.toLowerCase() !== this._configuration.api.trustedWebOrigin.toLowerCase()) {
-            throw ErrorHandler.fromSecurityVerificationError(
-                'The origin header was missing or contained an untrusted value');
-        }
-    }
-
-    /*
-     * Check that the state value in the authorization response matches that produced for the authorization request
-     */
-    private _validateStateCookie(request: AbstractRequest): string {
-
-        const cookieData = this._cookieService.readStateCookie(request);
-        const formData = request.getBody();
-
-        if (cookieData.state !== formData.state) {
-            throw ErrorHandler.fromSecurityVerificationError(
-                'The state parameter to end the login did not match that in the state cookie');
+        if (!origin) {
+            throw ErrorHandler.fromMissingFieldError('No origin header was supplied');
         }
 
-        return cookieData.codeVerifier;
+        if (origin.toLowerCase() !== this._configuration.api.trustedWebOrigin.toLowerCase()) {
+            throw ErrorHandler.fromInvalidDataError('The origin header contained an untrusted value');
+        }
     }
 
     /*
@@ -212,17 +223,20 @@ export class Authorizer {
 
         // Get the cookie value
         const cookieValue = this._cookieService.readAntiForgeryCookie(request);
+        if (!cookieValue) {
+            throw ErrorHandler.fromMissingCookieError('No anti forgery cookie was found in the incoming request');
+        }
 
         // Check the client has sent a matching anti forgery request header
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {
-            throw ErrorHandler.fromSecurityVerificationError('No anti forgery request header field was supplied');
+            throw ErrorHandler.fromMissingFieldError('No anti forgery request header field was supplied');
         }
 
         // Check that the values match
         if (cookieValue !== headerValue) {
-            throw ErrorHandler.fromSecurityVerificationError(
+            throw ErrorHandler.fromInvalidDataError(
                 'The anti forgery request header does not match the anti forgery cookie value');
         }
     }

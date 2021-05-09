@@ -1,18 +1,17 @@
 API PHASE 1
 -----------
-1. Tidy up OAuthService and get requests working
-   Add a getFormField method that is defensive and throws a 400 error when missing
-   authorizer should be in control of headers and data
-
-2. Complete core operations while testing against Express
-   Save all cookies including id cookie
+1. Implement 3 remaining operations against Express
+   Also include the SPA OPTIONS request as the first request before start login
    Use a configuration flag to control Cognito specific login URL handling
+   Get whole workflow completed against Express
+
+2. AWS deployment with no Express dependencies
+   Verify that HTTP tests work against deployed system
+   Also get Kubernetes deployment working
 
 3. Test strategy to ensure Serverless working on a developer PC
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
-
-4. Deploy to AWS without any Express code or dependencies
 
 SPA PHASE 1
 -----------

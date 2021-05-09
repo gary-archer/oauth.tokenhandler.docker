@@ -67,52 +67,54 @@ export class ErrorHandler {
     }
 
     /*
-     * Handle requests to API routes that don't exist
+     * Throw an API exception from a message
      */
-    public static fromRequestNotFound(context?: string): ClientError {
-
-        const error = new ClientError(
-            404,
-            ErrorCodes.requestNotFound,
-            context ?? 'A request was sent to a route that does not exist');
-        error.logContext = context!;
-        return error;
-    }
-
-    /*
-     * Handle failed HTTP connectivity
-     */
-    public static fromHttpRequestError(exception: any, url: string): ApiError {
+    public static fromMessage(logContext: string): ApiError {
 
         const apiError = new ApiError(
-            ErrorCodes.httpRequestError,
-            'Unable to connect to the Authorization Server',
-            exception.stack);
+            ErrorCodes.serverError,
+            'An unexpected exception occurred in the API');
 
-        apiError.url = url;
-        apiError.details = this._getExceptionDetails(exception);
+        apiError.details = logContext;
         return apiError;
     }
 
     /*
-     * These can occur in normal usage when a cookie expires or a new browser session is started
+     * These can occur in normal usage if a new browser session is started
      * We return the standard invalid_grant error code which our SPA checks for
      */
     public static fromMissingCookieError(logContext: string): ClientError {
 
         const error = new ClientError(
-            400, ErrorCodes.invalidGrant, 'A required cookie was missing in an incoming request');
+            400,
+            ErrorCodes.cookieNotFound,
+            'A required cookie was missing in an incoming request');
         error.logContext = logContext;
         return error;
     }
 
     /*
-     * Other security failures such as invalid anti forgery tokens
+     * These occur if a form field or header was not supplied
      */
-    public static fromSecurityVerificationError(logContext: string): ClientError {
+    public static fromMissingFieldError(logContext: string): ClientError {
 
         const error = new ClientError(
-            400, ErrorCodes.securityVerificationFailed, 'The request failed security verification');
+            400,
+            ErrorCodes.fieldNotFound,
+            'A required field was missing in an incoming request');
+        error.logContext = logContext;
+        return error;
+    }
+
+    /*
+     * These occur if a form field or header was supplied but with an invalid value
+     */
+    public static fromInvalidDataError(logContext: string): ClientError {
+
+        const error = new ClientError(
+            400,
+            ErrorCodes.invalidData,
+            'Request data was received with an invalid value');
         error.logContext = logContext;
         return error;
     }
@@ -123,12 +125,31 @@ export class ErrorHandler {
     public static fromCookieDecryptionError(name: string, exception: any): ApiError {
 
         const apiError = new ApiError(
-            ErrorCodes.securityVerificationFailed,
-            'The request cookie failed decryption',
+            ErrorCodes.invalidData,
+            'Request data was received with an invalid value',
             exception.stack);
 
         apiError.statusCode = 400;
-        apiError.details = `Name: ${name}, Details: ${this._getExceptionDetails(exception)}`;
+        apiError.details = {
+            name,
+            details: this._getExceptionDetails(exception),
+        };
+
+        return apiError;
+    }
+
+    /*
+     * Handle failed HTTP connectivity
+     */
+    public static fromHttpRequestError(exception: any, url: string): ApiError {
+
+        const apiError = new ApiError(
+            ErrorCodes.httpRequestError,
+            'Problem encountered connecting to the Authorization Server',
+            exception.stack);
+
+        apiError.url = url;
+        apiError.details = this._getExceptionDetails(exception);
         return apiError;
     }
 
@@ -139,13 +160,13 @@ export class ErrorHandler {
 
         if (e.message) {
             return e.message;
-        } else {
-            const details = e.toString();
-            if (details !== {}.toString()) {
-                return details;
-            } else {
-                return '';
-            }
         }
+
+        const details = e.toString();
+        if (details !== {}.toString()) {
+            return details;
+        }
+
+        return '';
     }
 }

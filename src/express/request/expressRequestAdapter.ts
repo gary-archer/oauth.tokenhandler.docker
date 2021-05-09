@@ -20,8 +20,8 @@ export class ExpressRequestAdapter implements AbstractRequest {
         return this._request.method;
     }
 
-    public getBody(): any {
-        return this._request.body;
+    public getFormField(name: string): string | null {
+        return this._request.body[name];
     }
 
     public getHeader(name: string): string | null {

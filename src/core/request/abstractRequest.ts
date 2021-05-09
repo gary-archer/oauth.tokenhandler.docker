@@ -7,7 +7,7 @@ export interface AbstractRequest {
 
     getMethod(): string;
 
-    getBody(): any;
+    getFormField(name: string): string | null;
 
     getHeader(name: string): string | null;
 

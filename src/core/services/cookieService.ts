@@ -34,7 +34,6 @@ export class CookieService {
     public readStateCookie(request: AbstractRequest): any {
 
         const cookieName = this._getCookieName('state');
-        console.log(`Looking for cookie ${cookieName}`);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
 
@@ -42,7 +41,7 @@ export class CookieService {
             return JSON.parse(serialized);
         }
 
-        throw ErrorHandler.fromMissingCookieError('No state cookie was found in the incoming request');
+        return null;
     }
 
     /*
@@ -58,7 +57,7 @@ export class CookieService {
     /*
      * Read the refresh token from the auth cookie
      */
-    public readAuthCookie(request: AbstractRequest): string {
+    public readAuthCookie(request: AbstractRequest): string | null {
 
         const cookieName = this._getCookieName('auth');
         const encryptedData = request.getCookie(cookieName);
@@ -66,7 +65,7 @@ export class CookieService {
             return this._decryptCookie(cookieName, encryptedData);
         }
 
-        throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
+        return null;
     }
 
     /*
@@ -82,7 +81,7 @@ export class CookieService {
     /*
      * Read the id cookie if needed for logout
      */
-    public readIdCookie(request: AbstractRequest): void {
+    public readIdCookie(request: AbstractRequest): string | null {
 
         const cookieName = this._getCookieName('id');
         const encryptedData = request.getCookie(cookieName);
@@ -90,7 +89,7 @@ export class CookieService {
             return this._decryptCookie(cookieName, encryptedData);
         }
 
-        throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
+        return null;
     }
 
     /*
@@ -115,15 +114,15 @@ export class CookieService {
     /*
      * Read the anti forgery value from the auth cookie
      */
-    public readAntiForgeryCookie(request: AbstractRequest): string {
+    public readAntiForgeryCookie(request: AbstractRequest): string | null {
 
         const cookieName = this._getCookieName('aft');
         const encryptedData = request.getCookie(cookieName);
-        if (!encryptedData) {
-            throw ErrorHandler.fromMissingCookieError('No anti forgery cookie was found in the incoming request');
+        if (encryptedData) {
+            return this._decryptCookie(cookieName, encryptedData);
         }
 
-        return this._decryptCookie(cookieName, encryptedData);
+        return null;
     }
 
     /*
@@ -162,9 +161,13 @@ export class CookieService {
     private _decryptCookie(cookieName: string, encryptedData: string) {
 
         try {
+
+            // Try the AES decryption
             return decryptCookie(encryptedData, {key: this._encryptionKey});
 
         } catch (e) {
+
+            // In the event of crypto errors, log the details but return a generic error to the client
             throw ErrorHandler.fromCookieDecryptionError(cookieName, e);
         }
     }

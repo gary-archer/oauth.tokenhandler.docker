@@ -22,8 +22,8 @@ export class LambdaRequest implements AbstractRequest {
         return this._event.httpMethod.toLowerCase();
     }
 
-    public getBody(): any {
-        return this._body;
+    public getFormField(name: string): string | null {
+        return this._body[name];
     }
 
     /*

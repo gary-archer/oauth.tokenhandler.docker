@@ -39,7 +39,7 @@ export class HttpServerConfiguration {
         this._authorizer = new Authorizer(
             this._configuration,
             new CookieService(configuration),
-            new OAuthService(configuration.api, httpProxy));
+            new OAuthService(configuration, httpProxy));
     }
 
     /*

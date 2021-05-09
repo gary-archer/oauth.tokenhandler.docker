@@ -5,9 +5,10 @@ API PHASE 1
    authorizer should be in control of headers and data
 
 2. Complete core operations while testing against Express
+   Save all cookies including id cookie
    Use a configuration flag to control Cognito specific login URL handling
 
-3. Test strategy for Serverless
+3. Test strategy to ensure Serverless working on a developer PC
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 

@@ -1,18 +1,17 @@
 API PHASE 1
 -----------
-1. Get Express working locally for productivity reasons
-   Fill in request objects from old Web Reverse Proxy solution - start with getHeader
-   Get HTTP tests working again and fix endLogin problem
+1. Tidy up OAuthService and get requests working
+   Add a getFormField method that is defensive and throws a 400 error when missing
+   authorizer should be in control of headers and data
 
 2. Complete core operations while testing against Express
    Use a configuration flag to control Cognito specific login URL handling
 
-3. Test strategy for Serverless without mock data
+3. Test strategy for Serverless
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
-   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up
+   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 
 4. Deploy to AWS without any Express code or dependencies
-   Deploy to Kubetneres without any Serverless code or dependencies
 
 SPA PHASE 1
 -----------
@@ -51,3 +50,6 @@ FINALIZATION
    Manage redirect URI and idp parameter via a server side strategy if needed
 
 8. Think about paths and multiple SPAs
+
+
+9. Deploy to Kubetneres without any Serverless code or dependencies

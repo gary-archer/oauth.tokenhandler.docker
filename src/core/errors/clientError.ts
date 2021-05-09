@@ -36,8 +36,8 @@ export class ClientError extends Error {
     public toResponseFormat(): any {
 
         return {
-            error: this._errorCode,
-            error_description: this.message,
+            code: this._errorCode,
+            message: this.message,
         };
     }
 
@@ -49,8 +49,8 @@ export class ClientError extends Error {
         const data: any = {
             status: this._statusCode,
             clientError: {
-                error: this._errorCode,
-                error_description: this.message,
+                code: this._errorCode,
+                message: this.message,
             },
         };
 

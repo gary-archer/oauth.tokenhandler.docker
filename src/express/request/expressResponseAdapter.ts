@@ -32,7 +32,7 @@ export class ExpressResponseAdapter implements AbstractResponse {
     public setError(error: ClientError): void {
         this.setStatusCode(error.statusCode);
         this._setJsonContentType();
-        this._data = error;
+        this._data = error.toResponseFormat();
     }
 
     public finalise(): any {

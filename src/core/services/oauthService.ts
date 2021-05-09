@@ -4,8 +4,6 @@ import {URLSearchParams} from 'url';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientError} from '../errors/clientError';
 import {ErrorHandler} from '../errors/errorHandler';
-import {AbstractRequest} from '../request/abstractRequest';
-import {AbstractResponse} from '../request/abstractResponse';
 import {HttpProxy} from '../utilities/httpProxy';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
 
@@ -39,34 +37,24 @@ export class OAuthService {
     /*
      * Send the authorization code grant message to the Authorization Server
      */
-    public async sendAuthorizationCodeGrant(
-        request: AbstractRequest,
-        response: AbstractResponse,
-        codeVerifier: string): Promise<any> {
+    public async sendAuthorizationCodeGrant(code: string, codeVerifier: string): Promise<any> {
 
-        // Form the body of the authorization code grant message
+        // Use the client configuration
         const formData = new URLSearchParams();
-        const body = request.getBody();
-        for (const field in body) {
-            if (field && body[field]) {
-                formData.append(field, body[field]);
-            }
-        }
+        formData.append('code', code);
+        formData.append('code_verifier', codeVerifier);
 
         // Send an HTTP message and get the response, then add a field for anti forgery protection
-        return this._postMessage(formData, response);
+        return this._postMessage(formData);
     }
 
     /*
      * Forward the refresh token grant message to the Authorization Server
      */
-    public async sendRefreshTokenGrant(
-        refreshToken: string,
-        request: AbstractRequest,
-        response: AbstractResponse): Promise<any>  {
+    public async sendRefreshTokenGrant(refreshToken: string): Promise<any>  {
 
         const formData = new URLSearchParams();
-        const body = request.getBody();
+        /*const body = request.getBody();
         for (const field in body) {
             if (field && body[field]) {
                 formData.append(field, body[field]);
@@ -77,14 +65,14 @@ export class OAuthService {
             formData.delete('refresh_token');
         }
 
-        formData.append('refresh_token', refreshToken);
-        return this._postMessage(formData, response);
+        formData.append('refresh_token', refreshToken);*/
+        return this._postMessage(formData);
     }
 
     /*
      * Route a message to the Authorization Server
      */
-    private async _postMessage(formData: URLSearchParams, response: AbstractResponse): Promise<void> {
+    private async _postMessage(formData: URLSearchParams): Promise<any> {
 
         // Define request options
         const options = {
@@ -95,15 +83,13 @@ export class OAuthService {
                 'content-type': 'application/x-www-form-urlencoded',
                 'accept': 'application/json',
             },
+            httpsAgent: this._httpProxy.getAgent(),
         };
 
         try {
 
-            // Call the Authorization Server
+            // Call the Authorization Server and return the data
             const authServerResponse = await axios.request(options as AxiosRequestConfig);
-
-            // Update the response for the success case and return data
-            response.setStatusCode(authServerResponse.status);
             return authServerResponse.data;
 
         } catch (e) {

@@ -5,7 +5,7 @@
 #
 # Configure an HTTP proxy if required
 #
-#export HTTPS_PROXY='http://127.0.0.1:8888'
+export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # Client configuration, most of which is handled by the browser for a real SPA
@@ -64,11 +64,11 @@ function getQueryParameterValue(){
 function apiError() {
 
   local _JSON=$(tail -n 1 $RESPONSE_FILE)
-  local _CODE=$(jq -r .error <<< "$_JSON")
-  local _DESC=$(jq -r .error_description <<< "$_JSON")
+  local _CODE=$(jq -r .code <<< "$_JSON")
+  local _MESSAGE=$(jq -r .message <<< "$_JSON")
   
-  if [ ! "$_CODE" = 'null'  ] && [ ! "$_DESC" = 'null' ]; then
-    echo "*** Code: $_CODE, Description: $_DESC"
+  if [ ! "$_CODE" = 'null'  ] && [ ! "$_MESSAGE" = 'null' ]; then
+    echo "*** Code: $_CODE, Message: $_MESSAGE"
   fi
 }
 

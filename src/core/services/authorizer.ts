@@ -76,7 +76,8 @@ export class Authorizer {
         const codeVerifier = this._validateStateCookie(request);
 
         // Send the authorization code grant request
-        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(request, response, codeVerifier);
+        const code = request.getBody()['code'];
+        const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(code, codeVerifier);
 
         // Get the refresh token
         const refreshToken = authCodeGrantData.refresh_token;
@@ -120,7 +121,7 @@ export class Authorizer {
 
         // Send it to the Authorization Server
         const refreshTokenGrantData =
-            await this._oauthService.sendRefreshTokenGrant(refreshToken, request, response);
+            await this._oauthService.sendRefreshTokenGrant(refreshToken);
 
         // Handle updated refresh tokens
         const newRefreshToken = refreshTokenGrantData.refresh_token;
@@ -198,7 +199,7 @@ export class Authorizer {
 
         if (cookieData.state !== formData.state) {
             throw ErrorHandler.fromSecurityVerificationError(
-                'The state parameter to end the login did not match that in the state cooki');
+                'The state parameter to end the login did not match that in the state cookie');
         }
 
         return cookieData.codeVerifier;

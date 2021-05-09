@@ -25,15 +25,10 @@ export class HttpProxy {
     }
 
     /*
-     * Set HTTP options as required by the Open ID Client library
+     * Return the agent for use with Axios
      */
-    public setOptions(options: any): any {
-
-        options.agent = {
-            https: this._agent,
-        };
-
-        return options;
+    public getAgent(): any {
+        return this._agent;
     }
 
     /*
@@ -47,6 +42,6 @@ export class HttpProxy {
      * Plumbing to ensure the this parameter is available
      */
     private _setupCallbacks(): void {
-        this.setOptions = this.setOptions.bind(this);
+        this.getAgent = this.getAgent.bind(this);
     }
 }

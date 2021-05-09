@@ -1,4 +1,4 @@
-import cookie, {CookieSerializeOptions} from 'cookie';
+import {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
 import {Configuration} from '../configuration/configuration';
 import {ErrorHandler} from '../errors/errorHandler';
@@ -25,7 +25,7 @@ export class CookieService {
 
         const cookieName = this._getCookieName('state');
         const encryptedData = encryptCookie(JSON.stringify(data), {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(cookieName, encryptedData));
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
     /*
@@ -52,7 +52,7 @@ export class CookieService {
 
         const cookieName = this._getCookieName('auth');
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(cookieName, encryptedData));
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
     /*
@@ -76,7 +76,7 @@ export class CookieService {
 
         const cookieName = this._getCookieName('id');
         const encryptedData = encryptCookie(idToken, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(cookieName, encryptedData));
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
     /*
@@ -100,7 +100,7 @@ export class CookieService {
 
         const cookieName = this._getCookieName('aft');
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
-        response.addCookie(this._formatCookie(cookieName, encryptedData));
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
     /*
@@ -141,9 +141,12 @@ export class CookieService {
      */
     public clearAll(response: AbstractResponse): void {
 
-        response.addCookie(this._clearCookie(`${this._getCookieName('auth')}`));
-        response.addCookie(this._clearCookie(`${this._getCookieName('id')}`));
-        response.addCookie(this._clearCookie(`${this._getCookieName('aft')}`));
+        const options = this._getCookieOptions();
+        options.expires = new Date(0);
+
+        response.addCookie(this._getCookieName('auth'), '', options);
+        response.addCookie(this._getCookieName('id'), '', options);
+        response.addCookie(this._getCookieName('aft'), '', options);
     }
 
     /*
@@ -151,23 +154,6 @@ export class CookieService {
      */
     private _getCookieName(type: string) {
         return `${this._configuration.api.cookiePrefix}-${type}-${this._configuration.client.name}`;
-    }
-
-    /*
-     * Format a same site cookie for the web domain
-     */
-    private _formatCookie(cookieName: string, value: string): string {
-        return cookie.serialize(cookieName, value, this._getCookieOptions());
-    }
-
-    /*
-     * Clear a same site cookie
-     */
-    private _clearCookie(cookieName: string): string {
-
-        const options = this._getCookieOptions();
-        options.expires = new Date(0);
-        return cookie.serialize(cookieName, '', options);
     }
 
     /*

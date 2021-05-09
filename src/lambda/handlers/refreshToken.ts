@@ -17,13 +17,13 @@ const handler = async (event: any, context: Context) => {
         const configuration = await ConfigurationLoader.load();
         const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
         await authorizer.refreshToken(request, response);
-        return response.getData();
+        return response.finalise();
 
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
         response.setError(error);
-        return response.getData();
+        return response.finalise();
     }
 };
 

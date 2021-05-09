@@ -1,3 +1,4 @@
+import {CookieSerializeOptions} from 'cookie';
 import {ClientError} from '../errors/clientError';
 
 /*
@@ -7,11 +8,11 @@ export interface AbstractResponse {
 
     setStatusCode(statusCode: number): void;
 
-    addCookie(data: string): void;
+    addCookie(name: string, value: string, options: CookieSerializeOptions): void;
 
     setBody(data: any): void;
 
     setError(error: ClientError): void;
 
-    getData(statusCode: number): any;
+    finalise(): any;
 }

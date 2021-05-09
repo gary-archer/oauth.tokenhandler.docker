@@ -1,3 +1,4 @@
+import {CookieSerializeOptions} from 'cookie';
 import {Response} from 'express';
 import {ClientError} from '../../core/errors/clientError';
 import {AbstractResponse} from '../../core/request/abstractResponse';
@@ -8,28 +9,43 @@ import {AbstractResponse} from '../../core/request/abstractResponse';
 export class ExpressResponseAdapter implements AbstractResponse {
 
     private readonly _response: Response;
+    private _data: any;
 
     public constructor(response: Response) {
         this._response = response;
+        this._data = null;
     }
 
     public setStatusCode(statusCode: number): void {
-        throw new Error('Method not implemented.');
+        this._response.status(statusCode);
     }
 
-    public addCookie(data: string): void {
-        throw new Error('Method not implemented.');
+    public addCookie(name: string, value: string, options: CookieSerializeOptions): void {
+        this._response.cookie(name, value, options);
     }
 
     public setBody(data: any): void {
-        throw new Error('Method not implemented.');
+        this._setJson();
+        this._data = data;
     }
 
     public setError(error: ClientError): void {
-        throw new Error('Method not implemented.');
+        this._setJson();
+        this._data = error;
     }
 
-    public getData(statusCode: number): any {
-        throw new Error('Method not implemented.');
+    public finalise(): any {
+
+        if (this._data) {
+            this._response.send(this._data);
+        } else {
+            this._response.send();
+        }
+
+        return null;
+    }
+
+    private _setJson(): void {
+        this._response.setHeader('content-type', 'application/json');
     }
 }

@@ -13,22 +13,35 @@ export class ExpressRequestAdapter implements AbstractRequest {
     }
 
     public getUri(): string {
-        throw new Error('Method not implemented.');
+        return this._request.path;
     }
 
     public getMethod(): string {
-        throw new Error('Method not implemented.');
+        return this._request.method;
     }
 
     public getBody(): any {
-        throw new Error('Method not implemented.');
+        return this._request.body;
     }
 
     public getHeader(name: string): string | null {
-        throw new Error('Method not implemented.');
+
+        if (this._request.headers) {
+            const found = this._request.headers[name];
+            if (found) {
+
+                if (Array.isArray(found)) {
+                    return found[0];
+                }
+
+                return found;
+            }
+        }
+
+        return null;
     }
 
     public getCookie(name: string): string | null {
-        throw new Error('Method not implemented.');
+        return this._request.cookies[name];
     }
 }

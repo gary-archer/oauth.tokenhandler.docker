@@ -17,14 +17,13 @@ const handler = async (event: any, context: Context) => {
         const configuration = await ConfigurationLoader.load();
         const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
         await authorizer.startLogout(request, response);
-        return response.getData();
+        return response.finalise();
 
     } catch (e) {
 
         const error = ErrorHandler.handleError(e);
-        response.addHeader('content-type', 'application/json');
         response.setError(error);
-        return response.getData();
+        return response.finalise();
     }
 };
 

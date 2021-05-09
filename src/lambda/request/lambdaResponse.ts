@@ -1,3 +1,4 @@
+import cookie, {CookieSerializeOptions} from 'cookie';
 import {ClientError} from '../../core/errors/clientError';
 import {AbstractResponse} from '../../core/request/abstractResponse';
 
@@ -23,9 +24,10 @@ export class LambdaResponse implements AbstractResponse {
         this._data.headers[name] = value;
     }
 
-    public addCookie(data: string): void {
-        const cookies = this._getCookieHeader();
-        cookies.push(data);
+    public addCookie(name: string, value: string, options: CookieSerializeOptions): void {
+
+        const data = cookie.serialize(name, value, options);
+        this._createCookieMultiValueHeader().push(data);
     }
 
     public setBody(data: any): void {
@@ -39,7 +41,7 @@ export class LambdaResponse implements AbstractResponse {
         this._setJson();
     }
 
-    public getData(): any {
+    public finalise(): any {
 
         const data = {
             statusCode : this._data.statusCode,
@@ -64,7 +66,7 @@ export class LambdaResponse implements AbstractResponse {
         this.addHeader('content-type', 'application/json');
     }
 
-    private _getCookieHeader(): string[] {
+    private _createCookieMultiValueHeader(): string[] {
 
         const found = Object.keys(this._data.multiValueHeaders).find((k) => k.toLowerCase() === 'set-cookie');
         if (found) {

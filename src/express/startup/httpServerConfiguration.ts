@@ -1,5 +1,6 @@
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import {Application, Request, Response} from 'express';
+import {Application, Request, Response, urlencoded} from 'express';
 import fs from 'fs-extra';
 import https from 'https';
 import {Configuration} from '../../core/configuration/configuration';
@@ -34,7 +35,7 @@ export class HttpServerConfiguration {
 
         this._expressApp = expressApp;
         this._configuration = configuration;
-        
+
         this._authorizer = new Authorizer(
             this._configuration,
             new CookieService(configuration),
@@ -46,10 +47,16 @@ export class HttpServerConfiguration {
      */
     public async initializeRoutes(): Promise<void> {
 
-        // Set generic behaviour
+        // Allow requests from the SPA
         const corsOptions = { origin: this._configuration.api.trustedWebOrigin };
-        this._expressApp.set('etag', false);
         this._expressApp.use('/spa/*', cors(corsOptions) as any);
+
+        // Receive form URL encoded OAuth messages and also cookies
+        this._expressApp.use('/spa/*', urlencoded({extended: true}));
+        this._expressApp.use('/spa/*', cookieParser());
+
+        // Do not cache API requests
+        this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
         this._expressApp.post('/spa/login/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
@@ -94,9 +101,13 @@ export class HttpServerConfiguration {
     private async _adapt(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
 
         try {
+
+            // Call the core authorizer routine
             await fn(new ExpressRequestAdapter(rq), new ExpressResponseAdapter(rs));
 
         } catch (e) {
+
+            // Report errors in an Express response
             this._unhandledExceptionHandler(e, rq, rs);
         }
     }

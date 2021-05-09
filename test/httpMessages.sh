@@ -5,17 +5,17 @@
 #
 # Configure an HTTP proxy if required
 #
-export HTTPS_PROXY=http://127.0.0.1:8888
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # Client configuration, most of which is handled by the browser for a real SPA
 #
-API_BASE_URL=https://api.mycompany.com:444
-WEB_BASE_URL=https://web.mycompany.com
-LOGIN_BASE_URL=https://login.authsamples.com
+API_BASE_URL='https://api.mycompany.com:444'
+WEB_BASE_URL='https://web.mycompany.com'
+LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
-TEST_USERNAME=guestuser@mycompany.com
+TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 RESPONSE_FILE=test/response.txt
 
@@ -31,7 +31,7 @@ RESPONSE_FILE=test/response.txt
 #
 function getHeaderValue(){
   local _HEADER_NAME=$1
-  local _HEADER_VALUE=$(cat $RESPONSE_FILE | grep "^$_HEADER_NAME" | sed -r "s/^$_HEADER_NAME: (.*)$/\1/")
+  local _HEADER_VALUE=$(cat $RESPONSE_FILE | grep -i "^$_HEADER_NAME" | sed -r "s/^$_HEADER_NAME: (.*)$/\1/i")
   local _HEADER_VALUE=${_HEADER_VALUE%$'\r'}
   echo $_HEADER_VALUE
 }
@@ -42,7 +42,7 @@ function getHeaderValue(){
 #
 function getCookieValue(){
   local _COOKIE_NAME=$1
-  local _COOKIE_VALUE=$(cat $RESPONSE_FILE | grep "set-cookie: $_COOKIE_NAME" | sed -r "s/^set-cookie: $_COOKIE_NAME=(.[^;]*)(.*)$/\1/")
+  local _COOKIE_VALUE=$(cat $RESPONSE_FILE | grep -i "set-cookie: $_COOKIE_NAME" | sed -r "s/^set-cookie: $_COOKIE_NAME=(.[^;]*)(.*)$/\1/i")
   local _COOKIE_VALUE=${_COOKIE_VALUE%$'\r'}
   echo $_COOKIE_VALUE
 }

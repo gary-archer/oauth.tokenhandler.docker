@@ -50,7 +50,6 @@ export class Authorizer {
         url += UrlHelper.createQueryParameter('code_challenge', loginState.codeChallenge);
         url += '&';
         url += UrlHelper.createQueryParameter('code_challenge_method', 'S256');
-        console.log(url);
 
         // Write the full URL to the response body
         const data = {} as any;

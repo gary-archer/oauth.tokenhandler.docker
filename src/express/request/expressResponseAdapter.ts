@@ -25,12 +25,13 @@ export class ExpressResponseAdapter implements AbstractResponse {
     }
 
     public setBody(data: any): void {
-        this._setJson();
+        this._setJsonContentType();
         this._data = data;
     }
 
     public setError(error: ClientError): void {
-        this._setJson();
+        this.setStatusCode(error.statusCode);
+        this._setJsonContentType();
         this._data = error;
     }
 
@@ -45,7 +46,7 @@ export class ExpressResponseAdapter implements AbstractResponse {
         return null;
     }
 
-    private _setJson(): void {
+    private _setJsonContentType(): void {
         this._response.setHeader('content-type', 'application/json');
     }
 }

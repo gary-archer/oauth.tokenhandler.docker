@@ -31,14 +31,14 @@ export class LambdaResponse implements AbstractResponse {
     }
 
     public setBody(data: any): void {
+        this._setJsonContentType();
         this._data.body = data;
-        this._setJson();
     }
 
     public setError(error: ClientError): void {
         this._data.statusCode = error.statusCode;
+        this._setJsonContentType();
         this._data.body = error.toResponseFormat();
-        this._setJson();
     }
 
     public finalise(): any {
@@ -62,7 +62,7 @@ export class LambdaResponse implements AbstractResponse {
         return data;
     }
 
-    private _setJson(): void {
+    private _setJsonContentType(): void {
         this.addHeader('content-type', 'application/json');
     }
 

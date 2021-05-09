@@ -100,29 +100,23 @@ export class HttpServerConfiguration {
      */
     private async _adapt(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
 
+        const request = new ExpressRequestAdapter(rq);
+        const response = new ExpressResponseAdapter(rs);
+
         try {
 
             // Call the core authorizer routine
-            await fn(new ExpressRequestAdapter(rq), new ExpressResponseAdapter(rs));
+            await fn(request, response);
+
+            // Return the response to the caller
+            response.finalise();
 
         } catch (e) {
 
-            // Report errors in an Express response
-            this._unhandledExceptionHandler(e, rq, rs);
+            // Return an Express error response
+            const clientError = ErrorHandler.handleError(e);
+            response.setError(clientError);
+            response.finalise();
         }
-    }
-
-    /*
-     * The entry point for handling exceptions forwards all exceptions to our handler class
-     */
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    private _unhandledExceptionHandler(
-        unhandledException: any,
-        request: Request,
-        response: Response): void {
-
-        const clientError = ErrorHandler.handleError(unhandledException);
-        response.setHeader('content-type', 'application/json');
-        response.status(clientError.statusCode).send(JSON.stringify(clientError));
     }
 }

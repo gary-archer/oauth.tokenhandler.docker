@@ -92,7 +92,7 @@ export class OAuthService {
                 const errorData = e.response.data;
                 if (errorData.error) {
 
-                    // Throw an error with Authorization Server details
+                    // Throw an error with Authorization Server details, such as invalid_grant
                     const description =
                         errorData.error_description ?? 'An error response was received from the Authorization Server';
                     throw new ClientError(e.response.status, errorData.error, description);

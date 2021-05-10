@@ -112,13 +112,9 @@ export class Authorizer {
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
 
-        // Also write an anti forgery token into an encrypted HTTP only cookie
-        const randomValue = this._oauthService.generateAntiForgeryValue();
-        this._cookieService.writeAntiForgeryCookie(response, randomValue);
-
-        // Also give the UI the anti forgery token in the response body
+        // Return a body consisting only of the anti forgery token
         const data = {} as any;
-        data['anti_forgery_token'] = randomValue;
+        this._addAntiForgeryResponseData(response, data);
         response.setBody(data);
     }
 
@@ -138,7 +134,7 @@ export class Authorizer {
             throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
         }
 
-        // Send it to the Authorization Server
+        // Send the request to the Authorization Server
         const refreshTokenGrantData =
             await this._oauthService.sendRefreshTokenGrant(refreshToken);
 
@@ -154,14 +150,10 @@ export class Authorizer {
             this._cookieService.writeIdCookie(newIdToken, response);
         }
 
-        // Write an updated anti forgery cookie
-        const randomValue = this._oauthService.generateAntiForgeryValue();
-        this._cookieService.writeAntiForgeryCookie(response, randomValue);
-
-        // Return the access token and the anti forgery token in the response body
+        // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
         data.access_token = refreshTokenGrantData.access_token;
-        data['anti_forgery_token'] = randomValue;
+        this._addAntiForgeryResponseData(response, data);
         response.setBody(data);
     }
 
@@ -183,7 +175,7 @@ export class Authorizer {
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
         this._cookieService.expireAuthCookie(refreshToken, response);
-        response.setStatusCode(204);
+        response.setStatusCode(200);
     }
 
     /*
@@ -195,6 +187,12 @@ export class Authorizer {
         console.log('API startLogout called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
+
+        // Get the id token from the id cookie
+        const idToken = this._cookieService.readIdCookie(request);
+        if (!idToken) {
+            throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
+        }
 
         // Clear all cookies for this client
         this._cookieService.clearAll(response);
@@ -239,6 +237,21 @@ export class Authorizer {
             throw ErrorHandler.fromInvalidDataError(
                 'The anti forgery request header does not match the anti forgery cookie value');
         }
+    }
+
+    /*
+     * Add anti forgery details to the response when ending a login or when refreshing a token
+     */
+    private _addAntiForgeryResponseData(response: AbstractResponse, data: any): void {
+
+        // Get a random value
+        const randomValue = this._oauthService.generateAntiForgeryValue();
+
+        // Set an anti forgery HTTP Only encrypted cookie
+        this._cookieService.writeAntiForgeryCookie(response, randomValue);
+
+        // Also give the UI the anti forgery token in the response body
+        data.anti_forgery_token = randomValue;
     }
 
     /*

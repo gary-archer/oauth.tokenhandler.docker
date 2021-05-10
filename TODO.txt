@@ -1,11 +1,9 @@
 API PHASE 1
 -----------
-1. AWS deployment and HTTP tests working against deployed system
-   I may get some CORS problems
+1. AWS deployment with no Express dependencies
+   Get rid of tunnel agent dependency also
 
-2. AWS deployment with no Express dependencies
-
-3. Complete the logout processing
+2. Complete the logout processing
    Use a configuration flag to control Cognito specific login URL handling
 
 SPA PHASE 1

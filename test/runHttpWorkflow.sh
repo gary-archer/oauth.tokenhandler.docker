@@ -203,7 +203,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 #
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
--H "Authorization: Bearer xx$ACCESS_TOKEN" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
@@ -246,3 +246,8 @@ if [ $HTTP_STATUS != '400' ]; then
   apiError
   exit
 fi
+
+#
+# Next expire the session to remove all cookies
+# TODO: read values in order to manually verify
+#

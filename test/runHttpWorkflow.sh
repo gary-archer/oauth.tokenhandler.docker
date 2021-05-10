@@ -11,8 +11,8 @@ export HTTPS_PROXY='http://127.0.0.1:8888'
 #
 # Client configuration, most of which is handled by the browser for a real SPA
 #
-WEB_BASE_URL='https://web.mycompany.com'
-PROXY_API_BASE_URL='https://api.mycompany.com:444'
+#WEB_BASE_URL='https://web.mycompany.com'
+#PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -24,8 +24,8 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these overrides to test AWS deployed endpoints
 #
-#WEB_BASE_URL=https://web.authsamples.com
-#PROXY_API_BASE_URL=https://api.authsamples.com
+WEB_BASE_URL=https://web.authsamples.com
+PROXY_API_BASE_URL=https://api.authsamples.com
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -69,7 +69,7 @@ function apiError() {
   local _CODE=$(jq -r .code <<< "$_JSON")
   local _MESSAGE=$(jq -r .message <<< "$_JSON")
   
-  if [ ! "$_CODE" = 'null'  ] && [ ! "$_MESSAGE" = 'null' ]; then
+  if [ "$_CODE" != 'null'  ] && [ "$_MESSAGE" != 'null' ]; then
     echo "*** Code: $_CODE, Message: $_MESSAGE"
   fi
 }
@@ -79,9 +79,9 @@ function apiError() {
 #
 echo "*** Requesting cross origin access"
 HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/spa/login/start" \
--H "origin: $WEB_BASE_URL" \
+-H "origin: xx$WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '204' ]; then
+if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
   echo "Problem encountered requesting cross origin access, status: $HTTP_STATUS"
   exit
 fi
@@ -203,7 +203,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 #
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
--H "Authorization: Bearer $ACCESS_TOKEN" \
+-H "Authorization: Bearer xx$ACCESS_TOKEN" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"

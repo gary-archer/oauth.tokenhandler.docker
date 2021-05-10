@@ -55,6 +55,7 @@ functions:
               - ${self:custom.config.settings.trustedOrigin}
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
 
   # Verify state and send the authorization code grant message
   endLogin:
@@ -68,6 +69,7 @@ functions:
               - ${self:custom.config.settings.trustedOrigin}
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
 
   # Return a new access token to the Browser UI
   refreshToken:
@@ -81,6 +83,7 @@ functions:
               - ${self:custom.config.settings.trustedOrigin}
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
 
   # Make the refresh token in the auth cookie act expired, for test purposes
   expireSession:
@@ -94,6 +97,7 @@ functions:
               - ${self:custom.config.settings.trustedOrigin}
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
 
   # Get the end session URL and remove cookies
   startLogout:
@@ -107,6 +111,7 @@ functions:
               - ${self:custom.config.settings.trustedOrigin}
               - ${self:custom.config.settings.trustedDevOrigin}
             headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
 
 # By default all files are included so remove files we don't need for any lambda
 # The custom packager does further work in code

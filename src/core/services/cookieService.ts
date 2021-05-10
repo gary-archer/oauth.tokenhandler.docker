@@ -126,16 +126,6 @@ export class CookieService {
     }
 
     /*
-     * Corrupt the refresh token inside the auth cookie by adding extra characters to it
-     * This will cause an invalid_grant error when the refresh token is next sent to the Authorization Server
-     */
-    public expireAuthCookie(refreshToken: string, response: AbstractResponse): void {
-
-        const expiredRefreshToken = `x${refreshToken}x`;
-        this.writeAuthCookie(expiredRefreshToken, response);
-    }
-
-    /*
      * Clear all cookies when the user session expires
      */
     public clearAll(response: AbstractResponse): void {

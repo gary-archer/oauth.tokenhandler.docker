@@ -47,9 +47,12 @@ export class HttpServerConfiguration {
      */
     public async initializeRoutes(): Promise<void> {
 
-        // Allow requests from the SPA
-        const corsOptions = { origin: this._configuration.api.trustedWebOrigin };
-        this._expressApp.use('/spa/*', cors(corsOptions) as any);
+        // Allow requests from the SPA including sending the cross origin same site cookie
+        const options = {
+            origin: this._configuration.api.trustedWebOrigin,
+            credentials: true,
+        };
+        this._expressApp.use('/spa/*', cors(options) as any);
 
         // Receive form URL encoded OAuth messages and also cookies
         this._expressApp.use('/spa/*', urlencoded({extended: true}));

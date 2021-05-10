@@ -134,21 +134,23 @@ export class Authorizer {
             throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
         }
 
+        // Get the id token from the id cookie
+        const idToken = this._cookieService.readAuthCookie(request);
+        if (!idToken) {
+            throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
+        }
+
         // Send the request to the Authorization Server
         const refreshTokenGrantData =
             await this._oauthService.sendRefreshTokenGrant(refreshToken);
 
-        // Handle updated refresh tokens
+        // Rewrite the refresh token cookie since we may have a new token
         const newRefreshToken = refreshTokenGrantData.refresh_token;
-        if (newRefreshToken) {
-            this._cookieService.writeAuthCookie(newRefreshToken, response);
-        }
+        this._cookieService.writeAuthCookie(newRefreshToken ?? refreshToken, response);
 
-        // Handle updated id tokens
+        // Rewrite the id token cookie since it may have changed
         const newIdToken = refreshTokenGrantData.id_token;
-        if (newIdToken) {
-            this._cookieService.writeIdCookie(newIdToken, response);
-        }
+        this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
 
         // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
@@ -174,8 +176,9 @@ export class Authorizer {
         }
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
-        this._cookieService.expireAuthCookie(refreshToken, response);
-        response.setStatusCode(200);
+        const expiredRefreshToken = `x${refreshToken}x`;
+        this._cookieService.writeAuthCookie(expiredRefreshToken, response);
+        response.setStatusCode(204);
     }
 
     /*

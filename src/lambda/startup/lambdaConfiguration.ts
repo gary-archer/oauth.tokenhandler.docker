@@ -27,6 +27,6 @@ export class LambdaConfiguration {
         return new Authorizer(
             this._configuration,
             new CookieService(this._configuration),
-            new OAuthService(this._configuration.api, httpProxy));
+            new OAuthService(this._configuration, httpProxy));
     }
 }

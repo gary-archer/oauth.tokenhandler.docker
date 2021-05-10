@@ -1,17 +1,12 @@
 API PHASE 1
 -----------
-1. Implement 3 remaining operations against Express
-   Also include the SPA OPTIONS request as the first request before start login
-   Use a configuration flag to control Cognito specific login URL handling
-   Get whole workflow completed against Express
+1. AWS deployment and HTTP tests working against deployed system
+   I may get some CORS problems
 
 2. AWS deployment with no Express dependencies
-   Verify that HTTP tests work against deployed system
-   Also get Kubernetes deployment working
 
-3. Test strategy to ensure Serverless working on a developer PC
-   Ideally I want to run bash scripts and test all at once, but also have options to test individually
-   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
+3. Complete the logout processing
+   Use a configuration flag to control Cognito specific login URL handling
 
 SPA PHASE 1
 -----------
@@ -29,10 +24,14 @@ SPA PHASE 1
 
 FINALIZATION
 ------------
+0. Test strategy to ensure Serverless working on a developer PC
+   Ideally I want to run bash scripts and test all at once, but also have options to test individually
+   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
+
 1. Validate id token and check AT hash - cf oidc client library
    Should I use a nonce? - and properly understand its role from IETF docs
 
-2. Use API error responses rather than invalid_grant errors
+2. Get Kubernetes deployment working for the proxy API and test with Curity
 
 3. Add logging middleware and log to the Elastic Search schema
    Detailed error testing of API operations to test each failure point

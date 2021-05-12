@@ -16,6 +16,4 @@ export interface ApiConfiguration {
     trustedWebOrigin: string;
 
     provider: string;
-
-    useMockResponses: boolean;
 }

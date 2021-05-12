@@ -13,8 +13,7 @@
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.authsamples.com",
-        "provider": "cognito",
-        "useMockResponses": false
+        "provider": "cognito"
     },
     "client": {
         "name": "finalspa",

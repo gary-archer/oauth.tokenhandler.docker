@@ -1,52 +1,51 @@
 SPA PHASE 1
 -----------
-1. Branch of oauth.websample.final, with web reverse proxy and oidc client removed
-   Check in with very clean code and a new authenticator implementation
-   Use / rename / revamp existing web reverse proxy client but extend it with explicit operations
-   Start by throwing not implemented errors for operations that OIDC client implemented previously
+1. SPA branch to get browser calls working via POSTs
+   Authenticator mostly just does Axios posts similar to old webReverseProxyClient but with json
+   Store state between requests in session storage
+   Do I need lax for redirect and state cookie?
 
-2. SPA branch to get browser calls working
-   Store state between requests in sesson storage
-   Add CORS middleware to API and write allow-credentials in response
-   Add OPTIONS requests to curl tests
-
-3. Test in all 4 browsers including Incognito mode
+2. Test in all 4 browsers including Incognito mode
+   Understand whether the overall solution is on track
 
 API PHASE 1
 -----------
 1. AWS deployment with no Express dependencies
-   Get rid of tunnel agent dependency also
+   Get rid of tunnel agent dependency also similar to main Serverless sample
 
-2. Complete the logout processing
+2. Implement logout processing
    Use a configuration flag to control Cognito specific login URL handling
 
 FINALIZATION
 ------------
-0. Test strategy to ensure Serverless working on a developer PC
+1. Test strategy to ensure Serverless working on a developer PC
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 
-1. Validate id token and check AT hash - cf oidc client library
-   Should I use a nonce? - and properly understand its role from IETF docs
+2. Validate id token and check AT hash - cf oidc client library
 
-2. Get Kubernetes deployment working for the proxy API and test with Curity
+3. Get Kubernetes deployment working for the proxy API and test with Curity
 
-3. Add logging middleware and log to the Elastic Search schema
+4. Add logging middleware and log to the Elastic Search schema
    Detailed error testing of API operations to test each failure point
    Use my standard client error object
 
-4. Update READMEs
+5. Update READMEs
 
-5. Test this from a multi tab browser viewpoint
+6. Test this from a multi tab browser viewpoint
    Are there any 401 race conditions that the SPA cannot handle?
 
-6. Proper API logging and write to Elastic Search from AWS
+7. Proper API logging and write to Elastic Search from AWS
    Logging also needs to use abstract request and response objects
 
-7. Use acr_values
-   Manage redirect URI and idp parameter via a server side strategy if needed
+9. Think about paths and multiple SPAs
+   Are there vulnerabilities here?
+   More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
 
-8. Think about paths and multiple SPAs
+10. Deploy to Kubetnetes without any Serverless code or dependencies
 
+11. Concurrency for the SPA during refresh token requests
+    SPA also needs to store anti forgery token from response body in local storage
 
-9. Deploy to Kubetneres without any Serverless code or dependencies
+12. Use acr_values
+   Manage redirect URI and idp parameter via a Cognito specific server side strategy if needed

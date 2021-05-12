@@ -3,7 +3,7 @@
         "port": 444,
         "sslCertificateFileName": "./certs/mycompany.com.ssl.p12",
         "sslCertificatePassword": "Password1",
-        "useHttpProxy": true,
+        "useHttpProxy": false,
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
@@ -13,8 +13,7 @@
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.mycompany.com",
-        "provider": "cognito",
-        "useMockResponses": true
+        "provider": "cognito"
     },
     "client": {
         "name": "finalspa",

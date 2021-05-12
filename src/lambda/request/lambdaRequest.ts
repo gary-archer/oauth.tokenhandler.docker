@@ -11,7 +11,7 @@ export class LambdaRequest implements AbstractRequest {
 
     public constructor(event: any) {
         this._event = event;
-        this._body = this._parseBody();
+        this._body = JSON.parse(this._event.body);
     }
 
     public getUri(): string {
@@ -22,7 +22,7 @@ export class LambdaRequest implements AbstractRequest {
         return this._event.httpMethod.toLowerCase();
     }
 
-    public getFormField(name: string): string | null {
+    public getJsonField(name: string): string | null {
         return this._body[name];
     }
 
@@ -76,32 +76,5 @@ export class LambdaRequest implements AbstractRequest {
         }
 
         return [];
-    }
-
-    /*
-     * Parse the body string into an object
-     */
-    private _parseBody(): any {
-
-        const body = this._event.body;
-        if (!body) {
-            return null;
-        }
-
-        const output: any = {};
-        const formUrlEncodedData = body;
-
-        // Split data such as 'grant_type=authorization_code&code=e7acecd0-6ec7-458b-b776-05a0757db30b' into fields
-        const nameValuePairs = formUrlEncodedData.trim().split('&');
-
-        // Add each field to the JSON object
-        nameValuePairs.forEach((nameValuePair: string) => {
-            const parts = nameValuePair.split('=');
-            if (parts.length === 2) {
-                output[parts[0].trim()] = decodeURIComponent(parts[1].trim());
-            }
-        });
-
-        return output;
     }
 }

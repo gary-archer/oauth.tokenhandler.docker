@@ -81,14 +81,14 @@ export class Authorizer {
         }
 
         // Check that the value posted matches
-        const state = request.getFormField('state');
+        const state = request.getJsonField('state');
         if (state !== stateCookie.state) {
             throw ErrorHandler.fromInvalidDataError(
                 'The end login state parameter did not match the state cookie value');
         }
 
         // Get the code value
-        const code = request.getFormField('code');
+        const code = request.getJsonField('code');
         if (!code) {
             throw ErrorHandler.fromMissingFieldError('No code value was supplied in the endLogin request');
         }

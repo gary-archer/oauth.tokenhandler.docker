@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import {Application, Request, Response, urlencoded} from 'express';
+import express, {Application, Request, Response} from 'express';
 import fs from 'fs-extra';
 import https from 'https';
 import {Configuration} from '../../core/configuration/configuration';
@@ -54,9 +54,9 @@ export class HttpServerConfiguration {
         };
         this._expressApp.use('/spa/*', cors(options) as any);
 
-        // Receive form URL encoded OAuth messages and also cookies
-        this._expressApp.use('/spa/*', urlencoded({extended: true}));
+        // Parse cookies and the request body
         this._expressApp.use('/spa/*', cookieParser());
+        this._expressApp.use('/spa/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);

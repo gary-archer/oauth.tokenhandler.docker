@@ -20,7 +20,7 @@ export class ExpressRequestAdapter implements AbstractRequest {
         return this._request.method;
     }
 
-    public getFormField(name: string): string | null {
+    public getJsonField(name: string): string | null {
         return this._request.body[name];
     }
 

@@ -11,8 +11,8 @@ export HTTPS_PROXY='http://127.0.0.1:8888'
 #
 # Client configuration, most of which is handled by the browser for a real SPA
 #
-#WEB_BASE_URL='https://web.mycompany.com'
-#PROXY_API_BASE_URL='https://api.mycompany.com:444'
+WEB_BASE_URL='https://web.mycompany.com'
+PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -24,8 +24,8 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these overrides to test AWS deployed endpoints
 #
-WEB_BASE_URL=https://web.authsamples.com
-PROXY_API_BASE_URL=https://api.authsamples.com
+#WEB_BASE_URL=https://web.authsamples.com
+#PROXY_API_BASE_URL=https://api.authsamples.com
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -79,7 +79,7 @@ function apiError() {
 #
 echo "*** Requesting cross origin access"
 HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/spa/login/start" \
--H "origin: xx$WEB_BASE_URL" \
+-H "origin: $WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
   echo "Problem encountered requesting cross origin access, status: $HTTP_STATUS"
@@ -152,10 +152,10 @@ AUTH_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
 echo "*** Finishing the login by processing the authorization code ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/login/end" \
 -H "origin: $WEB_BASE_URL" \
+-H 'content-type: application/json' \
 -H 'accept: application/json' \
 --cookie "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE" \
---data-urlencode "code=$AUTH_CODE" \
---data-urlencode "state=$AUTH_STATE" \
+-d '{"code":"'$AUTH_CODE'", "state":"'$AUTH_STATE'"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered ending a login, status: $HTTP_STATUS"

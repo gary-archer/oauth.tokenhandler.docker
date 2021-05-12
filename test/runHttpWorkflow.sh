@@ -1,6 +1,5 @@
 #
-# A script to send messages that the SPA and browser together will send to the OAuth Web Proxy API
-# The cookies are handled automatically by the browser to the API since it is in the same domain
+# A script to test messages that the SPA and browser will together send to the OAuth Web Proxy API
 #
 
 #

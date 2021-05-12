@@ -33,6 +33,9 @@ OAUTH FINALIZATION
 4. Get Kubernetes deployment working for the proxy API and test with Curity
    Remove Serverless dependencies
 
+5. Use authsamples.local instead of mycompany.com
+   Tidy up acr_values and implement a Cognito strategy
+
 CONSOLIDATION
 -------------
 1. Test strategy to ensure Serverless working on a developer PC
@@ -42,8 +45,3 @@ CONSOLIDATION
 2. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
    Data queryable in Elastic Cloud
-
-3. Use acr_values
-   Manage redirect URI and idp parameter via a Cognito specific server side strategy if needed
-
-4. Use authsamples.local instead of mycompany.com

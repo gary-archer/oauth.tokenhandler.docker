@@ -3,10 +3,14 @@ SPA PHASE 1
 1. SPA branch to get browser calls working via POSTs
    Authenticator mostly just does Axios posts similar to old webReverseProxyClient but with json
    Store state between requests in session storage
+   SPA also needs to store anti forgery token from response body in local storage
    Do I need lax for redirect and state cookie?
 
 2. Test in all 4 browsers including Incognito mode
    Understand whether the overall solution is on track
+
+3. Test this from a multi tab browser viewpoint
+   Are there any 401 concurrency conditions that the SPA cannot handle?
 
 API PHASE 1
 -----------
@@ -16,36 +20,30 @@ API PHASE 1
 2. Implement logout processing
    Use a configuration flag to control Cognito specific login URL handling
 
-FINALIZATION
-------------
+OAUTH FINALIZATION
+------------------
+1. Update READMEs
+
+2. Validate id token and check AT hash - cf oidc client library
+
+3. Think about paths and multiple SPAs
+   Are there vulnerabilities here?
+   More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
+
+4. Get Kubernetes deployment working for the proxy API and test with Curity
+   Remove Serverless dependencies
+
+CONSOLIDATION
+-------------
 1. Test strategy to ensure Serverless working on a developer PC
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 
-2. Validate id token and check AT hash - cf oidc client library
-
-3. Get Kubernetes deployment working for the proxy API and test with Curity
-
-4. Add logging middleware and log to the Elastic Search schema
-   Detailed error testing of API operations to test each failure point
-   Use my standard client error object
-
-5. Update READMEs
-
-6. Test this from a multi tab browser viewpoint
-   Are there any 401 race conditions that the SPA cannot handle?
-
-7. Proper API logging and write to Elastic Search from AWS
+2. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
+   Data queryable in Elastic Cloud
 
-9. Think about paths and multiple SPAs
-   Are there vulnerabilities here?
-   More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
-
-10. Deploy to Kubetnetes without any Serverless code or dependencies
-
-11. Concurrency for the SPA during refresh token requests
-    SPA also needs to store anti forgery token from response body in local storage
-
-12. Use acr_values
+3. Use acr_values
    Manage redirect URI and idp parameter via a Cognito specific server side strategy if needed
+
+4. Use authsamples.local instead of mycompany.com

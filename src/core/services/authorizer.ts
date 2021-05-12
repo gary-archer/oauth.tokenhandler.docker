@@ -54,7 +54,7 @@ export class Authorizer {
 
         // Write the full URL to the response body
         const data = {} as any;
-        data['authorization_uri'] = url;
+        data.authorization_uri = url;
         response.setBody(data);
 
         // Also write the state cookie to response headers

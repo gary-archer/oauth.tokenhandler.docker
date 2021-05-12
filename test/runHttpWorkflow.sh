@@ -10,8 +10,8 @@ export HTTPS_PROXY='http://127.0.0.1:8888'
 #
 # Client configuration, most of which is handled by the browser for a real SPA
 #
-#WEB_BASE_URL='https://web.mycompany.com'
-#PROXY_API_BASE_URL='https://api.mycompany.com:444'
+WEB_BASE_URL='https://web.mycompany.com'
+PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -23,8 +23,8 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these overrides to test AWS deployed endpoints
 #
-WEB_BASE_URL=https://web.authsamples.com
-PROXY_API_BASE_URL=https://api.authsamples.com
+#WEB_BASE_URL=https://web.authsamples.com
+#PROXY_API_BASE_URL=https://api.authsamples.com
 
 #
 # A simple routine to get a header value from an HTTP response file

@@ -2,7 +2,8 @@
 
 ## Overview
 
-An API that will issues SameSite cookies for SPAs as part of a `Back End for Front End` solution.
+An API that will issues SameSite cookies for SPAs as part of a `Back End for Front End` solution.\
+I am still playing around with this, but will integrate it with my [Final SPA](https://github.com/gary-archer/oauth.websample.final) where ready.
 
 ## Goals
 

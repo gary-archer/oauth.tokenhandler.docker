@@ -13,8 +13,8 @@ I am still playing around with this, but will integrate it with my [Final SPA](h
 
 ## Local PC Solution
 
-A developer runs this Proxy API alongside the SPA, but can connect to deployed APIs
+A developer runs this Proxy API on the local PC, alongside the SPA, but can connect to deployed APIs
 
 ## Deployed Solution
 
-Runs in AWS as a Serverless lambda for low cost hosting
+This API runs in AWS as a Serverless lambda, while the SPA is deployed to 20 global locations via AWS Cloudfront

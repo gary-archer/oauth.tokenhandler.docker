@@ -10,17 +10,17 @@ GO LIVE
    Are there vulnerabilities here?
    More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
 
-4. Validate id token and check AT hash - cf oidc client library
-
-5. Add logging middleware and log to the Elastic Search schema
+4. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
    Data queryable in Elastic Cloud
 
 CONSOLIDATION
 -------------
-1. Test strategy to ensure Serverless working on a developer PC
+1. Validate id token and check AT hash - cf other libraries such as Duende
+
+2. Test strategy to ensure Serverless working on a developer PC
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 
-2. Get Kubernetes deployment working for the proxy API and test with Curity
+3. Get Kubernetes deployment working for the proxy API and test with Curity
    Remove Serverless dependencies

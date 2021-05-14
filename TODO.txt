@@ -1,22 +1,19 @@
 GO LIVE
 -------
-1. Update README
+1. Get testLambdas.sh working
 
 2. Think about configuration, paths and multiple SPAs
-   Are there vulnerabilities here?
-   More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
+   More work on giving the 3 service classes reduced configuration
+   Are there extra vulnerabilities with multiple SPAs on the same domain?
 
 3. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
-   Data queryable in Elastic Cloud
+   Must work for lambda and Express
+   Deployed system writes to Elastic Cloud
 
 CONSOLIDATION
 -------------
 1. Validate id token and check AT hash - cf other libraries such as Duende
 
-2. Test strategy to ensure Serverless working on a developer PC
-   Ideally I want to run bash scripts and test all at once, but also have options to test individually
-   Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
-
-3. Get Kubernetes deployment working for the proxy API and test with Curity
+2. Get Kubernetes deployment working for the proxy API and test with Curity
    Remove Serverless dependencies

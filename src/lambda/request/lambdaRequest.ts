@@ -11,7 +11,7 @@ export class LambdaRequest implements AbstractRequest {
 
     public constructor(event: any) {
         this._event = event;
-        this._body = JSON.parse(this._event.body);
+        this._body = this._event.body ? JSON.parse(this._event.body) : {};
     }
 
     public getUri(): string {

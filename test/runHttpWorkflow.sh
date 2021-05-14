@@ -1,5 +1,7 @@
+#!/bin/bash
+
 #
-# A script to test messages that the SPA and browser will together send to the OAuth Web Proxy API
+# A script to test HTTP messages that the SPA and browser will together send to the OAuth Web Proxy API
 #
 
 #
@@ -10,8 +12,8 @@ export HTTPS_PROXY='http://127.0.0.1:8888'
 #
 # Client configuration, most of which is handled by the browser for a real SPA
 #
-#WEB_BASE_URL='https://web.mycompany.com'
-#PROXY_API_BASE_URL='https://api.mycompany.com:444'
+WEB_BASE_URL='https://web.mycompany.com'
+PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -23,8 +25,8 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these overrides to test AWS deployed endpoints
 #
-WEB_BASE_URL=https://web.authsamples.com
-PROXY_API_BASE_URL=https://api.authsamples.com
+#WEB_BASE_URL=https://web.authsamples.com
+#PROXY_API_BASE_URL=https://api.authsamples.com
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -74,7 +76,7 @@ function apiError() {
 }
 
 #
-# Act as the SPA by sending an OPTIONS request and verifying that we get the expected results
+# Act as the SPA by sending an OPTIONS request, then verifying that we get the expected results
 #
 echo "*** Requesting cross origin access"
 HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/spa/login/start" \
@@ -86,7 +88,7 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
 fi
 
 #
-# Act as the SPA by calling the OAuth proxy API to start a login and get the redirect URI
+# Act as the SPA by calling the OAuth proxy API to start a login and get the request URI
 #
 echo "*** Creating login URL ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/login/start" \
@@ -123,7 +125,7 @@ LOGIN_POST_LOCATION=$(getHeaderValue 'location')
 COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 
 #
-# We can now post a password credential, and the form fields used are vendor specific
+# We can now post a password credential, and the form fields used are Cognito specific
 #
 echo "*** Posting credentials to sign in the test user ..."
 HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
@@ -142,8 +144,8 @@ fi
 # Next get the code and state from the redirect response's query parameters, but without following the redirect
 #
 AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
-AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
 AUTH_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
+AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
 
 #
 # Next we end the login by asking the server to do an authorization code grant
@@ -198,7 +200,7 @@ ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 
 #
-# Call the cloud API with an access token
+# Call the business API with an access token
 #
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \

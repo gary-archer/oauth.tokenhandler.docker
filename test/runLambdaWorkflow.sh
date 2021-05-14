@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Get the authorization redirect URL and write a state cookie
-npm run startLogin
+#
+# A script to run Serverless lambdas locally and to deal with inputs and outputs
+#
+SLS=./node_modules/.bin/sls
+
+# Write the request.txt with jq and call 'sls invoke local -f startLogin -p test/request.json'
+$SLS invoke local -f startLogin -p test/data/startLoginRequest.json
 
 # Send the code, state and state cookie, then write cookies and anti forgery details
 #npm run endLogin 

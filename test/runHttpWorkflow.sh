@@ -102,7 +102,7 @@ fi
 # Get data we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-AUTHORIZATION_REQUEST_URL=$(jq -r .authorization_uri <<< "$JSON")
+AUTHORIZATION_REQUEST_URL=$(jq -r .authorization_request_uri <<< "$JSON")
 STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
 
 #
@@ -203,6 +203,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
 -H "Authorization: Bearer $ACCESS_TOKEN" \
+-H 'accept: application/json' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
@@ -216,6 +217,7 @@ fi
 echo "*** Expiring the refresh token ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/token/expire" \
 -H "origin: $WEB_BASE_URL" \
+-H 'accept: application/json' \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -241,12 +243,29 @@ HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/token" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '400' ]; then
-  echo "*** The expected invalid_grant error did not occur, status: $HTTP_STATUS"
+  echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
   apiError
   exit
 fi
 
 #
-# Next expire the session to remove all cookies
-# TODO: read values in order to manually verify
+# Next make a start logout request
 #
+echo "*** Calling start logout to clear cookies and get the end session request URL ..."
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/logout/start" \
+-H "origin: $WEB_BASE_URL" \
+-H 'accept: application/json' \
+-H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered starting a logout, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+
+#
+# The real SPA will then do a logout redirect with this URL
+#
+JSON=$(tail -n 1 $RESPONSE_FILE)
+END_SESSION_REQUEST_URL=$(jq -r .end_session_request_uri <<< "$JSON")

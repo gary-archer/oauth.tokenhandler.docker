@@ -7,6 +7,8 @@ export interface ApiConfiguration {
 
     tokenEndpoint: string;
 
+    endSessionEndpoint: string;
+
     cookieRootDomain: string,
 
     cookiePrefix: string,

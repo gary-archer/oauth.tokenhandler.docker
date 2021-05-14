@@ -1,40 +1,24 @@
-SPA PHASE 1
------------
-1. SPA branch to get browser calls working via POSTs
-   Authenticator mostly just does Axios posts similar to old webReverseProxyClient but with json
-   Store state between requests in session storage
-   SPA also needs to store anti forgery token from response body in local storage
-   Do I need lax for redirect and state cookie?
-
-2. Test in all 4 browsers including Incognito mode
-   Understand whether the overall solution is on track
-
-3. Test this from a multi tab browser viewpoint
-   Are there any 401 concurrency conditions that the SPA cannot handle?
-
 API PHASE 1
 -----------
-1. AWS deployment with no Express dependencies
-   Get rid of tunnel agent dependency also similar to main Serverless sample
+1. API request / response data should use camel case fields
+   Update API, SPA and bash script
 
-2. Implement logout processing
-   Use a configuration flag to control Cognito specific login URL handling
+2. AWS deployment with no Express dependencies
+   Get rid of tunnel agent dependency also similar to main Serverless sample
+   Then test via HTTP script
 
 OAUTH FINALIZATION
 ------------------
 1. Update READMEs
 
-2. Validate id token and check AT hash - cf oidc client library
-
-3. Think about paths and multiple SPAs
+2. Think about configuration, paths and multiple SPAs
    Are there vulnerabilities here?
    More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
 
+3. Validate id token and check AT hash - cf oidc client library
+
 4. Get Kubernetes deployment working for the proxy API and test with Curity
    Remove Serverless dependencies
-
-5. Use authsamples.local instead of mycompany.com
-   Tidy up acr_values and implement a Cognito strategy
 
 CONSOLIDATION
 -------------
@@ -45,3 +29,6 @@ CONSOLIDATION
 2. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
    Data queryable in Elastic Cloud
+
+3. Use authsamples.local instead of mycompany.com
+   Tidy up acr_values and implement a Cognito strategy

@@ -9,6 +9,7 @@
     "api": {
         "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
+        "endSessionEndpoint": "https://login.authsamples.com/logout",
         "cookieRootDomain": "mycompany.com",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",

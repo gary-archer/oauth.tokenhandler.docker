@@ -54,7 +54,7 @@ export class Authorizer {
 
         // Write the full URL to the response body
         const data = {} as any;
-        data.authorization_uri = url;
+        data.authorization_request_uri = url;
         response.setBody(data);
 
         // Also write the state cookie to response headers
@@ -197,9 +197,33 @@ export class Authorizer {
             throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
         }
 
-        // Clear all cookies for this client
+        // Start the URL
+        let url = this._configuration.api.endSessionEndpoint;
+        url += '?';
+        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
+        url += '&';
+
+        if (this._configuration.api.provider === 'cognito') {
+        
+            // Cognito has non standard parameters
+            url += UrlHelper.createQueryParameter('logout_uri', this._configuration.client.postLogoutRedirectUri);
+
+        } else {
+
+            // For other providers supply the most standard values
+            url += UrlHelper.createQueryParameter('post_logout_redirect_uri', this._configuration.client.postLogoutRedirectUri);
+            url += '&';
+            url += UrlHelper.createQueryParameter('id_token_hint', idToken);
+        }
+
+        // Clear all cookies for the caller
         this._cookieService.clearAll(response);
-        response.setStatusCode(204);
+
+        // Write the full URL to the response body
+        const data = {} as any;
+        data.end_session_request_uri = url;
+        response.setBody(data);
+        response.setStatusCode(200);
     }
 
     /*

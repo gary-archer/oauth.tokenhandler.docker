@@ -1,16 +1,12 @@
 GO LIVE
 -------
-1. AWS deployment with no Express dependencies
-   Get rid of tunnel agent dependency also similar to main Serverless sample
-   Then test via HTTP script
+1. Update README
 
-2. Update README
-
-3. Think about configuration, paths and multiple SPAs
+2. Think about configuration, paths and multiple SPAs
    Are there vulnerabilities here?
    More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
 
-4. Add logging middleware and log to the Elastic Search schema
+3. Add logging middleware and log to the Elastic Search schema
    Logging also needs to use abstract request and response objects
    Data queryable in Elastic Cloud
 

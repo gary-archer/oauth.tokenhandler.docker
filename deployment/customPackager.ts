@@ -1,6 +1,8 @@
 import admzip from 'adm-zip';
+import ChildProcess from 'child-process-es6-promise';
 import fs from 'fs-extra';
 import process from 'process';
+import './typings';
 
 class Packager {
 
@@ -10,8 +12,9 @@ class Packager {
     public async execute(): Promise<void> {
 
         // Unzip the default package created by the sls package command
-        const packageName = 'oauthwebproxy';
+        const packageName = 'oauthproxyapi';
         await this._unzipPackage(packageName);
+        await this._installDependencies(packageName, ['express', 'cookie-parser', 'cors']);
 
         // Copy in the deployed configuration
         await fs.copy('api.config.deployed.json', `.serverless/${packageName}/api.config.json`);
@@ -27,6 +30,59 @@ class Packager {
 
         const zip = new admzip(`.serverless/${packageName}.zip`);
         zip.extractAllTo(`.serverless/${packageName}`, true);
+    }
+
+    /*
+     * Install dependencies for the package in an optimized manner resulting in smaller lambda sizes
+     */
+    private async _installDependencies(packageName: string, removeDependencies: string[]) {
+
+        // Copy in package.json files
+        await fs.copy('package.json',      `.serverless/${packageName}/package.json`);
+        await fs.copy('package-lock.json', `.serverless/${packageName}/package-lock.json`);
+
+        // Remove development dependencies and those passed in to exclude
+        const pkg = await fs.readJson(`.serverless/${packageName}/package.json`);
+        delete pkg.devDependencies;
+        for (const dependency of removeDependencies) {
+            delete pkg.dependencies[dependency];
+        }
+
+        // Write back changes and include formatting
+        await fs.writeFile(`.serverless/${packageName}/package.json`, JSON.stringify(pkg, null, 2));
+
+        // Do the work of installing node production modules
+        await this._installNodeModules(packageName);
+
+        // Remove package.json files from the temporary folder
+        await fs.remove(`.serverless/${packageName}/package.json`);
+        await fs.remove(`.serverless/${packageName}/package-lock.json`);
+    }
+
+    /*
+     * Start a child process to install node modules and wait for it to complete
+     */
+    private async _installNodeModules(packageName: string) {
+
+        try {
+
+            // Configure npm
+            console.log(`Installing node modules for ${packageName} ...`);
+            const npmCommand = /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+            const options = {
+                cwd: `.serverless/${packageName}`,
+                capture: ['stdout', 'stderr'],
+            };
+
+            // Run a child process and report its output
+            const childProcess = await ChildProcess.spawn(npmCommand, ['install'], options);
+            console.log(childProcess.stdout);
+
+        } catch (e) {
+
+            // Report install errors
+            throw new Error(`Error installing npm packages for ${packageName}: ${e} : ${e.stderr.toString()}`);
+        }
     }
 
     /*

@@ -1,4 +1,3 @@
-import TunnelAgent from 'tunnel-agent';
 import url from 'url';
 
 /*
@@ -6,20 +5,29 @@ import url from 'url';
  */
 export class HttpProxy {
 
-    private readonly _proxyUrl: string;
-    private readonly _agent: any = null;
+    private _useProxy: boolean;
+    private _proxyUrl: string;
+    private _agent: any = null;
 
     public constructor(useProxy: boolean, proxyUrl: string) {
 
+        this._useProxy = useProxy;
         this._proxyUrl = '';
         this._agent = null;
         this._setupCallbacks();
 
         if (useProxy) {
-            const opts = url.parse(proxyUrl);
-            this._proxyUrl = proxyUrl;
-            this._agent = TunnelAgent.httpsOverHttp({
-                proxy: opts,
+            
+            // Ensure that the standard environment variable is set for our process
+            process.env.HTTPS_PROXY = this._proxyUrl;
+
+            // Use a dynamic import so that this dependency is only used on a developer PC
+            import('tunnel-agent').then((agent) => {
+
+                const opts = url.parse(this._proxyUrl);
+                this._agent = agent.httpsOverHttp({
+                    proxy: opts,
+                });
             });
         }
     }
@@ -29,13 +37,6 @@ export class HttpProxy {
      */
     public getAgent(): any {
         return this._agent;
-    }
-
-    /*
-     * Return the URL when needed
-     */
-    public getUrl(): string {
-        return this._proxyUrl;
     }
 
     /*

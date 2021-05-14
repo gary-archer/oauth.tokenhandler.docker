@@ -2,12 +2,12 @@
 
 ## Overview
 
-An API that issues SameSite cookies for SPAs as part of a `Back End for Front End` solution
+An API that issues SameSite cookies for SPAs as part of a `Back End for Front End` solution.\
+Used by the [Final SPA](https://github.com/gary-archer/oauth.websample.final) to improve security, reliability and to simplify SPA code.
 
-## Goals
+## Coding Goal
 
-- Separate Web and API concerns, to provide the best [Web Architecture](https://authguidance.com/2017/09/08/goal-1-requirements/) options.
-- Keep options open about using access tokens in the browser, which can enable some UI composition scenarios.
+- Separate Web and API concerns, to provide the best [Web Architecture](https://authguidance.com/2017/09/08/goal-1-requirements/) options
 
 ## Local PC Solution
 

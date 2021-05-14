@@ -1,4 +1,4 @@
-service: oauthwebproxy
+service: oauthproxyapi
 
 # Base details for AWS deployment
 provider:
@@ -119,7 +119,8 @@ package:
   patterns:
   - '!api.config**'
   - '!.vscode/**'
-  - '!.vscode/**'
+  - '!certs/**'
+  - '!deployment/**'
   - '!environments/**'
   - '!src/**'
   - '!test/**'

@@ -1,24 +1,20 @@
-API PHASE 1
------------
-1. API request / response data should use camel case fields
-   Update API, SPA and bash script
-
-2. AWS deployment with no Express dependencies
+GO LIVE
+-------
+1. AWS deployment with no Express dependencies
    Get rid of tunnel agent dependency also similar to main Serverless sample
    Then test via HTTP script
 
-OAUTH FINALIZATION
-------------------
-1. Update READMEs
+2. Update README
 
-2. Think about configuration, paths and multiple SPAs
+3. Think about configuration, paths and multiple SPAs
    Are there vulnerabilities here?
    More work on giving the 3 service classes reduced configuration - eg only entry point uses the host configuration
 
-3. Validate id token and check AT hash - cf oidc client library
+4. Validate id token and check AT hash - cf oidc client library
 
-4. Get Kubernetes deployment working for the proxy API and test with Curity
-   Remove Serverless dependencies
+5. Add logging middleware and log to the Elastic Search schema
+   Logging also needs to use abstract request and response objects
+   Data queryable in Elastic Cloud
 
 CONSOLIDATION
 -------------
@@ -26,9 +22,5 @@ CONSOLIDATION
    Ideally I want to run bash scripts and test all at once, but also have options to test individually
    Consider options between 'sls invoke', bash and NodeJS code and perhaps mix them up to build modular tests
 
-2. Add logging middleware and log to the Elastic Search schema
-   Logging also needs to use abstract request and response objects
-   Data queryable in Elastic Cloud
-
-3. Use authsamples.local instead of mycompany.com
-   Tidy up acr_values and implement a Cognito strategy
+2. Get Kubernetes deployment working for the proxy API and test with Curity
+   Remove Serverless dependencies

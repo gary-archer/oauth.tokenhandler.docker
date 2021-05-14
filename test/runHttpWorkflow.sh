@@ -102,7 +102,7 @@ fi
 # Get data we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-AUTHORIZATION_REQUEST_URL=$(jq -r .authorization_request_uri <<< "$JSON")
+AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$JSON")
 STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
 
 #
@@ -166,7 +166,7 @@ fi
 # Get data that we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-ANTI_FORGERY_TOKEN=$(jq -r .anti_forgery_token <<< "$JSON")
+ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
 AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
@@ -191,8 +191,8 @@ fi
 # Get data that we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-ACCESS_TOKEN=$(jq -r .access_token <<< "$JSON")
-ANTI_FORGERY_TOKEN=$(jq -r .anti_forgery_token <<< "$JSON")
+ACCESS_TOKEN=$(jq -r .accessToken <<< "$JSON")
+ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
 AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
@@ -268,4 +268,4 @@ fi
 # The real SPA will then do a logout redirect with this URL
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-END_SESSION_REQUEST_URL=$(jq -r .end_session_request_uri <<< "$JSON")
+END_SESSION_REQUEST_URL=$(jq -r .endSessionRequestUri <<< "$JSON")

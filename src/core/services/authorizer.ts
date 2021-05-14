@@ -54,7 +54,7 @@ export class Authorizer {
 
         // Write the full URL to the response body
         const data = {} as any;
-        data.authorization_request_uri = url;
+        data.authorizationRequestUri = url;
         response.setBody(data);
 
         // Also write the state cookie to response headers
@@ -154,7 +154,7 @@ export class Authorizer {
 
         // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
-        data.access_token = refreshTokenGrantData.access_token;
+        data.accessToken = refreshTokenGrantData.access_token;
         this._addAntiForgeryResponseData(response, data);
         response.setBody(data);
     }
@@ -204,14 +204,16 @@ export class Authorizer {
         url += '&';
 
         if (this._configuration.api.provider === 'cognito') {
-        
+
             // Cognito has non standard parameters
             url += UrlHelper.createQueryParameter('logout_uri', this._configuration.client.postLogoutRedirectUri);
 
         } else {
 
             // For other providers supply the most standard values
-            url += UrlHelper.createQueryParameter('post_logout_redirect_uri', this._configuration.client.postLogoutRedirectUri);
+            url += UrlHelper.createQueryParameter(
+                'post_logout_redirect_uri',
+                this._configuration.client.postLogoutRedirectUri);
             url += '&';
             url += UrlHelper.createQueryParameter('id_token_hint', idToken);
         }
@@ -221,7 +223,7 @@ export class Authorizer {
 
         // Write the full URL to the response body
         const data = {} as any;
-        data.end_session_request_uri = url;
+        data.endSessionRequestUri = url;
         response.setBody(data);
         response.setStatusCode(200);
     }
@@ -278,7 +280,7 @@ export class Authorizer {
         this._cookieService.writeAntiForgeryCookie(response, randomValue);
 
         // Also give the UI the anti forgery token in the response body
-        data.anti_forgery_token = randomValue;
+        data.antiForgeryToken = randomValue;
     }
 
     /*

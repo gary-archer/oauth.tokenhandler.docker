@@ -13,5 +13,5 @@ export interface ClientConfiguration {
 
     scope: string;
 
-    cookiePath: string;
+    path: string;
 }

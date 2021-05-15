@@ -1,6 +1,6 @@
 {
     "host": {
-        "port": 0,
+        "port": 443,
         "sslCertificateFileName": "",
         "sslCertificatePassword": "",
         "useHttpProxy": false,
@@ -22,6 +22,6 @@
         "redirectUri": "https://web.authsamples.com/spa/",
         "postLogoutRedirectUri": "https://web.authsamples.com/spa/loggedout.html",
         "scope": "openid profile email https://api.authsamples.com/api/transactions_read",
-        "cookiePath": "/spa"
+        "path": "/spa"
     }
 }

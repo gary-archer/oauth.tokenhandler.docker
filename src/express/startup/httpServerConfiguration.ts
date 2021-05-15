@@ -4,13 +4,14 @@ import express, {Application, Request, Response} from 'express';
 import fs from 'fs-extra';
 import https from 'https';
 import {Configuration} from '../../core/configuration/configuration';
-import {ErrorHandler } from '../../core/errors/errorHandler';
+import {ExceptionHandler } from '../../core/errors/exceptionHandler';
 import {AbstractRequest } from '../../core/request/abstractRequest';
 import {AbstractResponse } from '../../core/request/abstractResponse';
 import {Authorizer} from '../../core/services/authorizer';
 import {CookieService} from '../../core/services/cookieService';
 import {OAuthService} from '../../core/services/oauthService';
 import {HttpProxy} from '../../core/utilities/httpProxy';
+import {Logger} from '../../core/logging/logger';
 import {ExpressRequestAdapter} from '../request/expressRequestAdapter';
 import {ExpressResponseAdapter} from '../request/expressResponseAdapter';
 
@@ -27,19 +28,26 @@ export class HttpServerConfiguration {
     private readonly _expressApp: Application;
     private readonly _configuration: Configuration;
     private readonly _authorizer: Authorizer;
+    private readonly _logger: Logger;
 
     /*
      * Auto wire the main aithorizer class, which is the entry point for processing
      */
-    public constructor(expressApp: Application, configuration: Configuration, httpProxy: HttpProxy) {
+    public constructor(
+        expressApp: Application,
+        configuration: Configuration,
+        logger: Logger,
+        httpProxy: HttpProxy) {
 
         this._expressApp = expressApp;
         this._configuration = configuration;
+        this._logger = logger;
 
         this._authorizer = new Authorizer(
             this._configuration,
             new CookieService(configuration),
-            new OAuthService(configuration, httpProxy));
+            new OAuthService(configuration, httpProxy),
+            logger);
     }
 
     /*
@@ -86,14 +94,14 @@ export class HttpServerConfiguration {
             // Start listening over HTTPS
             const httpsServer = https.createServer(serverOptions, this._expressApp);
             httpsServer.listen(this._configuration.host.port, () => {
-                console.log(`OAuth Web Proxy API is listening on HTTPS port ${this._configuration.host.port}`);
+                this._logger.info(`OAuth Web Proxy API is listening on HTTPS port ${this._configuration.host.port}`);
             });
 
         } else {
 
             // Otherwise listen over HTTP
             this._expressApp.listen(this._configuration.host.port, () => {
-                console.log(`OAuth Web Proxy API is listening on HTTP port ${this._configuration.host.port}`);
+                this._logger.info(`OAuth Web Proxy API is listening on HTTP port ${this._configuration.host.port}`);
             });
         }
     }
@@ -117,7 +125,8 @@ export class HttpServerConfiguration {
         } catch (e) {
 
             // Return an Express error response
-            const clientError = ErrorHandler.handleError(e);
+            const handler = new ExceptionHandler(this._logger);
+            const clientError = handler.handleError(e);
             response.setError(clientError);
             response.finalise();
         }

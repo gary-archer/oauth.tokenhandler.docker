@@ -3,7 +3,7 @@ import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
 import {Configuration} from '../configuration/configuration';
 import {ClientError} from '../errors/clientError';
-import {ErrorHandler} from '../errors/errorHandler';
+import {ErrorUtils} from '../errors/errorUtils';
 import {HttpProxy} from '../utilities/httpProxy';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
 
@@ -100,7 +100,7 @@ export class OAuthService {
             }
 
             // Throw a generic client connectivity error
-            throw ErrorHandler.fromHttpRequestError(e, options.url);
+            throw ErrorUtils.fromHttpRequestError(e, options.url);
         }
     }
 }

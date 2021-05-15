@@ -1,15 +1,16 @@
 import express from 'express';
 import {ConfigurationLoader} from '../core/configuration/configurationLoader';
 import {HttpServerConfiguration} from './startup/httpServerConfiguration';
-import {ErrorHandler} from '../core/errors/errorHandler';
+import {ExceptionHandler} from '../core/errors/exceptionHandler';
+import {Logger} from '../core/logging/logger';
 import {HttpProxy} from '../core/utilities/httpProxy';
-import {Logger} from '../core/utilities/logger';
 
 /*
  * The Express API host
  */
 (async () => {
 
+    const logger = new Logger();
     try {
 
         // First load configuration
@@ -20,14 +21,19 @@ import {Logger} from '../core/utilities/logger';
 
         // Create and start the Express API
         const expressApp = express();
-        const httpServer = new HttpServerConfiguration(expressApp, configuration, httpProxy);
+        const httpServer = new HttpServerConfiguration(
+            expressApp,
+            configuration,
+            logger,
+            httpProxy);
+
         await httpServer.initializeRoutes();
         await httpServer.startListening();
 
     } catch (e) {
 
         // Report startup errors
-        const error = ErrorHandler.fromException(e);
-        Logger.error(error.toLogFormat());
+        const handler = new ExceptionHandler(logger);
+        handler.handleError(e);
     }
 })();

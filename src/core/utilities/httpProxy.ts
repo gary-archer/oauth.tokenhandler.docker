@@ -12,12 +12,12 @@ export class HttpProxy {
     public constructor(useProxy: boolean, proxyUrl: string) {
 
         this._useProxy = useProxy;
-        this._proxyUrl = '';
+        this._proxyUrl = proxyUrl;
         this._agent = null;
         this._setupCallbacks();
 
         if (useProxy) {
-            
+
             // Ensure that the standard environment variable is set for our process
             process.env.HTTPS_PROXY = this._proxyUrl;
 

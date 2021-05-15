@@ -2,16 +2,13 @@
 
 #
 # A script to test HTTP messages that the SPA and browser will together send to the OAuth Web Proxy API
+# Requires the jq tool to be installed
 #
 
 #
-# Configure an HTTP proxy if required
+# Endpoints and parameters
 #
 export HTTPS_PROXY='http://127.0.0.1:8888'
-
-#
-# Client configuration, most of which is handled by the browser for a real SPA
-#
 WEB_BASE_URL='https://web.mycompany.com'
 PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'

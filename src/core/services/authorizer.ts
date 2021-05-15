@@ -1,7 +1,8 @@
 import {Configuration} from '../configuration/configuration';
-import {ErrorHandler} from '../errors/errorHandler';
+import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {Logger} from '../logging/logger';
 import {UrlHelper} from '../utilities/urlHelper';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
@@ -14,12 +15,18 @@ export class Authorizer {
     private readonly _configuration: Configuration;
     private readonly _oauthService: OAuthService;
     private readonly _cookieService: CookieService;
+    private readonly _logger: Logger;
 
-    public constructor(configuration: Configuration, cookieService: CookieService, oauthService: OAuthService) {
+    public constructor(
+        configuration: Configuration,
+        cookieService: CookieService,
+        oauthService: OAuthService,
+        logger: Logger) {
 
         this._configuration = configuration;
         this._cookieService = cookieService;
         this._oauthService = oauthService;
+        this._logger = logger;
         this._setupCallbacks();
     }
 
@@ -29,7 +36,7 @@ export class Authorizer {
     public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        console.log('API startLogin called ...');
+        this._logger.info('API startLogin called ...');
         this._validateOrigin(request);
 
         // First create a random login state
@@ -71,26 +78,26 @@ export class Authorizer {
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        console.log('API endLogin called ...');
+        this._logger.info('API endLogin called ...');
         this._validateOrigin(request);
 
         // Read the state cookie
         const stateCookie = this._cookieService.readStateCookie(request);
         if (!stateCookie) {
-            throw ErrorHandler.fromMissingCookieError('No state cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No state cookie was found in the incoming request');
         }
 
         // Check that the value posted matches
         const state = request.getJsonField('state');
         if (state !== stateCookie.state) {
-            throw ErrorHandler.fromInvalidDataError(
+            throw ErrorUtils.fromInvalidDataError(
                 'The end login state parameter did not match the state cookie value');
         }
 
         // Get the code value
         const code = request.getJsonField('code');
         if (!code) {
-            throw ErrorHandler.fromMissingFieldError('No code value was supplied in the endLogin request');
+            throw ErrorUtils.fromMissingFieldError('No code value was supplied in the endLogin request');
         }
 
         // Send the Authorization Code Grant message
@@ -99,13 +106,13 @@ export class Authorizer {
         // Get the refresh token from the response
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
-            throw ErrorHandler.fromMessage('No refresh token was received in the authorization code grant response');
+            throw ErrorUtils.fromMessage('No refresh token was received in the authorization code grant response');
         }
 
         // Get the id token from the response
         const idToken = authCodeGrantData.id_token;
         if (!idToken) {
-            throw ErrorHandler.fromMessage('No id token was received in the authorization code grant response');
+            throw ErrorUtils.fromMessage('No id token was received in the authorization code grant response');
         }
 
         // Write both the refresh token and id token to HTTP only encrypted same site cookies
@@ -124,20 +131,20 @@ export class Authorizer {
     public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        console.log('API refreshToken called ...');
+        this._logger.info('API refreshToken called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
         // Get the refresh token from the auth cookie
         const refreshToken = this._cookieService.readAuthCookie(request);
         if (!refreshToken) {
-            throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No auth cookie was found in the incoming request');
         }
 
         // Get the id token from the id cookie
         const idToken = this._cookieService.readAuthCookie(request);
         if (!idToken) {
-            throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No id cookie was found in the incoming request');
         }
 
         // Send the request to the Authorization Server
@@ -165,14 +172,14 @@ export class Authorizer {
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        console.log('API expireSession called ...');
+        this._logger.info('API expireSession called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
         // Get the current refresh token
         const refreshToken = this._cookieService.readAuthCookie(request);
         if (!refreshToken) {
-            throw ErrorHandler.fromMissingCookieError('No auth cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No auth cookie was found in the incoming request');
         }
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
@@ -187,14 +194,14 @@ export class Authorizer {
     public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        console.log('API startLogout called ...');
+        this._logger.info('API startLogout called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
         // Get the id token from the id cookie
         const idToken = this._cookieService.readIdCookie(request);
         if (!idToken) {
-            throw ErrorHandler.fromMissingCookieError('No id cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No id cookie was found in the incoming request');
         }
 
         // Start the URL
@@ -235,11 +242,11 @@ export class Authorizer {
 
         const origin = request.getHeader('origin');
         if (!origin) {
-            throw ErrorHandler.fromMissingFieldError('No origin header was supplied');
+            throw ErrorUtils.fromMissingFieldError('No origin header was supplied');
         }
 
         if (origin.toLowerCase() !== this._configuration.api.trustedWebOrigin.toLowerCase()) {
-            throw ErrorHandler.fromInvalidDataError('The origin header contained an untrusted value');
+            throw ErrorUtils.fromInvalidDataError('The origin header contained an untrusted value');
         }
     }
 
@@ -251,19 +258,19 @@ export class Authorizer {
         // Get the cookie value
         const cookieValue = this._cookieService.readAntiForgeryCookie(request);
         if (!cookieValue) {
-            throw ErrorHandler.fromMissingCookieError('No anti forgery cookie was found in the incoming request');
+            throw ErrorUtils.fromMissingCookieError('No anti forgery cookie was found in the incoming request');
         }
 
         // Check the client has sent a matching anti forgery request header
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {
-            throw ErrorHandler.fromMissingFieldError('No anti forgery request header field was supplied');
+            throw ErrorUtils.fromMissingFieldError('No anti forgery request header field was supplied');
         }
 
         // Check that the values match
         if (cookieValue !== headerValue) {
-            throw ErrorHandler.fromInvalidDataError(
+            throw ErrorUtils.fromInvalidDataError(
                 'The anti forgery request header does not match the anti forgery cookie value');
         }
     }

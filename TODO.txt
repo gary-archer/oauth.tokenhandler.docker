@@ -1,15 +1,21 @@
 GO LIVE
 -------
-1. Get testLambdas.sh working
+1. Error handling and logs to write properly
+   - Startup errors to log in standard JSON format
+   - Lambda local to output to a file
+   - Exception handler needs to receive a log entry
+   - Log to schema and include client id
 
-2. Think about configuration, paths and multiple SPAs
+2. Separate API logs from client response on a developer PC
+   Control via crossenv - see lambda edge for an example
+
+3. Deployed system logs to Elastic Cloud
+
+4. Get testLambdas.sh completed
+   
+5. Think about configuration, paths and multiple SPAs and vulnerabilities
    More work on giving the 3 service classes reduced configuration
-   Are there extra vulnerabilities with multiple SPAs on the same domain?
-
-3. Add logging middleware and log to the Elastic Search schema
-   Logging also needs to use abstract request and response objects
-   Must work for lambda and Express
-   Deployed system writes to Elastic Cloud
+   OAuthService to do more of the OAuth work
 
 CONSOLIDATION
 -------------

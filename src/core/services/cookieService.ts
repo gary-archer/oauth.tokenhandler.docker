@@ -1,7 +1,7 @@
 import {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
 import {Configuration} from '../configuration/configuration';
-import {ErrorHandler} from '../errors/errorHandler';
+import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
@@ -158,7 +158,7 @@ export class CookieService {
         } catch (e) {
 
             // In the event of crypto errors, log the details but return a generic error to the client
-            throw ErrorHandler.fromCookieDecryptionError(cookieName, e);
+            throw ErrorUtils.fromCookieDecryptionError(cookieName, e);
         }
     }
 
@@ -179,7 +179,7 @@ export class CookieService {
             domain: `.${this._configuration.api.cookieRootDomain}`,
 
             // The cookie is only sent during OAuth related requests, and all Web / API requests are cookieless
-            path: this._configuration.client.cookiePath,
+            path: this._configuration.client.path,
 
             // Other domains cannot send the cookie, which reduces cross site scripting risks
             sameSite: 'strict',

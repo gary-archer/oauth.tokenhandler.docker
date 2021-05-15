@@ -1,45 +1,11 @@
 import {ApiError} from './apiError';
 import {ClientError} from './clientError';
 import {ErrorCodes} from './errorCodes';
-import {Logger} from '../utilities/logger';
 
 /*
- * A class to handle composing and reporting errors
+ * Error utilities
  */
-export class ErrorHandler {
-
-    /*
-     * Handle the server error and get client details
-     */
-    public static handleError(exception: any): ClientError {
-
-        // Ensure that the exception has a known type
-        const handledError = ErrorHandler.fromException(exception);
-        if (exception instanceof ClientError) {
-
-            // Client errors mean the caller did something wrong
-            const clientError = handledError as ClientError;
-
-            // Log the error
-            const errorToLog = clientError.toLogFormat();
-            Logger.error(errorToLog);
-
-            // Return the API response to the caller
-            return clientError;
-
-        } else {
-
-            // API errors mean we experienced a failure
-            const apiError = handledError as ApiError;
-
-            // Log the error with an id
-            const errorToLog = apiError.toLogFormat();
-            Logger.error(errorToLog);
-
-            // Return the API response to the caller
-            return apiError.toClientError();
-        }
-    }
+export class ErrorUtils {
 
     /*
      * Ensure that all errors are of a known type

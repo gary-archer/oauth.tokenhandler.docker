@@ -1,6 +1,7 @@
 node_modules
 .serverless
 dist
+logs
 .DS_store
 test/request.txt
 test/response.txt

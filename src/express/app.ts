@@ -1,7 +1,6 @@
 import express from 'express';
 import {ConfigurationLoader} from '../core/configuration/configurationLoader';
 import {HttpServerConfiguration} from './startup/httpServerConfiguration';
-import {ExceptionHandler} from '../core/errors/exceptionHandler';
 import {Logger} from '../core/logging/logger';
 import {HttpProxy} from '../core/utilities/httpProxy';
 
@@ -33,8 +32,7 @@ import {HttpProxy} from '../core/utilities/httpProxy';
 
     } catch (e) {
 
-        // Report startup errors
-        const handler = new ExceptionHandler(logger);
-        handler.handleError(e);
+        // Call an operation specific to startup errors, with no request object
+        logger.handleStartupError(e);
     }
 })();

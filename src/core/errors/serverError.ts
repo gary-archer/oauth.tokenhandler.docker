@@ -3,7 +3,7 @@ import {ClientError} from './clientError';
 /*
  * An error entity that the API will log
  */
-export class ApiError extends Error {
+export class ServerError extends Error {
 
     private _statusCode: number;
     private _errorCode: string;
@@ -71,7 +71,7 @@ export class ApiError extends Error {
         if (this.stack) {
 
             const frames: string[] = [];
-            const items = this.stack.split('\n').map((x: string) => x.trim()) as string[];
+            const items = this.stack.split('\n').map((x: string) => x.trim());
             items.forEach((i) => {
                 frames.push(i);
             });

@@ -4,7 +4,7 @@ import express, {Application, Request, Response} from 'express';
 import fs from 'fs-extra';
 import https from 'https';
 import {Configuration} from '../../core/configuration/configuration';
-import {ExceptionHandler } from '../../core/errors/exceptionHandler';
+import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractRequest } from '../../core/request/abstractRequest';
 import {AbstractResponse } from '../../core/request/abstractResponse';
 import {Authorizer} from '../../core/services/authorizer';
@@ -70,11 +70,20 @@ export class HttpServerConfiguration {
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/proxy/spa/login/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
-        this._expressApp.post('/proxy/spa/login/end', (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
-        this._expressApp.post('/proxy/spa/token', (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
-        this._expressApp.post('/proxy/spa/token/expire', (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
-        this._expressApp.post('/proxy/spa/logout/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
+        this._expressApp.post('/proxy/spa/login/start',
+            (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
+
+        this._expressApp.post('/proxy/spa/login/end',
+            (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
+
+        this._expressApp.post('/proxy/spa/token',
+            (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
+
+        this._expressApp.post('/proxy/spa/token/expire',
+            (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
+
+        this._expressApp.post('/proxy/spa/logout/start',
+            (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
     }
 
     /*
@@ -111,7 +120,8 @@ export class HttpServerConfiguration {
      */
     private async _adapt(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
 
-        const request = new ExpressRequestAdapter(rq);
+        const logEntry = new LogEntry();
+        const request = new ExpressRequestAdapter(rq, logEntry);
         const response = new ExpressResponseAdapter(rs);
 
         try {
@@ -120,15 +130,18 @@ export class HttpServerConfiguration {
             await fn(request, response);
 
             // Return the response to the caller
-            response.finalise();
+            response.finalise(logEntry);
 
         } catch (e) {
 
             // Return an Express error response
-            const handler = new ExceptionHandler(this._logger);
-            const clientError = handler.handleError(e);
+            const clientError = this._logger.handleError(e, logEntry);
             response.setError(clientError);
-            response.finalise();
+            response.finalise(logEntry);
+
+        } finally {
+
+            this._logger.write(logEntry);
         }
     }
 }

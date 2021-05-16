@@ -1,5 +1,6 @@
 import cookie, {CookieSerializeOptions} from 'cookie';
 import {ClientError} from '../../core/errors/clientError';
+import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractResponse} from '../../core/request/abstractResponse';
 
 /*
@@ -41,7 +42,9 @@ export class LambdaResponse implements AbstractResponse {
         this._data.body = error.toResponseFormat();
     }
 
-    public finalise(): any {
+    public finalise(logEntry: LogEntry): any {
+
+        logEntry.setStatusCode(this._data.statusCode);
 
         const data = {
             statusCode : this._data.statusCode,

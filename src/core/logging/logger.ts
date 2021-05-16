@@ -1,5 +1,8 @@
 import winston from 'winston';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
+import {ServerError} from '../errors/serverError';
+import {ClientError} from '../errors/clientError';
+import {ErrorUtils} from '../errors/errorUtils';
 import {LogEntry} from './logEntry';
 
 /*
@@ -36,16 +39,47 @@ export class Logger {
     }
 
     /*
-     * Output the log entry
+     * Startup errors do not have a request object
      */
-    public write(logEntry: LogEntry): void {
+    public handleStartupError(exception: any): void {
 
-        // Make sure we have a logger, and for startup errors we create the logger here
+        // Make sure we have a logger
         if (!this._innerLogger) {
             this._innerLogger = this._createLogger(this._getConsoleTransport());
         }
 
-        // Then send the data to winston
+        const logEntry = new LogEntry();
+        logEntry.setServerError(ErrorUtils.createServerError(exception));
+        this._innerLogger.info(logEntry.getData());
+    }
+
+    /*
+     * Handle errors during API calls
+     */
+    public handleError(exception: any, logEntry: LogEntry): ClientError {
+
+        // Ensure that the exception has a known type
+        const handledError = ErrorUtils.fromException(exception);
+        if (exception instanceof ClientError) {
+
+            // Client errors mean the caller did something wrong
+            const clientError = handledError as ClientError;
+            logEntry.setClientError(clientError);
+            return clientError;
+
+        } else {
+
+            // API errors mean we experienced a failure
+            const serverError = handledError as ServerError;
+            logEntry.setServerError(serverError);
+            return serverError.toClientError();
+        }
+    }
+
+    /*
+     * Output the log entry
+     */
+    public write(logEntry: LogEntry): void {
         this._innerLogger.info(logEntry.getData());
     }
 

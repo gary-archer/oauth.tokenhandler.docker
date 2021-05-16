@@ -1,6 +1,7 @@
 import {CookieSerializeOptions} from 'cookie';
 import {Response} from 'express';
 import {ClientError} from '../../core/errors/clientError';
+import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractResponse} from '../../core/request/abstractResponse';
 
 /*
@@ -35,7 +36,7 @@ export class ExpressResponseAdapter implements AbstractResponse {
         this._data = error.toResponseFormat();
     }
 
-    public finalise(): any {
+    public finalise(logEntry: LogEntry): any {
 
         if (this._data) {
             this._response.send(this._data);
@@ -43,6 +44,7 @@ export class ExpressResponseAdapter implements AbstractResponse {
             this._response.send();
         }
 
+        logEntry.setStatusCode(this._response.statusCode);
         return null;
     }
 

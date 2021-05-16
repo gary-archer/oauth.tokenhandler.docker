@@ -1,4 +1,4 @@
-import {ApiError} from './apiError';
+import {ServerError} from './serverError';
 import {ClientError} from './clientError';
 import {ErrorCodes} from './errorCodes';
 
@@ -10,10 +10,10 @@ export class ErrorUtils {
     /*
      * Ensure that all errors are of a known type
      */
-    public static fromException(exception: any): ApiError | ClientError {
+    public static fromException(exception: any): ServerError | ClientError {
 
         // Already handled 500 errors
-        if (exception instanceof ApiError) {
+        if (exception instanceof ServerError) {
             return exception;
         }
 
@@ -22,27 +22,34 @@ export class ErrorUtils {
             return exception;
         }
 
-        // Handle general exceptions
-        const apiError = new ApiError(
+        return this.createServerError(exception);
+    }
+
+    /*
+     * Create an error from an exception
+     */
+    public static createServerError(exception: any): ServerError {
+
+        const serverError = new ServerError(
             ErrorCodes.serverError,
             'An unexpected exception occurred in the API',
             exception.stack);
 
-        apiError.details = this._getExceptionDetails(exception);
-        return apiError;
+        serverError.details = this._getExceptionDetails(exception);
+        return serverError;
     }
 
     /*
      * Throw an API exception from a message
      */
-    public static fromMessage(logContext: string): ApiError {
+    public static fromMessage(logContext: string): ServerError {
 
-        const apiError = new ApiError(
+        const serverError = new ServerError(
             ErrorCodes.serverError,
             'An unexpected exception occurred in the API');
 
-        apiError.details = logContext;
-        return apiError;
+        serverError.details = logContext;
+        return serverError;
     }
 
     /*
@@ -55,6 +62,7 @@ export class ErrorUtils {
             400,
             ErrorCodes.cookieNotFound,
             'A required cookie was missing in an incoming request');
+
         error.logContext = logContext;
         return error;
     }
@@ -68,6 +76,7 @@ export class ErrorUtils {
             400,
             ErrorCodes.fieldNotFound,
             'A required field was missing in an incoming request');
+
         error.logContext = logContext;
         return error;
     }
@@ -81,6 +90,7 @@ export class ErrorUtils {
             400,
             ErrorCodes.invalidData,
             'Request data was received with an invalid value');
+
         error.logContext = logContext;
         return error;
     }
@@ -88,35 +98,35 @@ export class ErrorUtils {
     /*
      * Handle failed cookie decryption
      */
-    public static fromCookieDecryptionError(name: string, exception: any): ApiError {
+    public static fromCookieDecryptionError(name: string, exception: any): ServerError {
 
-        const apiError = new ApiError(
+        const serverError = new ServerError(
             ErrorCodes.invalidData,
             'Request data was received with an invalid value',
             exception.stack);
 
-        apiError.statusCode = 400;
-        apiError.details = {
+        serverError.statusCode = 400;
+        serverError.details = {
             name,
             details: this._getExceptionDetails(exception),
         };
 
-        return apiError;
+        return serverError;
     }
 
     /*
      * Handle failed HTTP connectivity
      */
-    public static fromHttpRequestError(exception: any, url: string): ApiError {
+    public static fromHttpRequestError(exception: any, url: string): ServerError {
 
-        const apiError = new ApiError(
+        const serverError = new ServerError(
             ErrorCodes.httpRequestError,
             'Problem encountered connecting to the Authorization Server',
             exception.stack);
 
-        apiError.url = url;
-        apiError.details = this._getExceptionDetails(exception);
-        return apiError;
+        serverError.url = url;
+        serverError.details = this._getExceptionDetails(exception);
+        return serverError;
     }
 
     /*

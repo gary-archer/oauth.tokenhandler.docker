@@ -1,4 +1,5 @@
 import cookie from 'cookie';
+import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractRequest} from '../../core/request/abstractRequest';
 
 /*
@@ -8,10 +9,12 @@ export class LambdaRequest implements AbstractRequest {
 
     private readonly _event: any;
     private readonly _body: any;
+    private readonly _logEntry: LogEntry;
 
-    public constructor(event: any) {
+    public constructor(event: any, logEntry: LogEntry) {
         this._event = event;
         this._body = this._event.body ? JSON.parse(this._event.body) : {};
+        this._logEntry = logEntry;
     }
 
     public getUri(): string {
@@ -42,11 +45,6 @@ export class LambdaRequest implements AbstractRequest {
         return null;
     }
 
-    /*
-     * Use a library to parse incoming cookies, which are generally received in multiple headers like this:
-     * - Cookie: First=1; Second=2
-     * - Cookie: Third=3
-     */
     public getCookie(name: string): string | null {
 
         let result = '';
@@ -62,9 +60,10 @@ export class LambdaRequest implements AbstractRequest {
         return result;
     }
 
-    /*
-     * Get a multi value header
-     */
+    public getLogEntry(): LogEntry {
+        return this._logEntry;
+    }
+
     private _getMultiValueHeader(name: string): string[] {
 
         if (this._event.headers) {

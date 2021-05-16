@@ -128,7 +128,7 @@ export class CookieService {
     /*
      * Clear the temporary state cookie used during login
      */
-    public clearStateCookie(response: AbstractResponse) {
+    public clearStateCookie(response: AbstractResponse): void {
 
         const options = this._getCookieOptions();
         options.expires = new Date(0);

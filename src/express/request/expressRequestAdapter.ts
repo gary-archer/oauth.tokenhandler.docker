@@ -1,4 +1,5 @@
 import {Request} from 'express';
+import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractRequest} from '../../core/request/abstractRequest';
 
 /*
@@ -7,9 +8,11 @@ import {AbstractRequest} from '../../core/request/abstractRequest';
 export class ExpressRequestAdapter implements AbstractRequest {
 
     private readonly _request: Request;
+    private readonly _logEntry: LogEntry;
 
-    public constructor(request: Request) {
+    public constructor(request: Request, logEntry: LogEntry) {
         this._request = request;
+        this._logEntry = logEntry;
     }
 
     public getUri(): string {
@@ -43,5 +46,9 @@ export class ExpressRequestAdapter implements AbstractRequest {
 
     public getCookie(name: string): string | null {
         return this._request.cookies[name];
+    }
+
+    public getLogEntry(): LogEntry {
+        return this._logEntry;
     }
 }

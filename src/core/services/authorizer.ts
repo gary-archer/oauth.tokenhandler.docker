@@ -36,6 +36,7 @@ export class Authorizer {
     public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        request.getLogEntry().setOperationName('startLogin');
         this._validateOrigin(request);
 
         // First create a random login state
@@ -77,6 +78,7 @@ export class Authorizer {
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        request.getLogEntry().setOperationName('endLogin');
         this._validateOrigin(request);
 
         // Read the state cookie and then clear it
@@ -130,6 +132,7 @@ export class Authorizer {
     public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        request.getLogEntry().setOperationName('refreshToken');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -170,6 +173,7 @@ export class Authorizer {
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        request.getLogEntry().setOperationName('expireSession');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -181,7 +185,6 @@ export class Authorizer {
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
         const expiredRefreshToken = `x${refreshToken}x`;
-        console.log(expiredRefreshToken);
         this._cookieService.writeAuthCookie(expiredRefreshToken, response);
         response.setStatusCode(204);
     }
@@ -192,6 +195,7 @@ export class Authorizer {
     public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
+        request.getLogEntry().setOperationName('startLogout');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 

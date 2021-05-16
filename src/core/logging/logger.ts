@@ -24,60 +24,29 @@ export class Logger {
      */
     public initialize(configuration: ApiConfiguration): void {
 
-        if (configuration.development && this._isLambda) {
+        this._isDevelopment = configuration.development;
+        if (this._isDevelopment && this._isLambda) {
+
             this._innerLogger = this._createLogger(this._getFileTransport());
+
         } else {
+
             this._innerLogger = this._createLogger(this._getConsoleTransport());
         }
     }
 
     /*
-     * Output the log entry and use pretty printing during development
+     * Output the log entry
      */
     public write(logEntry: LogEntry): void {
 
-        // For startup errors create the logger here
+        // Make sure we have a logger, and for startup errors we create the logger here
         if (!this._innerLogger) {
             this._innerLogger = this._createLogger(this._getConsoleTransport());
         }
 
-        if (this._isDevelopment) {
-
-            // Use readable logs when debugging
-            this._innerLogger.info(JSON.stringify(logEntry.getData(), null, 2));
-
-        } else {
-
-            // Use logs that can be easily shipped to Elastic Search
-            this._innerLogger.info(JSON.stringify(logEntry.getData()));
-        }
-    }
-
-    /*
-     * Log to stdout for deployed systems and during local Express development
-     */
-    private _getConsoleTransport(): winston.transport {
-
-        const consoleOptions = {
-            format: winston.format.combine(
-                winston.format.simple(),
-            ),
-        };
-
-        return new (winston.transports.Console)(consoleOptions);
-    }
-
-    /*
-     * During local lambda development we log to logs/api.log and the console shows the lambda response
-     */
-    private _getFileTransport(): winston.transport {
-
-        const fileOptions = {
-            dirname: 'logs',
-            filename: 'api.log',
-        };
-
-        return new (winston.transports.File)(fileOptions);
+        // Then send the data to winston
+        this._innerLogger.info(logEntry.getData());
     }
 
     /*
@@ -91,5 +60,54 @@ export class Logger {
                 transport
             ],
         });
+    }
+
+    /*
+     * Log to stdout for deployed systems and during local Express development
+     */
+    private _getConsoleTransport(): winston.transport {
+
+        const transport = new winston.transports.Console();
+        transport.format = this._isDevelopment ? this._getPrettyJsonFormatter() : this._getBareJsonFormatter();
+        return transport;
+    }
+
+    /*
+     * During local lambda development we log to logs/api.log and the console shows the lambda response
+     */
+    private _getFileTransport(): winston.transport {
+
+        const fileOptions = {
+            dirname: 'logs',
+            filename: 'api.log',
+        };
+
+        const transport = new winston.transports.File(fileOptions);
+        transport.format = this._getPrettyJsonFormatter();
+        return transport;
+    }
+
+    /*
+     * Get winston to print a JSON object per line, used by log shipping tools
+     */
+    private _getBareJsonFormatter(): winston.Logform.Format {
+
+        return winston.format.combine(
+            winston.format.printf((data: any) => {
+                return JSON.stringify(data.message);
+            })
+        );
+    }
+
+    /*
+     * Get winston to print a multi line JSON for best readability during development
+     */
+    private _getPrettyJsonFormatter(): winston.Logform.Format {
+
+        return winston.format.combine(
+            winston.format.printf((data: any) => {
+                return JSON.stringify(data.message, null, 2);
+            })
+        );
     }
 }

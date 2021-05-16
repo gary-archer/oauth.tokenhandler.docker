@@ -1,25 +1,22 @@
 GO LIVE
 -------
-1. Error handling and logs to write properly
-   - Startup errors to log in standard JSON format
-   - Lambda local to output to a file
-   - Exception handler needs to receive a log entry
-   - Log to schema and include client id
+1. Get first lambda test fully working based on JSON response data
 
-2. Separate API logs from client response on a developer PC
-   Control via crossenv - see lambda edge for an example
+2. Create a log entry early for both lambda and express
+   Fill in some basic schema fields and authorizer can fill in some details itself
 
-3. Deployed system logs to Elastic Cloud
-
-4. Get testLambdas.sh completed
+3. Get testLambdas.sh completed
+   See if I can get query params more reliably
    
-5. Think about configuration, paths and multiple SPAs and vulnerabilities
-   More work on giving the 3 service classes reduced configuration
+4. Finalise configuration and give classes reduced configuration objects where possible
    OAuthService to do more of the OAuth work
 
 CONSOLIDATION
 -------------
 1. Validate id token and check AT hash - cf other libraries such as Duende
+   Fill in user id and client id in logs
 
-2. Get Kubernetes deployment working for the proxy API and test with Curity
+2. Deployed system logs to Elastic Cloud
+
+3. Get Kubernetes deployment working for the proxy API and test with Curity
    Remove Serverless dependencies

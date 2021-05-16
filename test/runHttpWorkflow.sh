@@ -80,7 +80,7 @@ HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/spa/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
-  echo "Problem encountered requesting cross origin access, status: $HTTP_STATUS"
+  echo "*** Problem encountered requesting cross origin access, status: $HTTP_STATUS"
   exit
 fi
 
@@ -93,7 +93,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/login/start" \
 -H 'accept: application/json' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
-  echo "Problem encountered starting a login, status: $HTTP_STATUS"
+  echo "*** Problem encountered starting a login, status: $HTTP_STATUS"
   exit
 fi
 
@@ -110,7 +110,7 @@ STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
 echo "*** Following login redirect ..."
 HTTP_STATUS=$(curl -i -L -s "$AUTHORIZATION_REQUEST_URL" -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
-  echo "Problem encountered using the OpenID Connect authorization URL, status: $HTTP_STATUS"
+  echo "*** Problem encountered using the OpenID Connect authorization URL, status: $HTTP_STATUS"
   exit
 fi
 
@@ -133,7 +133,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
 --data-urlencode "password=$TEST_PASSWORD" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '302' ]; then
-  echo "Problem encountered posting a credential to AWS Cognito, status: $HTTP_STATUS"
+  echo "*** Problem encountered posting a credential to AWS Cognito, status: $HTTP_STATUS"
   exit
 fi
 

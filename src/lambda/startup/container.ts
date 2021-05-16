@@ -37,7 +37,7 @@ export class Container {
      */
     public initialize(): void {
 
-        this._configuration = new ConfigurationLoader().load();
+        this._configuration = ConfigurationLoader.load();
         this._logger.initialise(this._configuration.api);
 
         const httpProxy = new HttpProxy(

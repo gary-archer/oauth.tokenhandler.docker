@@ -5,7 +5,7 @@ import {Logger} from '../core/logging/logger';
 import {HttpProxy} from '../core/utilities/httpProxy';
 
 /*
- * The Express API host
+ * The Express API host to run on a Developer PC or in Kubernetes environments
  */
 (async () => {
 
@@ -13,7 +13,7 @@ import {HttpProxy} from '../core/utilities/httpProxy';
     try {
 
         // First load configuration
-        const configuration = await ConfigurationLoader.load();
+        const configuration = ConfigurationLoader.load();
 
         // Initialise logging and visibility of outbound OAuth messages
         logger.initialise(configuration.api);

@@ -9,7 +9,7 @@ export class ConfigurationLoader {
     /*
      * Load JSON data from the app config file
      */
-    public load(): Configuration {
+    public static load(): Configuration {
 
         const configurationBuffer = fs.readFileSync('api.config.json');
         return JSON.parse(configurationBuffer.toString()) as Configuration;

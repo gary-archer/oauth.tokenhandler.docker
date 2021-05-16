@@ -12,9 +12,10 @@ export class LambdaRequest implements AbstractRequest {
     private readonly _logEntry: LogEntry;
 
     public constructor(event: any, logEntry: LogEntry) {
+
         this._event = event;
         this._body = this._event.body ? JSON.parse(this._event.body) : {};
-        
+
         this._logEntry = logEntry;
         this._logEntry.start(
             this.getMethod(),

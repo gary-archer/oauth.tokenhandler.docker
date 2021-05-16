@@ -41,13 +41,13 @@ export class ExpressResponseAdapter implements AbstractResponse {
     public finalise(): any {
 
         this._logEntry.end(this._response.statusCode);
-        
+
         if (this._data) {
             this._response.send(this._data);
         } else {
             this._response.send();
         }
-        
+
         return null;
     }
 

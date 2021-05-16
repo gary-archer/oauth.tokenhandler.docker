@@ -15,7 +15,7 @@ const handler = async (event: any): Promise<void> => {
     try {
 
         const configuration = await ConfigurationLoader.load();
-        logger.initialize(configuration.api);
+        logger.initialise(configuration.api);
 
         const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
         await authorizer.endLogin(request, response);

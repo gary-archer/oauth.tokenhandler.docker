@@ -52,7 +52,7 @@ export class HttpServerConfiguration {
     /*
      * Set up routes for the API's OAuth operations
      */
-    public async initializeRoutes(): Promise<void> {
+    public async initialiseRoutes(): Promise<void> {
 
         // Allow requests from the SPA including sending the cross origin same site cookie
         const options = {

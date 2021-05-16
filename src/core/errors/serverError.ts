@@ -86,7 +86,7 @@ export class ServerError extends Error {
      * Translate to a supportable error response to return to the API caller
      */
     public toClientError(): ClientError {
-        
+
         const error = new ClientError(this._statusCode, this._errorCode, this.message);
         error.setExceptionDetails('oauthproxyapi', this._instanceId, this._utcTime);
         return error;

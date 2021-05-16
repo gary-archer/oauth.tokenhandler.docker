@@ -2,7 +2,7 @@
 
 #
 # A script to test HTTP messages that the SPA and browser will together send to the OAuth Web Proxy API
-# Requires the jq tool to be installed
+# The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
 #
 
 #

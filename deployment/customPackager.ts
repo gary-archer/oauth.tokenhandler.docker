@@ -14,6 +14,11 @@ class Packager {
         // Unzip the default package created by the sls package command
         const packageName = 'oauthproxyapi';
         await this._unzipPackage(packageName);
+
+        // Exclude Express specific code from AWS
+        await this._excludeFolders(packageName, ['dist/express']);
+
+        // Exclude Express dependencies from AWS
         await this._installDependencies(packageName, ['express', 'cookie-parser', 'cors']);
 
         // Copy in the deployed configuration
@@ -30,6 +35,16 @@ class Packager {
 
         const zip = new admzip(`.serverless/${packageName}.zip`);
         zip.extractAllTo(`.serverless/${packageName}`, true);
+    }
+
+    /*
+     * Remove folders not relevant to deployed lambdas
+     */
+    private async _excludeFolders(packageName: string, folders: string[]) {
+
+        for (const folder of folders) {
+            await fs.remove(`.serverless/${packageName}/${folder}`);
+        }
     }
 
     /*

@@ -1,4 +1,4 @@
-import winston from 'winston';
+import fs from 'fs-extra';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ServerError} from '../errors/serverError';
 import {ClientError} from '../errors/clientError';
@@ -12,7 +12,6 @@ export class Logger {
 
     private readonly _isLambda: boolean;
     private _isDevelopment: boolean;
-    private _innerLogger: any = null;
 
     /*
      * The logger is created during application startup
@@ -23,19 +22,10 @@ export class Logger {
     }
 
     /*
-     * The inner logger is created once configuration is loaded
+     * Initialise once the configuration file is loaded
      */
-    public initialize(configuration: ApiConfiguration): void {
-
+    public initialise(configuration: ApiConfiguration): void {
         this._isDevelopment = configuration.development;
-        if (this._isDevelopment && this._isLambda) {
-
-            this._innerLogger = this._createLogger(this._getFileTransport());
-
-        } else {
-
-            this._innerLogger = this._createLogger(this._getConsoleTransport());
-        }
     }
 
     /*
@@ -43,14 +33,9 @@ export class Logger {
      */
     public handleStartupError(exception: any): void {
 
-        // Make sure we have a logger
-        if (!this._innerLogger) {
-            this._innerLogger = this._createLogger(this._getConsoleTransport());
-        }
-
         const logEntry = new LogEntry();
         logEntry.setServerError(ErrorUtils.createServerError(exception));
-        this._innerLogger.info(logEntry.getData());
+        this.write(logEntry);
     }
 
     /*
@@ -79,68 +64,43 @@ export class Logger {
      * Output the log entry
      */
     public write(logEntry: LogEntry): void {
-        this._innerLogger.info(logEntry.getData());
+
+        const dataToLog = this._formatData(logEntry);
+        if (this._isLambda && this._isDevelopment) {
+
+            this._logToFile(dataToLog);
+
+        } else {
+
+            this._logToConsole(dataToLog);
+        }
     }
 
     /*
-     * Create the logger with a single transport and JSON logging for this sample does not use log levels
+     * Use prettified output for development to improve readability
+     * Use a single line per JSON object for deployed systems, as expected by log shipper tools
      */
-    private _createLogger(transport: winston.transport): winston.Logger {
+    private _formatData(logEntry: LogEntry): string {
 
-        return winston.createLogger({
-            level: 'info',
-            transports: [
-                transport
-            ],
-        });
+        if (this._isDevelopment) {
+            return JSON.stringify(logEntry.getData(), null, 2);
+        } else {
+            return JSON.stringify(logEntry.getData());
+        }
     }
 
     /*
-     * Log to stdout for deployed systems and during local Express development
+     * Write to stdout
      */
-    private _getConsoleTransport(): winston.transport {
-
-        const transport = new winston.transports.Console();
-        transport.format = this._isDevelopment ? this._getPrettyJsonFormatter() : this._getBareJsonFormatter();
-        return transport;
+    private _logToConsole(data: string) {
+        console.log(data);
     }
 
     /*
-     * During local lambda development we log to logs/api.log and the console shows the lambda response
+     * Write to file in order to prevent mixing logs with lambda responses on a developer PC
+     * This is not efficient but is only used when 'sls invoke local -f' is used during development
      */
-    private _getFileTransport(): winston.transport {
-
-        const fileOptions = {
-            dirname: 'logs',
-            filename: 'api.log',
-        };
-
-        const transport = new winston.transports.File(fileOptions);
-        transport.format = this._getPrettyJsonFormatter();
-        return transport;
-    }
-
-    /*
-     * Get winston to print a JSON object per line, used by log shipping tools
-     */
-    private _getBareJsonFormatter(): winston.Logform.Format {
-
-        return winston.format.combine(
-            winston.format.printf((data: any) => {
-                return JSON.stringify(data.message);
-            })
-        );
-    }
-
-    /*
-     * Get winston to print a multi line JSON for best readability during development
-     */
-    private _getPrettyJsonFormatter(): winston.Logform.Format {
-
-        return winston.format.combine(
-            winston.format.printf((data: any) => {
-                return JSON.stringify(data.message, null, 2);
-            })
-        );
+    private _logToFile(data: string): void {
+        fs.appendFileSync('./logs/api.log', data);
     }
 }

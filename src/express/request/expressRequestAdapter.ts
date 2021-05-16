@@ -11,10 +11,10 @@ export class ExpressRequestAdapter implements AbstractRequest {
     private readonly _logEntry: LogEntry;
 
     public constructor(request: Request, logEntry: LogEntry) {
+
         this._request = request;
         this._logEntry = logEntry;
 
-        this._logEntry = logEntry;
         this._logEntry.start(
             this.getMethod(),
             this.getUri(),

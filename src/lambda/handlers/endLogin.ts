@@ -1,6 +1,6 @@
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
-import {LogEntry} from '../../core/logging/logEntry';
 import {Logger} from '../../core/logging/logger';
+import {LogEntry} from '../../core/logging/logEntry';
 import {LambdaRequest} from '../request/lambdaRequest';
 import {LambdaResponse} from '../request/lambdaResponse';
 import {LambdaConfiguration} from '../startup/lambdaConfiguration';

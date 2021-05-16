@@ -1,24 +1,17 @@
 import {Guid} from 'guid-typescript';
-import os from 'os';
 import {ServerError} from '../errors/serverError';
 import {ClientError} from '../errors/clientError';
+import {LogEntryData} from './logEntryData';
 
 /*
  * Each API operation has a log entry, to support structured logging
  */
 export class LogEntry {
 
-    private readonly _data: any;
+    private readonly _data: LogEntryData;
 
     public constructor() {
-
-        this._data = {
-            id: Guid.create().toString(),
-            utcTime: new Date().toISOString(),
-            apiName: 'oauthproxyapi',
-            hostName: os.hostname(),
-            performanceThreshold: 500,
-        };
+        this._data = new LogEntryData();
     }
 
     /*
@@ -31,6 +24,7 @@ export class LogEntry {
         correlationId: string | null,
         sessionId: string | null): void {
 
+        this._data.performance.start();
         this._data.requestVerb = method;
         this._data.requestPath = path;
 
@@ -53,20 +47,25 @@ export class LogEntry {
     }
 
     public setServerError(error: ServerError): void {
+
         this._data.errorData = error.toLogFormat();
         this._data.errorCode = error.errorCode;
+        this._data.errorId = error.getInstanceId();
     }
 
     public setClientError(error: ClientError): void {
+
         this._data.errorData = error.toLogFormat();
         this._data.errorCode = error.errorCode;
     }
 
     public end(statusCode: number): void {
+
+        this._data.performance.dispose();
         this._data.statusCode = statusCode;
     }
 
     public getData(): any {
-        return this._data;
+        return this._data.toLogFormat();
     }
 }

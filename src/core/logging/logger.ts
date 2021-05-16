@@ -58,7 +58,6 @@ export class Logger {
      */
     public handleError(exception: any, logEntry: LogEntry): ClientError {
 
-        // Ensure that the exception has a known type
         const handledError = ErrorUtils.fromException(exception);
         if (exception instanceof ClientError) {
 

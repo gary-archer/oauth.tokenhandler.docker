@@ -30,13 +30,13 @@ export class ErrorUtils {
      */
     public static createServerError(exception: any): ServerError {
 
-        const serverError = new ServerError(
+        const error = new ServerError(
             ErrorCodes.serverError,
             'An unexpected exception occurred in the API',
             exception.stack);
 
-        serverError.details = this._getExceptionDetails(exception);
-        return serverError;
+        error.details = this._getExceptionDetails(exception);
+        return error;
     }
 
     /*
@@ -44,12 +44,12 @@ export class ErrorUtils {
      */
     public static fromMessage(logContext: string): ServerError {
 
-        const serverError = new ServerError(
+        const error = new ServerError(
             ErrorCodes.serverError,
             'An unexpected exception occurred in the API');
 
-        serverError.details = logContext;
-        return serverError;
+        error.details = logContext;
+        return error;
     }
 
     /*
@@ -98,20 +98,15 @@ export class ErrorUtils {
     /*
      * Handle failed cookie decryption
      */
-    public static fromCookieDecryptionError(name: string, exception: any): ServerError {
+    public static fromCookieDecryptionError(name: string, exception: any): ClientError {
 
-        const serverError = new ServerError(
+        const error = new ClientError(
+            400,
             ErrorCodes.invalidData,
-            'Request data was received with an invalid value',
-            exception.stack);
+            'Request data was received with an invalid value');
 
-        serverError.statusCode = 400;
-        serverError.details = {
-            name,
-            details: this._getExceptionDetails(exception),
-        };
-
-        return serverError;
+        error.logContext = this._getExceptionDetails(exception);
+        return error;
     }
 
     /*
@@ -124,8 +119,7 @@ export class ErrorUtils {
             'Problem encountered connecting to the Authorization Server',
             exception.stack);
 
-        serverError.url = url;
-        serverError.details = this._getExceptionDetails(exception);
+        serverError.details = `${this._getExceptionDetails(exception)}, URL: ${url}`;
         return serverError;
     }
 

@@ -9,9 +9,9 @@ export class ConfigurationLoader {
     /*
      * Load JSON data from the app config file
      */
-    public static async load(): Promise<Configuration> {
+    public load(): Configuration {
 
-        const configurationBuffer = await fs.readFile('api.config.json');
+        const configurationBuffer = fs.readFileSync('api.config.json');
         return JSON.parse(configurationBuffer.toString()) as Configuration;
     }
 }

@@ -1,32 +1,42 @@
-import {Configuration} from '../../core/configuration/configuration';
-import {Authorizer} from '../../core/services/authorizer';
-import {CookieService} from '../../core/services/cookieService';
-import {OAuthService} from '../../core/services/oauthService';
-import {HttpProxy} from '../../core/utilities/httpProxy';
+import middy from '@middy/core';
+import cors from '@middy/http-cors';
+import {Context, Handler} from 'aws-lambda';
+import {Container} from './container';
+
+// A custom type for more readable code
+export type AsyncHandler = (event: any, context: Context) => Promise<any>;
 
 /*
  * A class to wire up dependencies and middleware
  */
 export class LambdaConfiguration {
 
-    private readonly _configuration: Configuration;
+    private readonly _container: Container;
 
-    public constructor(configuration: Configuration) {
-        this._configuration = configuration;
+    public constructor(container: Container) {
+        this._container = container;
     }
 
     /*
-     * Auto wire the main auth service entry point class
+     * Deal with cross cutting concerns in a single place for all lambdas
      */
-    public getAuthorizer(): Authorizer {
+    public enrichHandler(baseHandler: AsyncHandler): Handler {
 
-        const httpProxy = new HttpProxy(
-            this._configuration.host.useHttpProxy,
-            this._configuration.host.httpProxyUrl);
+        try {
 
-        return new Authorizer(
-            this._configuration.api,
-            new CookieService(this._configuration.api, this._configuration.client),
-            new OAuthService(this._configuration.api, this._configuration.client, httpProxy));
+            // Initialise the app
+            this._container.initialize();
+        
+            // Then wrap the 
+            return middy(async (event: any, context: Context) => {
+                return baseHandler(event, context);
+
+            }).use(cors({origins: [this._container.configuration.api.trustedWebOrigin]}));
+
+        } catch(e) {
+
+            // Return an error callback
+            throw new Error('not implemented');
+        }
     }
 }

@@ -1,36 +1,17 @@
-import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
-import {Logger} from '../../core/logging/logger';
-import {LogEntry} from '../../core/logging/logEntry';
-import {LambdaRequest} from '../request/lambdaRequest';
-import {LambdaResponse} from '../request/lambdaResponse';
+import {Authorizer} from '../../core/services/authorizer';
+import {Container} from '../startup/container';
 import {LambdaConfiguration} from '../startup/lambdaConfiguration';
 
-const handler = async (event: any): Promise<void> => {
+const container = new Container();
 
-    const logger = new Logger(true);
-    const logEntry = new LogEntry();
-    const request = new LambdaRequest(event, logEntry);
-    const response = new LambdaResponse(logEntry);
+// The callback invoked at runtime invokes an auto wired object
+const baseHandler = async (event: any): Promise<void> => {
+    return container.execute(event, (a: Authorizer) => a.startLogin);
+}
 
-    try {
+// Auto wire objects into the container, and wrap the handler in middleware
+const configuration = new LambdaConfiguration(container);
+const handler = configuration.enrichHandler(baseHandler);
 
-        const configuration = await ConfigurationLoader.load();
-        logger.initialise(configuration.api);
-
-        const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
-        await authorizer.startLogin(request, response);
-        return response.finalise();
-
-    } catch (e) {
-
-        const clientError = logger.handleError(e, logEntry);
-        response.setError(clientError);
-        return response.finalise();
-
-    } finally {
-
-        logger.write(logEntry);
-    }
-};
-
+// Return the enriched handler
 export {handler};

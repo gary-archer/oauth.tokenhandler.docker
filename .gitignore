@@ -3,5 +3,4 @@ node_modules
 dist
 logs
 .DS_store
-test/request.txt
-test/response.txt
+test/*.txt

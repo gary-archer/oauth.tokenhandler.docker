@@ -1,8 +1,0 @@
-{
-  "path": "/spa/login/start",
-  "httpMethod": "POST",
-  "headers": {
-    "origin": "https://web.mycompany.com",
-    "accept": "application/json"
-  }
-}

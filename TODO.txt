@@ -1,14 +1,12 @@
 GO LIVE
 -------
-1. Get first lambda test fully working based on JSON response data
+1. Get testLambdas.sh completed
+   See if I can get query params more reliably
 
 2. Create a log entry early for both lambda and express
    Fill in some basic schema fields and authorizer can fill in some details itself
-
-3. Get testLambdas.sh completed
-   See if I can get query params more reliably
    
-4. Finalise configuration and give classes reduced configuration objects where possible
+3. Finalise configuration and give classes reduced configuration objects where possible
    OAuthService to do more of the OAuth work
 
 CONSOLIDATION

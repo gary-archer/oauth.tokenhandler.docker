@@ -6,6 +6,7 @@ import {ClientError} from '../errors/clientError';
 import {ErrorUtils} from '../errors/errorUtils';
 import {HttpProxy} from '../utilities/httpProxy';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
+import {UrlHelper} from '../utilities/urlHelper';
 
 /*
  * A class to deal with calls to the Authorization Server and other OAuth responsibilities
@@ -35,6 +36,29 @@ export class OAuthService {
     }
 
     /*
+     * Form the OpenID Connect authorization request URL
+     */
+    public getAuthorizationRequestUri(loginState: OAuthLoginState): string {
+
+        let url = this._configuration.api.authorizeEndpoint;
+        url += '?';
+        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
+        url += '&';
+        url += UrlHelper.createQueryParameter('redirect_uri', this._configuration.client.redirectUri);
+        url += '&';
+        url += UrlHelper.createQueryParameter('response_type', 'code');
+        url += '&';
+        url += UrlHelper.createQueryParameter('scope', this._configuration.client.scope);
+        url += '&';
+        url += UrlHelper.createQueryParameter('state', loginState.state);
+        url += '&';
+        url += UrlHelper.createQueryParameter('code_challenge', loginState.codeChallenge);
+        url += '&';
+        url += UrlHelper.createQueryParameter('code_challenge_method', 'S256');
+        return url;
+    }
+
+    /*
      * Send the authorization code grant message to the Authorization Server
      */
     public async sendAuthorizationCodeGrant(code: string, codeVerifier: string): Promise<any> {
@@ -58,6 +82,35 @@ export class OAuthService {
         formData.append('client_id', this._configuration.client.clientId);
         formData.append('refresh_token', refreshToken);
         return this._postGrantMessage(formData);
+    }
+
+    /*
+     * Create the OpenID Connect end session request URL
+     */
+    public getEndSessionRequestUri(idToken: string): string {
+
+        // Start the URL
+        let url = this._configuration.api.endSessionEndpoint;
+        url += '?';
+        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
+        url += '&';
+
+        if (this._configuration.api.provider === 'cognito') {
+
+            // Cognito has non standard parameters
+            url += UrlHelper.createQueryParameter('logout_uri', this._configuration.client.postLogoutRedirectUri);
+
+        } else {
+
+            // For other providers supply the most standard values
+            url += UrlHelper.createQueryParameter(
+                'post_logout_redirect_uri',
+                this._configuration.client.postLogoutRedirectUri);
+            url += '&';
+            url += UrlHelper.createQueryParameter('id_token_hint', idToken);
+        }
+
+        return url;
     }
 
     /*

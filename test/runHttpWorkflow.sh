@@ -23,7 +23,7 @@ RESPONSE_FILE=test/response.txt
 # Use these overrides to test AWS deployed endpoints
 #
 #WEB_BASE_URL=https://web.authsamples.com
-#PROXY_API_BASE_URL=https://api.authsamples.com
+#PROXY_API_BASE_URL=https://api.authsamples.com/proxy/spa
 
 #
 # A simple routine to get a header value from an HTTP response file

@@ -3,7 +3,6 @@ import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 import {Logger} from '../logging/logger';
-import {UrlHelper} from '../utilities/urlHelper';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
@@ -42,26 +41,9 @@ export class Authorizer {
         // First create a random login state
         const loginState = this._oauthService.generateLoginState();
 
-        // Next form the OpenID Connect authorization redirect URI
-        let url = this._configuration.api.authorizeEndpoint;
-        url += '?';
-        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
-        url += '&';
-        url += UrlHelper.createQueryParameter('redirect_uri', this._configuration.client.redirectUri);
-        url += '&';
-        url += UrlHelper.createQueryParameter('response_type', 'code');
-        url += '&';
-        url += UrlHelper.createQueryParameter('scope', this._configuration.client.scope);
-        url += '&';
-        url += UrlHelper.createQueryParameter('state', loginState.state);
-        url += '&';
-        url += UrlHelper.createQueryParameter('code_challenge', loginState.codeChallenge);
-        url += '&';
-        url += UrlHelper.createQueryParameter('code_challenge_method', 'S256');
-
         // Write the full URL to the response body
         const data = {} as any;
-        data.authorizationRequestUri = url;
+        data.authorizationRequestUri = this._oauthService.getAuthorizationRequestUri(loginState);
         response.setBody(data);
 
         // Also write the state cookie to response headers
@@ -205,33 +187,12 @@ export class Authorizer {
             throw ErrorUtils.fromMissingCookieError('No id cookie was found in the incoming request');
         }
 
-        // Start the URL
-        let url = this._configuration.api.endSessionEndpoint;
-        url += '?';
-        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
-        url += '&';
-
-        if (this._configuration.api.provider === 'cognito') {
-
-            // Cognito has non standard parameters
-            url += UrlHelper.createQueryParameter('logout_uri', this._configuration.client.postLogoutRedirectUri);
-
-        } else {
-
-            // For other providers supply the most standard values
-            url += UrlHelper.createQueryParameter(
-                'post_logout_redirect_uri',
-                this._configuration.client.postLogoutRedirectUri);
-            url += '&';
-            url += UrlHelper.createQueryParameter('id_token_hint', idToken);
-        }
-
         // Clear all cookies for the caller
         this._cookieService.clearAll(response);
 
         // Write the full URL to the response body
         const data = {} as any;
-        data.endSessionRequestUri = url;
+        data.endSessionRequestUri = this._oauthService.getEndSessionRequestUri(idToken);
         response.setBody(data);
         response.setStatusCode(200);
     }

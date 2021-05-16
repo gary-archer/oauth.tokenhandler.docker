@@ -3,10 +3,7 @@ GO LIVE
 1. Fill in all logging fields
    Also handle startup errors
    
-2. Deploy to AWS and test HTTP calls
-   Also check logs including exceptions
-
-3. Finalise configuration and give classes reduced configuration objects where possible
+2. Finalise configuration and give classes reduced configuration objects where possible
    OAuthService to do more of the OAuth work
 
 CONSOLIDATION

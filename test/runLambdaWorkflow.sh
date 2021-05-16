@@ -199,3 +199,77 @@ if [ $HTTP_STATUS -ne 200 ]; then
   apiError "$BODY"
   exit
 fi
+
+#
+# Get values we will use shortly
+#
+AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
+AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
+
+#
+# Next write the input file for the refresh token request
+#
+jo -p \
+path=/spa/token \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+"x-$COOKIE_PREFIX-aft-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
+
+#
+# Invoke the refresh lambda to get an access token
+#
+echo "*** Calling refresh to get an access token in the client ..."
+$SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the refreshToken lambda"
+  exit
+fi
+
+#
+# Get data that we will use later
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
+if [ $HTTP_STATUS -ne 200 ]; then
+  echo "*** Problem encountered refreshing an access token, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
+# Reget these values after every refresh
+#
+AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
+AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ACCESS_TOKEN=$(jq -r .accessToken <<< "$BODY")
+ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
+
+#
+# Call the business API with an access token
+#
+echo "*** Calling cross domain API with an access token ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
+-H "Authorization: Bearer $ACCESS_TOKEN" \
+-H 'accept: application/json' \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+
+#
+# Next expire the refresh token in the auth cookie, for test purposes
+#
+echo "*** Expiring the refresh token ..."

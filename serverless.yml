@@ -48,7 +48,7 @@ functions:
     handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
-          path: /spa/login/start
+          path: /proxy/spa/login/start
           method: post
           cors:
             origins:
@@ -62,7 +62,7 @@ functions:
     handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
-          path: /spa/login/end
+          path: /proxy/spa/login/end
           method: post
           cors:
             origins:
@@ -76,7 +76,7 @@ functions:
     handler: dist/lambda/handlers/refreshToken.handler
     events:
       - http: 
-          path: /spa/token
+          path: /proxy/spa/token
           method: post
           cors:
             origins:
@@ -90,7 +90,7 @@ functions:
     handler: dist/lambda/handlers/expireSession.handler
     events:
       - http: 
-          path: /spa/token/expire
+          path: /proxy/spa/token/expire
           method: post
           cors:
             origins:
@@ -104,7 +104,7 @@ functions:
     handler: dist/lambda/handlers/startLogout.handler
     events:
       - http: 
-          path: /spa/logout/start
+          path: /proxy/spa/logout/start
           method: post
           cors:
             origins:

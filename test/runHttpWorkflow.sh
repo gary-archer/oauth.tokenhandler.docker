@@ -10,7 +10,7 @@
 #
 #export HTTPS_PROXY='http://127.0.0.1:8888'
 WEB_BASE_URL='https://web.mycompany.com'
-PROXY_API_BASE_URL='https://api.mycompany.com:444'
+PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy/spa'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -76,7 +76,7 @@ function apiError() {
 # Act as the SPA by sending an OPTIONS request, then verifying that we get the expected results
 #
 echo "*** Requesting cross origin access"
-HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/spa/login/start" \
+HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
@@ -88,7 +88,7 @@ fi
 # Act as the SPA by calling the OAuth proxy API to start a login and get the request URI
 #
 echo "*** Creating login URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/login/start" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -148,7 +148,7 @@ AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
 # Next we end the login by asking the server to do an authorization code grant
 #
 echo "*** Finishing the login by processing the authorization code ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/login/end" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/end" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
 -H 'accept: application/json' \
@@ -174,7 +174,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 # Next get an access token so that the client can make cross domain calls
 #
 echo "*** Calling refresh to get an access token in the client ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/token" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
@@ -214,7 +214,7 @@ fi
 # Next expire the refresh token in the auth cookie, for test purposes
 #
 echo "*** Expiring the refresh token ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/token/expire" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token/expire" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
@@ -235,7 +235,7 @@ AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 # Next try to refresh the token again and we should get an invalid_grant error
 #
 echo "*** Calling refresh to get an access token when the session is expired ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/token" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
@@ -251,7 +251,7 @@ fi
 # Next make a start logout request
 #
 echo "*** Calling start logout to clear cookies and get the end session request URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/spa/logout/start" \
+HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/logout/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \

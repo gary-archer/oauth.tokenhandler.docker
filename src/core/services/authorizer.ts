@@ -79,11 +79,12 @@ export class Authorizer {
         // Check incoming details
         this._validateOrigin(request);
 
-        // Read the state cookie
+        // Read the state cookie and then clear it
         const stateCookie = this._cookieService.readStateCookie(request);
         if (!stateCookie) {
             throw ErrorUtils.fromMissingCookieError('No state cookie was found in the incoming request');
         }
+        this._cookieService.clearStateCookie(response);
 
         // Check that the value posted matches
         const state = request.getJsonField('state');
@@ -168,7 +169,6 @@ export class Authorizer {
      */
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
-        console.log('*** EXPIRING SESSION');
         // Check incoming details
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);

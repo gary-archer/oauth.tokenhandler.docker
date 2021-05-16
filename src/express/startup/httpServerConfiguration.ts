@@ -60,21 +60,21 @@ export class HttpServerConfiguration {
             origin: this._configuration.api.trustedWebOrigin,
             credentials: true,
         };
-        this._expressApp.use('/spa/*', cors(options) as any);
+        this._expressApp.use('/proxy/spa/*', cors(options) as any);
 
         // Parse cookies and the request body
-        this._expressApp.use('/spa/*', cookieParser());
-        this._expressApp.use('/spa/*', express.json());
+        this._expressApp.use('/proxy/spa/*', cookieParser());
+        this._expressApp.use('/proxy/spa/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/spa/login/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
-        this._expressApp.post('/spa/login/end', (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
-        this._expressApp.post('/spa/token', (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
-        this._expressApp.post('/spa/token/expire', (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
-        this._expressApp.post('/spa/logout/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
+        this._expressApp.post('/proxy/spa/login/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
+        this._expressApp.post('/proxy/spa/login/end', (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
+        this._expressApp.post('/proxy/spa/token', (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
+        this._expressApp.post('/proxy/spa/token/expire', (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
+        this._expressApp.post('/proxy/spa/logout/start', (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
     }
 
     /*

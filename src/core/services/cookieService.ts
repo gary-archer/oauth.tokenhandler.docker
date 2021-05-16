@@ -126,6 +126,16 @@ export class CookieService {
     }
 
     /*
+     * Clear the temporary state cookie used during login
+     */
+    public clearStateCookie(response: AbstractResponse) {
+
+        const options = this._getCookieOptions();
+        options.expires = new Date(0);
+        response.addCookie(this._getCookieName('state'), '', options);
+    }
+
+    /*
      * Clear all cookies when the user session expires
      */
     public clearAll(response: AbstractResponse): void {

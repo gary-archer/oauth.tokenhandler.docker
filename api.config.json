@@ -23,6 +23,6 @@
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
         "scope": "openid profile email",
-        "path": "/spa"
+        "path": "/proxy/spa"
     }
 }

@@ -168,6 +168,7 @@ export class Authorizer {
      */
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
+        console.log('*** EXPIRING SESSION');
         // Check incoming details
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
@@ -180,6 +181,7 @@ export class Authorizer {
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token renewal attempt
         const expiredRefreshToken = `x${refreshToken}x`;
+        console.log(expiredRefreshToken);
         this._cookieService.writeAuthCookie(expiredRefreshToken, response);
         response.setStatusCode(204);
     }

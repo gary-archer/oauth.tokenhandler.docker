@@ -8,7 +8,7 @@
 #
 # Endpoints and parameters
 #
-export HTTPS_PROXY='http://127.0.0.1:8888'
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 WEB_BASE_URL='https://web.mycompany.com'
 PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
@@ -81,6 +81,24 @@ function apiError() {
   if [ "$_CODE" != 'null'  ] && [ "$_MESSAGE" != 'null' ]; then
     echo "*** Code: $_CODE, Message: $_MESSAGE"
   fi
+}
+
+#
+# A subroutine in order to avoid duplication
+#
+function createPostWithCookiesRequest() {
+
+  jo -p \
+    path=$1 \
+    httpMethod=POST \
+    headers=$(jo origin="$WEB_BASE_URL" \
+    accept=application/json \
+    content-type=application/json \
+    "x-$COOKIE_PREFIX-aft-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+    multiValueHeaders=$(jo cookie=$(jo -a \
+    "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE", \
+    "$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+    "$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
 }
 
 #
@@ -209,24 +227,10 @@ AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
-# Next write the input file for the refresh token request
-#
-jo -p \
-path=/spa/token \
-httpMethod=POST \
-headers=$(jo origin="$WEB_BASE_URL" \
-accept=application/json \
-content-type=application/json \
-"x-$COOKIE_PREFIX-aft-$APP_NAME=$ANTI_FORGERY_TOKEN") \
-multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
-
-#
 # Invoke the refresh lambda to get an access token
 #
 echo "*** Calling refresh to get an access token in the client ..."
+createPostWithCookiesRequest '/spa/token'
 $SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refreshToken lambda"
@@ -265,11 +269,86 @@ HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError
+  apiError "$(cat $RESPONSE_FILE)"
   exit
 fi
 
 #
-# Next expire the refresh token in the auth cookie, for test purposes
+# Next expire the session by rewriting the refresh token in the auth cookie, for test purposes
 #
-echo "*** Expiring the refresh token ..."
+echo "*** Expiring the refresh token to force an end of session ..."
+createPostWithCookiesRequest '/spa/token/expire'
+$SLS invoke local -f expireSession -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the expireSession lambda"
+  exit
+fi
+
+#
+# Check for the expected result
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
+if [ $HTTP_STATUS != '204' ]; then
+  echo "*** Problem encountered expiring the refresh token, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
+# Get the updated auth cookie, which now contains an invalid refresh token
+#
+AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+
+#
+# Next try to refresh the token again and we should get an invalid_grant error
+#
+echo "*** Calling refresh to get an access token when the session is expired ..."
+createPostWithCookiesRequest '/spa/token'
+$SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the refreshToken lambda"
+  exit
+fi
+
+#
+# Check for the expected error
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS != '400' ]; then
+  echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
+  apiError $BODY
+  exit
+fi
+
+#
+# Next start a logout request
+#
+echo "*** Calling start logout to clear cookies and get the end session request URL ..."
+createPostWithCookiesRequest '/logout/start'
+$SLS invoke local -f startLogout -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the startLogout lambda"
+  exit
+fi
+
+#
+# Check for the expected result
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered starting a logout, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
+# The real SPA will then do a logout redirect with this URL
+#
+END_SESSION_REQUEST_URL=$(jq -r .endSessionRequestUri <<< "$BODY")

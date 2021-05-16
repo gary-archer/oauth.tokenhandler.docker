@@ -8,7 +8,7 @@
 #
 # Endpoints and parameters
 #
-export HTTPS_PROXY='http://127.0.0.1:8888'
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 WEB_BASE_URL='https://web.mycompany.com'
 PROXY_API_BASE_URL='https://api.mycompany.com:444'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
@@ -227,7 +227,7 @@ if [ $HTTP_STATUS != '204' ]; then
 fi
 
 #
-# Get data that we will use later
+# Get the updated auth cookie, which now contains an invalid refresh token
 #
 AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 

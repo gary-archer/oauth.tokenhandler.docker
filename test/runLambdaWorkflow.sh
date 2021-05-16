@@ -192,7 +192,7 @@ path=/proxy/spa/login/end \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
-content-type=application/json
+content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID) \
 multiValueHeaders=$(jo cookie=$(jo -a "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE")) \

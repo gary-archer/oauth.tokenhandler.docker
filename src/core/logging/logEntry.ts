@@ -62,6 +62,7 @@ export class LogEntry {
     public end(statusCode: number): void {
 
         this._data.performance.dispose();
+        this._data.millisecondsTaken = this._data.performance.millisecondsTaken;
         this._data.statusCode = statusCode;
     }
 

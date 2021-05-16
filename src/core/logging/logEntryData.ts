@@ -1,6 +1,6 @@
 import {Guid} from 'guid-typescript';
 import os from 'os';
-import {PerformanceBreakdownImpl} from './performanceBreakdownImpl';
+import {PerformanceBreakdown} from './performanceBreakdown';
 
 /*
  * Each API request writes a structured log entry containing fields we will query by
@@ -57,7 +57,7 @@ export class LogEntryData {
     public sessionId: string;
 
     // An object containing performance data, written when performance is slow
-    public performance: PerformanceBreakdownImpl;
+    public performance: PerformanceBreakdown;
 
     // An object containing error data, written for failed requests
     public errorData: any;
@@ -79,14 +79,14 @@ export class LogEntryData {
         this.userOAuthId = '';
         this.statusCode = 0;
         this.millisecondsTaken = 0;
-        this.performanceThresholdMilliseconds = 0;
+        this.performanceThresholdMilliseconds = 500;
         this.errorCode = '';
         this.errorId = 0;
         this.correlationId = '';
         this.sessionId = '';
 
         // Objects that are not directly queryable
-        this.performance = new PerformanceBreakdownImpl('total');
+        this.performance = new PerformanceBreakdown();
         this.errorData = null;
     }
 
@@ -121,8 +121,7 @@ export class LogEntryData {
         this._outputString((x) => output.correlationId = x, this.correlationId);
         this._outputString((x) => output.sessionId = x, this.sessionId);
 
-        // Output object data, which is looked up via top level fields
-        this._outputPerformance(output);
+        // Output errors as an object
         this._outputError(output);
         return output;
     }
@@ -144,16 +143,6 @@ export class LogEntryData {
 
         if (value > 0 || force) {
             setter(value);
-        }
-    }
-
-    /*
-     * Add the performance breakdown if the threshold has been exceeded or there has been a 500 error
-     */
-    private _outputPerformance(output: any): void {
-
-        if (this.performance.millisecondsTaken >= this.performanceThresholdMilliseconds || this.errorId) {
-            output.performance = this.performance.data;
         }
     }
 

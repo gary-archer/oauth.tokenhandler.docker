@@ -1,5 +1,0 @@
-GO LIVE
--------
-1. Fill in all logging fields
-   Performance breakdown
-   Error instance id

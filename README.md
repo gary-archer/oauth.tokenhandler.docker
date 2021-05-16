@@ -48,13 +48,13 @@ Used carefully, access tokens should not have greater browser risks than auth co
 The following additional related measures were also taken to reduce token risks:
 
 - The Content Security Policy prevents untrusted domains from executing code
-- The Content Security Policy prevents tokens ot data being sent to untrusted domains
+- The Content Security Policy prevents tokens or data being sent to untrusted domains
 - In future [DPoP](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-dpop) may further strengthen use of tokens in the browser
 
 ## Proxying Business API Calls
 
 Some stakeholders feel uncomfortable about using access tokens in the browser.\
-If so then this type of Proxy API can easily be adapted to also double hop API calls via the proxy API.
+If so then this solution can easily be adapted to also double hop API calls via the Proxy API.
 
 ## Developer Setup
 

@@ -14,7 +14,8 @@
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.authsamples.com",
-        "provider": "cognito"
+        "provider": "cognito",
+        "development": false
     },
     "client": {
         "name": "finalspa",

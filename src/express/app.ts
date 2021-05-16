@@ -10,13 +10,14 @@ import {HttpProxy} from '../core/utilities/httpProxy';
  */
 (async () => {
 
-    const logger = new Logger();
+    const logger = new Logger(false);
     try {
 
         // First load configuration
         const configuration = await ConfigurationLoader.load();
 
-        // Initialize HTTP proxy behaviour so that we can view outbound OAuth requests
+        // Initialise logging and visibility of outbound OAuth messages
+        logger.initialize(configuration.api);
         const httpProxy = new HttpProxy(configuration.host.useHttpProxy, configuration.host.httpProxyUrl);
 
         // Create and start the Express API

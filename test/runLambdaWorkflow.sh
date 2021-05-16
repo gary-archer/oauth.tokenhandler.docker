@@ -2,7 +2,7 @@
 
 #
 # A script to run Serverless lambdas locally and to deal with inputs and outputs
-# Requires the jo and jq tools to be installed
+# This uses the jo tool to write JSON objects and the jq tool to read JSON objects
 #
 
 #
@@ -39,7 +39,7 @@ headers=$(jo origin="$WEB_BASE_URL" accept=application/json) \
 #
 # Call startLogin to write the response data
 #
-$SLS invoke local -f startLogin -p test/request.txt > test/response.txt
+$SLS invoke local -f startLogin -p test/request.txt
 if [ $? -ne 0 ]; then
   echo "Problem encountered starting a login, status: $HTTP_STATUS"
   exit

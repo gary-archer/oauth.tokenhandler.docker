@@ -36,7 +36,6 @@ export class Authorizer {
     public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._logger.info('API startLogin called ...');
         this._validateOrigin(request);
 
         // First create a random login state
@@ -78,7 +77,6 @@ export class Authorizer {
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._logger.info('API endLogin called ...');
         this._validateOrigin(request);
 
         // Read the state cookie
@@ -131,7 +129,6 @@ export class Authorizer {
     public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._logger.info('API refreshToken called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -172,7 +169,6 @@ export class Authorizer {
     public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._logger.info('API expireSession called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -194,7 +190,6 @@ export class Authorizer {
     public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        this._logger.info('API startLogout called ...');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 

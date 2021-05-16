@@ -4,8 +4,8 @@
   "description": "An OAuth secured API that manages translation from SameSite cookies to tokens",
   "scripts": {
     "lint": "npx eslint . --ext .ts,.tsx",
-    "start": "nodemon -e ts --exec \"npm run build\"",
-    "build": "ts-node --files src/express/app.ts",
+    "start": "nodemon -e ts --exec \"ts-node --files src/express/app.ts\"",
+    "build": "rimraf dist && tsc --outDir dist",
     "buildRelease": "rimraf dist && tsc --outDir dist --sourceMap false",
     "startRelease": "node dist/express/app.js",
     "http": "./test/runHttpWorkflow.sh",
@@ -26,7 +26,8 @@
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "fs-extra": "^9.0.1"
+    "fs-extra": "^9.0.1",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.4.34",

@@ -18,4 +18,6 @@ export interface ApiConfiguration {
     trustedWebOrigin: string;
 
     provider: string;
+
+    development: boolean;
 }

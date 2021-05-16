@@ -1,3 +1,4 @@
+import {LogEntry} from '../logging/logEntry';
 import {Logger} from '../logging/logger';
 import {ApiError} from './apiError';
 import {ClientError} from './clientError';
@@ -28,7 +29,7 @@ export class ExceptionHandler {
 
             // Log the error
             const errorToLog = clientError.toLogFormat();
-            this._logger.error(errorToLog);
+            this._logger.write(new LogEntry(errorToLog));
 
             // Return the API response to the caller
             return clientError;
@@ -40,7 +41,7 @@ export class ExceptionHandler {
 
             // Log the error with an id
             const errorToLog = apiError.toLogFormat();
-            this._logger.error(errorToLog);
+            this._logger.write(new LogEntry(errorToLog));
 
             // Return the API response to the caller
             return apiError.toClientError();

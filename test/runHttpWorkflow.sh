@@ -17,6 +17,7 @@ COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
+SESSION_ID=$(uuidgen)
 RESPONSE_FILE=test/response.txt
 
 #
@@ -91,6 +92,8 @@ echo "*** Creating login URL ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered starting a login, status: $HTTP_STATUS"
@@ -152,6 +155,8 @@ HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/end" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 --cookie "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE" \
 -d '{"code":"'$AUTH_CODE'", "state":"'$AUTH_STATE'"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -177,6 +182,8 @@ echo "*** Calling refresh to get an access token in the client ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -203,6 +210,8 @@ echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
 -H "Authorization: Bearer $ACCESS_TOKEN" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
@@ -217,6 +226,8 @@ echo "*** Expiring the refresh token ..."
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token/expire" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -238,6 +249,8 @@ echo "*** Calling refresh to get an access token when the session is expired ...
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
@@ -254,6 +267,8 @@ echo "*** Calling start logout to clear cookies and get the end session request 
 HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/logout/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
 --cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')

@@ -1,21 +1,26 @@
 import {CookieSerializeOptions} from 'cookie';
 import {encryptCookie, decryptCookie} from 'cookie-encrypter';
-import {Configuration} from '../configuration/configuration';
+import {randomBytes} from 'crypto';
+import {ApiConfiguration} from '../configuration/apiConfiguration';
+import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
 /*
- * A class to deal with cookie sopecific responsibilities
+ * A class to deal with cookie specific responsibilities
  */
 export class CookieService {
 
-    private readonly _configuration: Configuration;
+    private readonly _apiConfiguration: ApiConfiguration;
+    private readonly _clientConfiguration: ClientConfiguration;
     private readonly _encryptionKey: Buffer;
 
-    public constructor(configuration: Configuration) {
-        this._encryptionKey = Buffer.from(configuration.api.cookieEncryptionKey, 'base64');
-        this._configuration = configuration;
+    public constructor(apiConfiguration: ApiConfiguration, clientConfiguration: ClientConfiguration) {
+
+        this._apiConfiguration = apiConfiguration;
+        this._clientConfiguration = clientConfiguration;
+        this._encryptionKey = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'base64');
     }
 
     /*
@@ -42,6 +47,13 @@ export class CookieService {
         }
 
         return null;
+    }
+
+    /*
+     * Generate a field used to protect the auth cookie
+     */
+    public generateAntiForgeryValue(): string {
+        return randomBytes(32).toString('base64');
     }
 
     /*
@@ -152,7 +164,7 @@ export class CookieService {
      * Return a cookie of the form 'mycompany-auth-finalspa'
      */
     private _getCookieName(type: string) {
-        return `${this._configuration.api.cookiePrefix}-${type}-${this._configuration.client.name}`;
+        return `${this._apiConfiguration.cookiePrefix}-${type}-${this._clientConfiguration.name}`;
     }
 
     /*
@@ -186,10 +198,10 @@ export class CookieService {
             secure: true,
 
             // The cookie written will be usable for the SPA in a sibling web domain
-            domain: `.${this._configuration.api.cookieRootDomain}`,
+            domain: `.${this._apiConfiguration.cookieRootDomain}`,
 
             // The cookie is only sent during OAuth related requests, and all Web / API requests are cookieless
-            path: this._configuration.client.path,
+            path: this._clientConfiguration.path,
 
             // Other domains cannot send the cookie, which reduces cross site scripting risks
             sameSite: 'strict',

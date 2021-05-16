@@ -13,6 +13,14 @@ export class ExpressRequestAdapter implements AbstractRequest {
     public constructor(request: Request, logEntry: LogEntry) {
         this._request = request;
         this._logEntry = logEntry;
+
+        this._logEntry = logEntry;
+        this._logEntry.start(
+            this.getMethod(),
+            this.getUri(),
+            this.getHeader('x-mycompany-api-client'),
+            this.getHeader('x-mycompany-correlation-id'),
+            this.getHeader('x-mycompany-session-id'));
     }
 
     public getUri(): string {

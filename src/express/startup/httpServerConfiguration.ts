@@ -44,10 +44,9 @@ export class HttpServerConfiguration {
         this._logger = logger;
 
         this._authorizer = new Authorizer(
-            this._configuration,
-            new CookieService(configuration),
-            new OAuthService(configuration, httpProxy),
-            logger);
+            this._configuration.api,
+            new CookieService(configuration.api, configuration.client),
+            new OAuthService(configuration.api, configuration.client, httpProxy));
     }
 
     /*
@@ -122,7 +121,7 @@ export class HttpServerConfiguration {
 
         const logEntry = new LogEntry();
         const request = new ExpressRequestAdapter(rq, logEntry);
-        const response = new ExpressResponseAdapter(rs);
+        const response = new ExpressResponseAdapter(rs, logEntry);
 
         try {
 
@@ -130,14 +129,14 @@ export class HttpServerConfiguration {
             await fn(request, response);
 
             // Return the response to the caller
-            response.finalise(logEntry);
+            response.finalise();
 
         } catch (e) {
 
             // Return an Express error response
             const clientError = this._logger.handleError(e, logEntry);
             response.setError(clientError);
-            response.finalise(logEntry);
+            response.finalise();
 
         } finally {
 

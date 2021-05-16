@@ -10,22 +10,22 @@ const handler = async (event: any): Promise<void> => {
     const logger = new Logger(true);
     const logEntry = new LogEntry();
     const request = new LambdaRequest(event, logEntry);
-    const response = new LambdaResponse();
+    const response = new LambdaResponse(logEntry);
 
     try {
 
         const configuration = await ConfigurationLoader.load();
         logger.initialize(configuration.api);
 
-        const authorizer = new LambdaConfiguration(configuration, logger).getAuthorizer();
+        const authorizer = new LambdaConfiguration(configuration).getAuthorizer();
         await authorizer.startLogin(request, response);
-        return response.finalise(logEntry);
+        return response.finalise();
 
     } catch (e) {
 
         const clientError = logger.handleError(e, logEntry);
         response.setError(clientError);
-        return response.finalise(logEntry);
+        return response.finalise();
 
     } finally {
 

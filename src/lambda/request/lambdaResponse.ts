@@ -9,8 +9,11 @@ import {AbstractResponse} from '../../core/request/abstractResponse';
 export class LambdaResponse implements AbstractResponse {
 
     private readonly _data: any;
+    private readonly _logEntry: LogEntry;
 
-    public constructor() {
+    public constructor(logEntry: LogEntry) {
+
+        this._logEntry = logEntry;
         this._data = {};
         this._data.statusCode = 200;
         this._data.headers = {};
@@ -42,9 +45,9 @@ export class LambdaResponse implements AbstractResponse {
         this._data.body = error.toResponseFormat();
     }
 
-    public finalise(logEntry: LogEntry): any {
+    public finalise(): any {
 
-        logEntry.setStatusCode(this._data.statusCode);
+        this._logEntry.end(this._data.statusCode);
 
         const data = {
             statusCode : this._data.statusCode,

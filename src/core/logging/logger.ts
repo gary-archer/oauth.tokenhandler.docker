@@ -19,7 +19,7 @@ export class Logger {
      */
     public constructor(isLambda: boolean) {
         this._isLambda = isLambda;
-        this._isDevelopment = false;
+        this._isDevelopment = true;
     }
 
     /*

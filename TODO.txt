@@ -1,17 +1,4 @@
 GO LIVE
 -------
 1. Fill in all logging fields
-   Also handle startup errors
-   
-2. Finalise configuration and give classes reduced configuration objects where possible
-   OAuthService to do more of the OAuth work
-
-CONSOLIDATION
--------------
-1. Validate id token and check AT hash - cf other libraries such as Duende
-   Fill in user id and client id in logs
-
-2. Deployed system logs to Elastic Cloud
-
-3. Get Kubernetes deployment working for the proxy API and test with Curity
-   Remove Serverless dependencies
+   Performance breakdown

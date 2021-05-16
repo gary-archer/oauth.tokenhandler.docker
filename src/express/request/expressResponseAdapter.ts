@@ -10,10 +10,12 @@ import {AbstractResponse} from '../../core/request/abstractResponse';
 export class ExpressResponseAdapter implements AbstractResponse {
 
     private readonly _response: Response;
+    private readonly _logEntry: LogEntry;
     private _data: any;
 
-    public constructor(response: Response) {
+    public constructor(response: Response, logEntry: LogEntry) {
         this._response = response;
+        this._logEntry = logEntry;
         this._data = null;
     }
 
@@ -36,15 +38,16 @@ export class ExpressResponseAdapter implements AbstractResponse {
         this._data = error.toResponseFormat();
     }
 
-    public finalise(logEntry: LogEntry): any {
+    public finalise(): any {
 
+        this._logEntry.end(this._response.statusCode);
+        
         if (this._data) {
             this._response.send(this._data);
         } else {
             this._response.send();
         }
-
-        logEntry.setStatusCode(this._response.statusCode);
+        
         return null;
     }
 

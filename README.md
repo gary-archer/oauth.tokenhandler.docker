@@ -58,5 +58,5 @@ If so then this solution can easily be adapted to also double hop API calls via 
 
 ## Developer Setup
 
-Developers now need to run the Proxy API in addition to the SPA on their local workstation.\
+Developers need to run the Express version of the Proxy API when doing SPA development.\
 The SPA can continue to call deployed business APIs hosted in other domains.

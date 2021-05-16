@@ -27,6 +27,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fs-extra": "^9.0.1",
+    "guid-typescript": "^1.0.9",
     "winston": "^3.3.3"
   },
   "devDependencies": {

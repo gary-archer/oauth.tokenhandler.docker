@@ -22,6 +22,10 @@ export class ClientError extends Error {
         Object.setPrototypeOf(this, new.target.prototype);
     }
 
+    public get errorCode(): string {
+        return this._errorCode;
+    }
+
     public get statusCode(): number {
         return this._statusCode;
     }

@@ -1,31 +1,27 @@
-import {Configuration} from '../configuration/configuration';
+import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
-import {Logger} from '../logging/logger';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point class for the OAuth Proxy API's logic
+ * The entry point class for the OAuth Proxy API's logic performs an outline of processing
  */
 export class Authorizer {
 
-    private readonly _configuration: Configuration;
+    private readonly _apiConfiguration: ApiConfiguration;
     private readonly _oauthService: OAuthService;
     private readonly _cookieService: CookieService;
-    private readonly _logger: Logger;
 
     public constructor(
-        configuration: Configuration,
+        apiConfiguration: ApiConfiguration,
         cookieService: CookieService,
-        oauthService: OAuthService,
-        logger: Logger) {
+        oauthService: OAuthService) {
 
-        this._configuration = configuration;
+        this._apiConfiguration = apiConfiguration;
         this._cookieService = cookieService;
         this._oauthService = oauthService;
-        this._logger = logger;
         this._setupCallbacks();
     }
 
@@ -70,7 +66,7 @@ export class Authorizer {
         }
         this._cookieService.clearStateCookie(response);
 
-        // Check that the value posted matches
+        // Check that the value posted matches that in the cookie
         const state = request.getJsonField('state');
         if (state !== stateCookie.state) {
             throw ErrorUtils.fromInvalidDataError(
@@ -130,15 +126,15 @@ export class Authorizer {
             throw ErrorUtils.fromMissingCookieError('No id cookie was found in the incoming request');
         }
 
-        // Send the request to the Authorization Server
+        // Send the request for a new access token to the Authorization Server
         const refreshTokenGrantData =
             await this._oauthService.sendRefreshTokenGrant(refreshToken);
 
-        // Rewrite the refresh token cookie since we may have a new token
+        // Rewrite the refresh token cookie since the refresh token may have been renewed
         const newRefreshToken = refreshTokenGrantData.refresh_token;
         this._cookieService.writeAuthCookie(newRefreshToken ?? refreshToken, response);
 
-        // Rewrite the id token cookie since it may have changed
+        // Rewrite the id token cookie since the id token may have been renewed
         const newIdToken = refreshTokenGrantData.id_token;
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
 
@@ -207,7 +203,7 @@ export class Authorizer {
             throw ErrorUtils.fromMissingFieldError('No origin header was supplied');
         }
 
-        if (origin.toLowerCase() !== this._configuration.api.trustedWebOrigin.toLowerCase()) {
+        if (origin.toLowerCase() !== this._apiConfiguration.trustedWebOrigin.toLowerCase()) {
             throw ErrorUtils.fromInvalidDataError('The origin header contained an untrusted value');
         }
     }
@@ -243,7 +239,7 @@ export class Authorizer {
     private _addAntiForgeryResponseData(response: AbstractResponse, data: any): void {
 
         // Get a random value
-        const randomValue = this._oauthService.generateAntiForgeryValue();
+        const randomValue = this._cookieService.generateAntiForgeryValue();
 
         // Set an anti forgery HTTP Only encrypted cookie
         this._cookieService.writeAntiForgeryCookie(response, randomValue);

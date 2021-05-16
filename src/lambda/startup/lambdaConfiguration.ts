@@ -1,5 +1,4 @@
 import {Configuration} from '../../core/configuration/configuration';
-import {Logger} from '../../core/logging/logger';
 import {Authorizer} from '../../core/services/authorizer';
 import {CookieService} from '../../core/services/cookieService';
 import {OAuthService} from '../../core/services/oauthService';
@@ -11,11 +10,9 @@ import {HttpProxy} from '../../core/utilities/httpProxy';
 export class LambdaConfiguration {
 
     private readonly _configuration: Configuration;
-    private readonly _logger: Logger;
 
-    public constructor(configuration: Configuration, logger: Logger) {
+    public constructor(configuration: Configuration) {
         this._configuration = configuration;
-        this._logger = logger;
     }
 
     /*
@@ -28,9 +25,8 @@ export class LambdaConfiguration {
             this._configuration.host.httpProxyUrl);
 
         return new Authorizer(
-            this._configuration,
-            new CookieService(this._configuration),
-            new OAuthService(this._configuration, httpProxy),
-            this._logger);
+            this._configuration.api,
+            new CookieService(this._configuration.api, this._configuration.client),
+            new OAuthService(this._configuration.api, this._configuration.client, httpProxy));
     }
 }

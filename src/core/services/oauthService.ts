@@ -1,7 +1,7 @@
 import axios, {AxiosRequestConfig} from 'axios';
-import {randomBytes} from 'crypto';
 import {URLSearchParams} from 'url';
-import {Configuration} from '../configuration/configuration';
+import {ApiConfiguration} from '../configuration/apiConfiguration';
+import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ClientError} from '../errors/clientError';
 import {ErrorUtils} from '../errors/errorUtils';
 import {HttpProxy} from '../utilities/httpProxy';
@@ -13,11 +13,17 @@ import {UrlHelper} from '../utilities/urlHelper';
  */
 export class OAuthService {
 
-    private readonly _configuration: Configuration;
+    private readonly _apiConfiguration: ApiConfiguration;
+    private readonly _clientConfiguration: ClientConfiguration;
     private readonly _httpProxy: HttpProxy;
 
-    public constructor(configuration: Configuration, httpProxy: HttpProxy) {
-        this._configuration = configuration;
+    public constructor(
+        apiConfiguration: ApiConfiguration,
+        clientConfiguration: ClientConfiguration,
+        httpProxy: HttpProxy) {
+
+        this._apiConfiguration = apiConfiguration;
+        this._clientConfiguration = clientConfiguration;
         this._httpProxy = httpProxy;
     }
 
@@ -29,26 +35,19 @@ export class OAuthService {
     }
 
     /*
-     * Generate a field used to protect the auth cookie
-     */
-    public generateAntiForgeryValue(): string {
-        return randomBytes(32).toString('base64');
-    }
-
-    /*
      * Form the OpenID Connect authorization request URL
      */
     public getAuthorizationRequestUri(loginState: OAuthLoginState): string {
 
-        let url = this._configuration.api.authorizeEndpoint;
+        let url = this._apiConfiguration.authorizeEndpoint;
         url += '?';
-        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
+        url += UrlHelper.createQueryParameter('client_id', this._clientConfiguration.clientId);
         url += '&';
-        url += UrlHelper.createQueryParameter('redirect_uri', this._configuration.client.redirectUri);
+        url += UrlHelper.createQueryParameter('redirect_uri', this._clientConfiguration.redirectUri);
         url += '&';
         url += UrlHelper.createQueryParameter('response_type', 'code');
         url += '&';
-        url += UrlHelper.createQueryParameter('scope', this._configuration.client.scope);
+        url += UrlHelper.createQueryParameter('scope', this._clientConfiguration.scope);
         url += '&';
         url += UrlHelper.createQueryParameter('state', loginState.state);
         url += '&';
@@ -65,9 +64,9 @@ export class OAuthService {
 
         const formData = new URLSearchParams();
         formData.append('grant_type', 'authorization_code');
-        formData.append('client_id', this._configuration.client.clientId);
+        formData.append('client_id', this._clientConfiguration.clientId);
         formData.append('code', code);
-        formData.append('redirect_uri', this._configuration.client.redirectUri);
+        formData.append('redirect_uri', this._clientConfiguration.redirectUri);
         formData.append('code_verifier', codeVerifier);
         return this._postGrantMessage(formData);
     }
@@ -79,7 +78,7 @@ export class OAuthService {
 
         const formData = new URLSearchParams();
         formData.append('grant_type', 'refresh_token');
-        formData.append('client_id', this._configuration.client.clientId);
+        formData.append('client_id', this._clientConfiguration.clientId);
         formData.append('refresh_token', refreshToken);
         return this._postGrantMessage(formData);
     }
@@ -90,22 +89,22 @@ export class OAuthService {
     public getEndSessionRequestUri(idToken: string): string {
 
         // Start the URL
-        let url = this._configuration.api.endSessionEndpoint;
+        let url = this._apiConfiguration.endSessionEndpoint;
         url += '?';
-        url += UrlHelper.createQueryParameter('client_id', this._configuration.client.clientId);
+        url += UrlHelper.createQueryParameter('client_id', this._clientConfiguration.clientId);
         url += '&';
 
-        if (this._configuration.api.provider === 'cognito') {
+        if (this._apiConfiguration.provider === 'cognito') {
 
             // Cognito has non standard parameters
-            url += UrlHelper.createQueryParameter('logout_uri', this._configuration.client.postLogoutRedirectUri);
+            url += UrlHelper.createQueryParameter('logout_uri', this._clientConfiguration.postLogoutRedirectUri);
 
         } else {
 
             // For other providers supply the most standard values
             url += UrlHelper.createQueryParameter(
                 'post_logout_redirect_uri',
-                this._configuration.client.postLogoutRedirectUri);
+                this._clientConfiguration.postLogoutRedirectUri);
             url += '&';
             url += UrlHelper.createQueryParameter('id_token_hint', idToken);
         }
@@ -120,7 +119,7 @@ export class OAuthService {
 
         // Define request options
         const options = {
-            url: this._configuration.api.tokenEndpoint,
+            url: this._apiConfiguration.tokenEndpoint,
             method: 'POST',
             data: formData,
             headers: {

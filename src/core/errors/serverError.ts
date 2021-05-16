@@ -32,6 +32,10 @@ export class ServerError extends Error {
         Object.setPrototypeOf(this, new.target.prototype);
     }
 
+    public get errorCode(): any {
+        return this._errorCode;
+    }
+
     public get url(): any {
         return this._url;
     }

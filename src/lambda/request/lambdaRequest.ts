@@ -14,7 +14,14 @@ export class LambdaRequest implements AbstractRequest {
     public constructor(event: any, logEntry: LogEntry) {
         this._event = event;
         this._body = this._event.body ? JSON.parse(this._event.body) : {};
+        
         this._logEntry = logEntry;
+        this._logEntry.start(
+            this.getMethod(),
+            this.getUri(),
+            this.getHeader('x-mycompany-api-client'),
+            this.getHeader('x-mycompany-correlation-id'),
+            this.getHeader('x-mycompany-session-id'));
     }
 
     public getUri(): string {

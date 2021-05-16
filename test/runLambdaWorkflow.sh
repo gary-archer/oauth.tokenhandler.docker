@@ -16,6 +16,7 @@ COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
+SESSION_ID=$(uuidgen)
 REQUEST_FILE=test/request.txt
 RESPONSE_FILE=test/response.txt
 SLS=./node_modules/.bin/sls
@@ -87,6 +88,8 @@ function createPostWithCookiesRequest() {
     headers=$(jo origin="$WEB_BASE_URL" \
     accept=application/json \
     content-type=application/json \
+    x-mycompany-api-client=lambdaTest \
+    x-mycompany-session-id=$SESSION_ID \
     "x-$COOKIE_PREFIX-aft-$APP_NAME=$ANTI_FORGERY_TOKEN") \
     multiValueHeaders=$(jo cookie=$(jo -a \
     "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE", \
@@ -95,13 +98,20 @@ function createPostWithCookiesRequest() {
 }
 
 #
+# First remove logs from last time
+#
+rm logs/api.log 2>/dev/null
+
+#
 # Write the input file for the startLogin request
 #
 jo -p \
 path=/proxy/spa/login/start \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
-accept=application/json) \
+accept=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID) \
 > $REQUEST_FILE
 
 #
@@ -182,7 +192,9 @@ path=/proxy/spa/login/end \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
-content-type=application/json) \
+content-type=application/json
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID) \
 multiValueHeaders=$(jo cookie=$(jo -a "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE")) \
 body="{\\\""code\\\"":\\\""$AUTH_CODE\\\"", \\\""state\\\"":\\\""$AUTH_STATE\\\""}" \
 | sed 's/\\\\\\/\\/g' \
@@ -259,6 +271,8 @@ echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
 -H "Authorization: Bearer $ACCESS_TOKEN" \
 -H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"

@@ -1,9 +1,10 @@
 import middy from '@middy/core';
 import cors from '@middy/http-cors';
 import {Context, Handler} from 'aws-lambda';
+import {ExceptionMiddleware} from '../middleware.ts/exceptionMiddleware';
 import {Container} from './container';
 
-// A custom type for more readable code
+// A custom type for readability
 export type AsyncHandler = (event: any, context: Context) => Promise<any>;
 
 /*
@@ -24,19 +25,31 @@ export class LambdaConfiguration {
 
         try {
 
-            // Initialise the app
+            // Run startup logic and populate the container with auto wired objects
             this._container.initialize();
-        
-            // Then wrap the 
+
+            // Then wrap the base handler to manage error handling and CORS
             return middy(async (event: any, context: Context) => {
                 return baseHandler(event, context);
 
-            }).use(cors({origins: [this._container.configuration.api.trustedWebOrigin]}));
+            })
+                .use(new ExceptionMiddleware(this._container))
+                .use(cors({origins: [this._container.configuration.api.trustedWebOrigin]}));
 
-        } catch(e) {
+        } catch (e) {
 
-            // Return an error callback
-            throw new Error('not implemented');
+            // Handle any problems configuring the lambda
+            return this._handleStartupError(e);
         }
+    }
+
+    /*
+     * Ensure that any startup errors are logged and then return a handler that will provide the client response
+     */
+    private _handleStartupError(exception: any): Handler {
+
+        return async () => {
+            return this._container.handleError(exception);
+        };
     }
 }

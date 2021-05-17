@@ -1,5 +1,6 @@
 import {Configuration} from '../../core/configuration/configuration';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
+import {ErrorUtils} from '../../core/errors/errorUtils';
 import {LogEntry} from '../../core/logging/logEntry';
 import {Logger} from '../../core/logging/logger';
 import {AbstractRequest} from '../../core/request/abstractRequest';
@@ -12,7 +13,7 @@ import {LambdaRequest} from '../request/lambdaRequest';
 import {LambdaResponse} from '../request/lambdaResponse';
 
 /*
- * A primitive DI container class to hold some objects
+ * A primitive DI container class to manage objects and provide some shared entry points
  */
 export class Container {
 
@@ -20,18 +21,16 @@ export class Container {
     private readonly _logEntry: LogEntry;
     private _configuration: Configuration | null;
     private _authorizer: Authorizer | null;
+    private _response: LambdaResponse | null;
 
     public constructor() {
         this._logger = new Logger(true);
         this._logEntry = new LogEntry();
         this._configuration = null;
         this._authorizer = null;
+        this._response = null;
     }
 
-    public get configuration(): Configuration {
-        return this._configuration!;
-    }
-    
     /*
      * Run the startup code to auto wire objects
      */
@@ -49,23 +48,55 @@ export class Container {
             new CookieService(this._configuration.api, this._configuration.client),
             new OAuthService(this._configuration.api, this._configuration.client, httpProxy));
     }
-    
-    /*
-     * Do the work of the supplied authorizer method
-     */
-    public async execute(
-        event: any, 
-        fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>) {
 
-        // Get the authorizer method passed in
+    /*
+     * Return the logger to other startup processing code
+     */
+    public get logger(): Logger {
+        return this._logger;
+    }
+
+    /*
+     * Return the configuration to other startup processing code
+     */
+    public get configuration(): Configuration {
+        return this._configuration!;
+    }
+
+    /*
+     * Do the work of the authorizer method supplied
+     */
+    public async executeLambda(
+        event: any,
+        fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>): Promise<void> {
+
+        // Access the function reference on the authorizer in this class
         const authorizerMethod = fn(this._authorizer!);
-        
+
         // Adapt the request and response to core classes and invoke the method
         const request = new LambdaRequest(event, this._logEntry);
-        const response = new LambdaResponse(this._logEntry);
-        await authorizerMethod(request, response);
+        this._response = new LambdaResponse(this._logEntry);
+
+        // Invoke the method
+        await authorizerMethod(request, this._response);
 
         // Return the result, and any errors are caught by the exception middleware
+        return this._response.finalise();
+    }
+
+    /*
+     * Handle errors using inner objects and return the response
+     */
+    public handleError(exception: any): any {
+
+        // Process the error and complete logging
+        const error = ErrorUtils.fromException(exception);
+        const clientError = this._logger.handleError(error, this._logEntry);
+        this._logger.write(this._logEntry);
+
+        // Return the error response to the caller
+        const response = this._response ?? new LambdaResponse(this._logEntry);
+        response.setError(clientError);
         return response.finalise();
     }
 }

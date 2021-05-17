@@ -6,8 +6,8 @@ const container = new Container();
 
 // The callback invoked at runtime invokes an auto wired object
 const baseHandler = async (event: any): Promise<void> => {
-    return container.execute(event, (a: Authorizer) => a.endLogin);
-}
+    return container.executeLambda(event, (a: Authorizer) => a.endLogin);
+};
 
 // Auto wire objects into the container, and wrap the handler in middleware
 const configuration = new LambdaConfiguration(container);

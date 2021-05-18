@@ -1,6 +1,6 @@
 import {Authorizer} from '../../core/services/authorizer';
 import {Container} from '../startup/container';
-import {LambdaConfiguration} from '../startup/lambdaConfiguration';
+import {LambdaStartup} from '../startup/lambdaStartup';
 
 const container = new Container();
 
@@ -10,8 +10,8 @@ const baseHandler = async (event: any): Promise<void> => {
 };
 
 // Auto wire objects into the container, and wrap the handler in middleware
-const configuration = new LambdaConfiguration(container);
-const handler = configuration.enrichHandler(baseHandler);
+const startup = new LambdaStartup(container);
+const handler = startup.enrichHandler(baseHandler);
 
 // Return the enriched handler
 export {handler};

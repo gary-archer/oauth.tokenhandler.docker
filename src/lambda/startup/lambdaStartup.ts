@@ -10,7 +10,7 @@ export type AsyncHandler = (event: any, context: Context) => Promise<any>;
 /*
  * A class to wire up dependencies and middleware
  */
-export class LambdaConfiguration {
+export class LambdaStartup {
 
     private readonly _container: Container;
 

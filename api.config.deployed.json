@@ -1,0 +1,29 @@
+{
+    "host": {
+        "port": 443,
+        "sslCertificateFileName": "",
+        "sslCertificatePassword": "",
+        "useHttpProxy": false,
+        "httpProxyUrl": "http://127.0.0.1:8888"
+    },
+    "api": {
+        "name": "OAuthProxyApi",
+        "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
+        "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
+        "endSessionEndpoint": "https://login.authsamples.com/logout",
+        "cookieRootDomain": "authsamples.com",
+        "cookiePrefix": "mycompany",
+        "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
+        "trustedWebOrigin": "https://web.authsamples.com",
+        "provider": "cognito",
+        "development": false
+    },
+    "client": {
+        "name": "finalspa",
+        "clientId": "2tdldo8gk79dsi2lpntntcdug0",
+        "redirectUri": "https://web.authsamples.com/spa/",
+        "postLogoutRedirectUri": "https://web.authsamples.com/spa/loggedout.html",
+        "scope": "openid profile email https://api.authsamples.com/api/transactions_read",
+        "path": "/proxy/spa"
+    }
+}

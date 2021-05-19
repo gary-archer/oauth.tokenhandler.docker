@@ -1,0 +1,6 @@
+node_modules
+.serverless
+dist
+logs
+.DS_store
+test/*.txt

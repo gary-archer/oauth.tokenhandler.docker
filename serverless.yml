@@ -1,0 +1,160 @@
+service: oauthproxyapi
+
+# Base details for AWS deployment
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-2
+  profile: default
+  stage: ${self:custom.config.settings.stage}
+  lambdaHashingVersion: '20201221'
+  apiGateway:
+    shouldStartNameWithService: true
+
+custom:
+  # Each environment can have its own configuration file
+  config: ${file(environments/${opt:stage, 'local'}.yml)}
+  
+  # AWS deployed details
+  customDomain:
+    domainName: ${self:custom.config.settings.apiHostName}
+    certificateName: '*.${self:custom.config.settings.certificateDomainName}'
+    stage: ${self:custom.config.settings.stage}
+    endpointType: regional
+
+  # Headers that will be accepted by AWS
+  allowedHeaders:
+    - Content-Type
+    - Accept
+    - Cookie
+    - X-Amz-Date
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
+    - x-mycompany-aft-finalspa
+    - x-mycompany-api-client
+    - x-mycompany-correlation-id
+    - x-mycompany-session-id
+    - x-mycompany-test-exception
+
+  # Scripts used when building the AWS deployment package
+  scripts:
+    hooks:
+      'after:package:createDeploymentArtifacts': npm run customPackager
+
+functions:
+  # Get the authorization URL and store state
+  startLogin:
+    handler: dist/lambda/handlers/startLogin.handler
+    events:
+      - http: 
+          path: /proxy/spa/login/start
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+
+  # Verify state and send the authorization code grant message
+  endLogin:
+    handler: dist/lambda/handlers/endLogin.handler
+    events:
+      - http: 
+          path: /proxy/spa/login/end
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+
+  # Return a new access token to the Browser UI
+  refreshToken:
+    handler: dist/lambda/handlers/refreshToken.handler
+    events:
+      - http: 
+          path: /proxy/spa/token
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+
+  # Make the refresh token in the auth cookie act expired, for test purposes
+  expireSession:
+    handler: dist/lambda/handlers/expireSession.handler
+    events:
+      - http: 
+          path: /proxy/spa/token/expire
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+
+  # Get the end session URL and remove cookies
+  startLogout:
+    handler: dist/lambda/handlers/startLogout.handler
+    events:
+      - http: 
+          path: /proxy/spa/logout/start
+          method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+
+# By default all files are included so remove files we don't need for any lambda
+# The custom packager does further work in code
+package:
+  patterns:
+  - '!api.config**'
+  - '!.vscode/**'
+  - '!certs/**'
+  - '!deployment/**'
+  - '!environments/**'
+  - '!logs/**'
+  - '!src/**'
+  - '!test/**'
+  - '!ts*.json'
+  - '!package*.json'
+  - '!README.md'
+  - '!LICENSE.txt'
+
+plugins:
+  - serverless-plugin-scripts
+  - serverless-domain-manager
+
+resources:
+  Resources:
+
+    # Limit cloudwatch log retention 
+    StartLoginLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    EndLoginLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    RefreshTokenLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    ExpireSessionLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'
+    StartLogoutLogGroup:
+      Type: 'AWS::Logs::LogGroup'
+      Properties:
+        RetentionInDays: '5'

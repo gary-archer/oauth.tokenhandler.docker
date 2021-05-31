@@ -23,7 +23,7 @@
         "clientId": "4co5uvgmse68utsekh7p2sc0lg",
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
-        "scope": "openid profile email",
+        "scope": "openid profile email https://api.authsamples.com/api/transactions_read",
         "path": "/proxy/spa"
     }
 }

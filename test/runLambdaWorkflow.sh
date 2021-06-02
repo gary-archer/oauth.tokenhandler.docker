@@ -101,6 +101,7 @@ function createPostWithCookiesRequest() {
 # First remove logs from last time
 #
 rm logs/api.log 2>/dev/null
+mkdir -p logs
 
 #
 # Write the input file for the startLogin request
@@ -131,7 +132,7 @@ JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
 BODY=$(jq -r .body <<< "$JSON")
 MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
-if [ $HTTP_STATUS -ne 200 ]; then
+if [ $HTTP_STATUS -ne 2> ]; then
   echo "*** Problem encountered starting a login, status: $HTTP_STATUS"
   apiError "$BODY"
   exit

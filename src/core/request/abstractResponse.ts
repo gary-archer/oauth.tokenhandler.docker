@@ -14,5 +14,7 @@ export interface AbstractResponse {
 
     setError(error: ClientError): void;
 
-    finalise(): any;
+    finaliseLogs(): void;
+
+    finaliseData(): any;
 }

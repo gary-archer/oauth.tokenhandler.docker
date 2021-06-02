@@ -21,14 +21,12 @@ export class Container {
     private readonly _logEntry: LogEntry;
     private _configuration: Configuration | null;
     private _authorizer: Authorizer | null;
-    private _response: LambdaResponse | null;
 
     public constructor() {
         this._logger = new Logger(true);
         this._logEntry = this._logger.createLogEntry();
         this._configuration = null;
         this._authorizer = null;
-        this._response = null;
     }
 
     /*
@@ -75,29 +73,47 @@ export class Container {
 
         // Adapt the request and response to core classes and invoke the method
         const request = new LambdaRequest(event, this._logEntry);
-        this._response = new LambdaResponse(this._logEntry);
+        const response = new LambdaResponse(this._logEntry);
 
-        // Invoke the method
-        await authorizerMethod(request, this._response);
+        try {
 
-        // Complete logging on success and return the result
-        this._logger.write(this._logEntry);
-        return this._response.finalise();
+            // Do the work
+            await authorizerMethod(request, response);
+
+            // Return the collected data
+            return response.finaliseData();
+
+        } catch (e) {
+
+            // Handle and return error details
+            const error = ErrorUtils.fromException(e);
+            const clientError = this._logger.handleError(error, this._logEntry);
+            response.setError(clientError);
+            return response.finaliseData();
+
+        } finally {
+
+            // Always write logs before exiting
+            response.finaliseLogs();
+            this._logger.write(this._logEntry);
+        }
     }
 
     /*
-     * The exception middleware calls back this method to process errors during lambda execution
+     * Similar to the above error handling but for startup errors
      */
-    public handleError(exception: any): any {
+    public handleStartupError(exception: any): any {
 
-        // Process the error and complete logging
+        // Get error details
         const error = ErrorUtils.fromException(exception);
         const clientError = this._logger.handleError(error, this._logEntry);
+
+        // Add the error to logs
+        const response = new LambdaResponse(this._logEntry);
+        response.setError(clientError);
         this._logger.write(this._logEntry);
 
-        // Return the error response to the caller
-        const response = this._response ?? new LambdaResponse(this._logEntry);
-        response.setError(clientError);
-        return response.finalise();
+        // Return the error response
+        return response.finaliseData();
     }
 }

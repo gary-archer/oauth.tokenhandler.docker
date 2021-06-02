@@ -1,7 +1,6 @@
 import middy from '@middy/core';
 import cors from '@middy/http-cors';
 import {Context, Handler} from 'aws-lambda';
-import {ExceptionMiddleware} from '../middleware.ts/exceptionMiddleware';
 import {Container} from './container';
 
 // A custom type for readability
@@ -33,28 +32,19 @@ export class LambdaStartup {
                 credentials: true,
             };
 
-            // Then wrap the base handler to manage error handling and CORS
+            // Then wrap the base handler to include CORS processing
             return middy(async (event: any, context: Context) => {
                 return baseHandler(event, context);
 
             })
-                .use(new ExceptionMiddleware(this._container))
                 .use(cors(corsOptions));
 
         } catch (e) {
 
             // Handle any problems configuring the lambda
-            return this._handleStartupError(e);
+            return async () => {
+                return this._container.handleStartupError(e);
+            };
         }
-    }
-
-    /*
-     * Ensure that any startup errors are logged and then return a handler that will provide the client response
-     */
-    private _handleStartupError(exception: any): Handler {
-
-        return async () => {
-            return this._container.handleError(exception);
-        };
     }
 }

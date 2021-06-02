@@ -45,9 +45,11 @@ export class LambdaResponse implements AbstractResponse {
         this._data.body = error.toResponseFormat();
     }
 
-    public finalise(): any {
-
+    public finaliseLogs(): void {
         this._logEntry.end(this._data.statusCode);
+    }
+
+    public finaliseData(): any {
 
         const data = {
             statusCode : this._data.statusCode,

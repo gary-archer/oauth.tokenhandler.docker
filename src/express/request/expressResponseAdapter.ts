@@ -38,9 +38,11 @@ export class ExpressResponseAdapter implements AbstractResponse {
         this._data = error.toResponseFormat();
     }
 
-    public finalise(): any {
-
+    public finaliseLogs(): void {
         this._logEntry.end(this._response.statusCode);
+    }
+
+    public finaliseData(): any {
 
         if (this._data) {
             this._response.send(this._data);

@@ -127,18 +127,20 @@ export class HttpServerConfiguration {
             // Call the core authorizer routine
             await fn(request, response);
 
-            // Return the response to the caller
-            response.finalise();
+            // Return a success response to the caller
+            response.finaliseData();
 
         } catch (e) {
 
-            // Return an Express error response
+            // Add the error to logs and return an error response to the caller
             const clientError = this._logger.handleError(e, logEntry);
             response.setError(clientError);
-            response.finalise();
+            response.finaliseData();
 
         } finally {
 
+            // Always write logs before returning
+            response.finaliseLogs();
             this._logger.write(logEntry);
         }
     }

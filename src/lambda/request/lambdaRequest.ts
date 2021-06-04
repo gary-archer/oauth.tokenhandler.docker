@@ -30,7 +30,7 @@ export class LambdaRequest implements AbstractRequest {
     }
 
     public getMethod(): string {
-        return this._event.httpMethod.toLowerCase();
+        return this._event.httpMethod;
     }
 
     public getJsonField(name: string): string | null {

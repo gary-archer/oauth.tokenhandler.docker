@@ -9,8 +9,8 @@
 # Endpoints and parameters
 #
 #export HTTPS_PROXY='http://127.0.0.1:8888'
-WEB_BASE_URL='https://web.mycompany.com'
-PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy/spa'
+#WEB_BASE_URL='https://web.mycompany.com'
+#PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy/spa'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -23,8 +23,8 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these overrides to test AWS deployed endpoints
 #
-#WEB_BASE_URL=https://web.authsamples.com
-#PROXY_API_BASE_URL=https://api.authsamples.com/proxy/spa
+WEB_BASE_URL=https://web.authsamples.com
+PROXY_API_BASE_URL=https://api.authsamples.com/proxy/spa
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -76,6 +76,7 @@ function apiError() {
 #
 # Act as the SPA by sending an OPTIONS request, then verifying that we get the expected results
 #
+echo "Session ID is $SESSION_ID"
 echo "*** Requesting cross origin access"
 HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \

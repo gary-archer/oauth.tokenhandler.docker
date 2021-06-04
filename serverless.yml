@@ -35,7 +35,6 @@ custom:
     - x-mycompany-api-client
     - x-mycompany-correlation-id
     - x-mycompany-session-id
-    - x-mycompany-test-exception
 
   # Scripts used when building the AWS deployment package
   scripts:

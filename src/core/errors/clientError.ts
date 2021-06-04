@@ -76,7 +76,7 @@ export class ClientError extends Error {
     public toLogFormat(): any {
 
         const data: any = {
-            status: this._statusCode,
+            statusCode: this._statusCode,
             clientError: this.toResponseFormat(),
         };
 

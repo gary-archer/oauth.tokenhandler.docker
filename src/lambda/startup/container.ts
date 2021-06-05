@@ -1,7 +1,6 @@
 import {Configuration} from '../../core/configuration/configuration';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
 import {ErrorUtils} from '../../core/errors/errorUtils';
-import {LogEntry} from '../../core/logging/logEntry';
 import {Logger} from '../../core/logging/logger';
 import {AbstractRequest} from '../../core/request/abstractRequest';
 import {AbstractResponse} from '../../core/request/abstractResponse';
@@ -17,103 +16,103 @@ import {LambdaResponse} from '../request/lambdaResponse';
  */
 export class Container {
 
-    private readonly _logger: Logger;
-    private readonly _logEntry: LogEntry;
     private _configuration: Configuration | null;
-    private _authorizer: Authorizer | null;
+    private _httpProxy: HttpProxy | null;
 
     public constructor() {
-        this._logger = new Logger(true);
-        this._logEntry = this._logger.createLogEntry();
         this._configuration = null;
-        this._authorizer = null;
+        this._httpProxy = null;
     }
 
     /*
-     * Run the startup code to auto wire objects
+     * Create singletons when the lambda is enriched, before it executes
      */
-    public initialize(): void {
+    public initialize(): Configuration {
 
         this._configuration = ConfigurationLoader.load();
-        this._logger.initialise(this._configuration.api);
 
-        const httpProxy = new HttpProxy(
+        this._httpProxy = new HttpProxy(
             this._configuration.host.useHttpProxy,
             this._configuration.host.httpProxyUrl);
 
-        this._authorizer = new Authorizer(
-            this._configuration.api,
-            new CookieService(this._configuration.api, this._configuration.client),
-            new OAuthService(this._configuration.api, this._configuration.client, httpProxy));
+        return this._configuration;
     }
 
     /*
-     * Return the logger to other startup processing code
-     */
-    public get logger(): Logger {
-        return this._logger;
-    }
-
-    /*
-     * Return the configuration to other startup processing code
-     */
-    public get configuration(): Configuration {
-        return this._configuration!;
-    }
-
-    /*
-     * Do the work of the authorizer method supplied
+     * Do the work of the authorizer method when the lambda is called
      */
     public async executeLambda(
         event: any,
         fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>): Promise<void> {
 
-        // Access the function reference on the authorizer in this class
-        const authorizerMethod = fn(this._authorizer!);
+        // Create the authorizer
+        const configuration = this._configuration!;
+        const authorizer = new Authorizer(
+            configuration.api,
+            new CookieService(configuration.api, configuration.client),
+            new OAuthService(configuration.api, configuration.client, this._httpProxy!));
 
-        // Adapt the request and response to core classes and invoke the method
-        const request = new LambdaRequest(event, this._logEntry);
-        const response = new LambdaResponse(this._logEntry);
+        // Get the supplied function reference on the authorizer
+        const authorizerMethod = fn(authorizer);
+
+        // Initialise logging and create the log entry
+        const logger = new Logger(true);
+        logger.initialise(this._configuration!.api);
+        const logEntry = logger.createLogEntry();
+
+        // Adapt the request and response to core classes
+        const request = new LambdaRequest(event, logEntry);
+        const response = new LambdaResponse(logEntry);
 
         try {
 
-            // Do the work
+            // Invoke the method to do the work
             await authorizerMethod(request, response);
 
-            // Return the collected data
+            // Finalise logs before exiting
+            response.finaliseLogs();
+            logger.write(logEntry);
+
+            // Return the response data
             return response.finaliseData();
 
         } catch (e) {
 
-            // Handle and return error details
+            // Process error details
             const error = ErrorUtils.fromException(e);
-            const clientError = this._logger.handleError(error, this._logEntry);
+            const clientError = logger.handleError(error, logEntry);
+
+            // Add the error to logs
             response.setError(clientError);
-            return response.finaliseData();
-
-        } finally {
-
-            // Always write logs before exiting
             response.finaliseLogs();
-            this._logger.write(this._logEntry);
+            logger.write(logEntry);
+
+            // Return the response data
+            return response.finaliseData();
         }
     }
 
     /*
-     * Similar to the above error handling but for startup errors
+     * Error handling and logging for startup errors
      */
     public handleStartupError(exception: any): any {
 
-        // Get error details
+        // Initialise logging and create the log entry
+        const logger = new Logger(true);
+        logger.initialise(this._configuration!.api);
+        const logEntry = logger.createLogEntry();
+
+        // Process error details
         const error = ErrorUtils.fromException(exception);
-        const clientError = this._logger.handleError(error, this._logEntry);
+        const clientError = logger.handleError(error, logEntry);
 
         // Add the error to logs
-        const response = new LambdaResponse(this._logEntry);
+        const response = new LambdaResponse(logEntry);
         response.setError(clientError);
-        this._logger.write(this._logEntry);
+        response.finaliseLogs();
+        logger.write(logEntry);
 
-        // Return the error response
+        // Return the response data
         return response.finaliseData();
     }
 }

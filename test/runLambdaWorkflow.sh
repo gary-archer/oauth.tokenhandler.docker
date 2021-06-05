@@ -5,10 +5,6 @@
 # This uses the jo tool to write JSON objects and the jq tool to read JSON objects
 #
 
-#
-# Endpoints and parameters
-#
-#export HTTPS_PROXY='http://127.0.0.1:8888'
 WEB_BASE_URL='https://web.mycompany.com'
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
 LOGIN_BASE_URL='https://login.authsamples.com'
@@ -20,6 +16,11 @@ SESSION_ID=$(uuidgen)
 REQUEST_FILE=test/request.txt
 RESPONSE_FILE=test/response.txt
 SLS=./node_modules/.bin/sls
+
+#
+# Enable this to view requests in an HTTP Proxy tool
+#
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file in a direct Cognito request
@@ -100,6 +101,7 @@ function createPostWithCookiesRequest() {
 #
 # First remove logs from last time
 #
+echo "*** Session ID is $SESSION_ID"
 rm logs/api.log 2>/dev/null
 mkdir -p logs
 

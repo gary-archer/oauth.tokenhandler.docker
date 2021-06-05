@@ -24,11 +24,10 @@ export class LambdaStartup {
 
         try {
 
-            // Run startup logic and populate the container with auto wired objects
-            this._container.initialize();
-
+            // Run startup logic
+            const configuration = this._container.initialize();
             const corsOptions = {
-                origins: [this._container.configuration.api.trustedWebOrigin],
+                origins: [configuration.api.trustedWebOrigin],
                 credentials: true,
             };
 

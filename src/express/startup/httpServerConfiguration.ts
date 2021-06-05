@@ -69,19 +69,19 @@ export class HttpServerConfiguration {
 
         // Route requests through to the authorizer
         this._expressApp.post('/proxy/spa/login/start',
-            (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogin));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogin));
 
         this._expressApp.post('/proxy/spa/login/end',
-            (rq, rs) => this._adapt(rq, rs, this._authorizer.endLogin));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
         this._expressApp.post('/proxy/spa/token',
-            (rq, rs) => this._adapt(rq, rs, this._authorizer.refreshToken));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refreshToken));
 
         this._expressApp.post('/proxy/spa/token/expire',
-            (rq, rs) => this._adapt(rq, rs, this._authorizer.expireSession));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expireSession));
 
         this._expressApp.post('/proxy/spa/logout/start',
-            (rq, rs) => this._adapt(rq, rs, this._authorizer.startLogout));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogout));
     }
 
     /*
@@ -114,9 +114,9 @@ export class HttpServerConfiguration {
     }
 
     /*
-     * Adapt the request to technology neutral classes also used by Serverless lambdas
+     * Run outline processinf for the supplied function reference
      */
-    private async _adapt(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
+    private async _executeMethod(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
 
         const logEntry = this._logger.createLogEntry();
         const request = new ExpressRequestAdapter(rq, logEntry);
@@ -127,21 +127,25 @@ export class HttpServerConfiguration {
             // Call the core authorizer routine
             await fn(request, response);
 
+            // Update logs
+            response.finaliseLogs();
+            this._logger.write(logEntry);
+
             // Return a success response to the caller
             response.finaliseData();
 
         } catch (e) {
 
-            // Add the error to logs and return an error response to the caller
+            // Process the error
             const clientError = this._logger.handleError(e, logEntry);
             response.setError(clientError);
-            response.finaliseData();
 
-        } finally {
-
-            // Always write logs before returning
+            // Update logs
             response.finaliseLogs();
             this._logger.write(logEntry);
+
+            // Return a failure response to the caller
+            response.finaliseData();
         }
     }
 }

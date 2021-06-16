@@ -46,6 +46,10 @@ export class LogEntry {
         this._data.operationName = operationName;
     }
 
+    public setUserId(userId: string): void {
+        this._data.userOAuthId = userId;
+    }
+
     public setServerError(error: ServerError): void {
 
         this._data.errorData = error.toLogFormat(this._data.apiName);

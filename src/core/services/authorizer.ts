@@ -1,3 +1,4 @@
+import {decode} from 'jsonwebtoken';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
@@ -88,6 +89,7 @@ export class Authorizer {
         }
 
         // Get the id token from the response
+        // We do not currently validate the id token since it is received in a direct HTTPS request
         const idToken = authCodeGrantData.id_token;
         if (!idToken) {
             throw ErrorUtils.fromMessage('No id token was received in an authorization code grant response');
@@ -96,6 +98,9 @@ export class Authorizer {
         // Write both the refresh token and id token to separate HTTP only encrypted same site cookies
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
+
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
 
         // Return a body consisting only of the anti forgery token
         const data = {} as any;
@@ -137,6 +142,9 @@ export class Authorizer {
         const newIdToken = refreshTokenGrantData.id_token;
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
 
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
+
         // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
         data.accessToken = refreshTokenGrantData.access_token;
@@ -159,6 +167,15 @@ export class Authorizer {
         if (!refreshToken) {
             throw ErrorUtils.fromMissingCookieError('auth');
         }
+
+        // Get the id token from the id cookie
+        const idToken = this._cookieService.readAuthCookie(request);
+        if (!idToken) {
+            throw ErrorUtils.fromMissingCookieError('id');
+        }
+
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token refresh attempt
         const expiredRefreshToken = `x${refreshToken}x`;
@@ -184,6 +201,9 @@ export class Authorizer {
 
         // Clear all cookies for the caller
         this._cookieService.clearAll(response);
+
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
 
         // Write the full end session URL to the response body
         const data = {} as any;
@@ -247,6 +267,17 @@ export class Authorizer {
     }
 
     /*
+     * Parse the id token then include the user id in logs
+     */
+    private _logUserId(request: AbstractRequest, idToken: string): void {
+
+        const decoded = decode(idToken, {complete: true});
+        if (decoded) {
+            request.getLogEntry().setUserId(decoded.payload.sub);
+        }
+    }
+
+    /*
      * Make the this parameter available for when the API is called
      */
     private _setupCallbacks(): void {
@@ -255,6 +286,5 @@ export class Authorizer {
         this.refreshToken = this.refreshToken.bind(this);
         this.expireSession = this.expireSession.bind(this);
         this.startLogout = this.startLogout.bind(this);
-
     }
 }

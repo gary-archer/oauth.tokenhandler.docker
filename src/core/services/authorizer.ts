@@ -95,12 +95,12 @@ export class Authorizer {
             throw ErrorUtils.fromMessage('No id token was received in an authorization code grant response');
         }
 
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
+
         // Write both the refresh token and id token to separate HTTP only encrypted same site cookies
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
-
-        // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
 
         // Return a body consisting only of the anti forgery token
         const data = {} as any;
@@ -125,10 +125,13 @@ export class Authorizer {
         }
 
         // Get the id token from the id cookie
-        const idToken = this._cookieService.readAuthCookie(request);
+        const idToken = this._cookieService.readIdCookie(request);
         if (!idToken) {
             throw ErrorUtils.fromMissingCookieError('id');
         }
+
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
 
         // Send the request for a new access token to the Authorization Server
         const refreshTokenGrantData =
@@ -141,9 +144,6 @@ export class Authorizer {
         // Rewrite the id token cookie since the id token may have been renewed
         const newIdToken = refreshTokenGrantData.id_token;
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
-
-        // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
 
         // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
@@ -169,7 +169,7 @@ export class Authorizer {
         }
 
         // Get the id token from the id cookie
-        const idToken = this._cookieService.readAuthCookie(request);
+        const idToken = this._cookieService.readIdCookie(request);
         if (!idToken) {
             throw ErrorUtils.fromMissingCookieError('id');
         }
@@ -199,11 +199,11 @@ export class Authorizer {
             throw ErrorUtils.fromMissingCookieError('id');
         }
 
-        // Clear all cookies for the caller
-        this._cookieService.clearAll(response);
-
         // Include the OAuth user id in API logs
         this._logUserId(request, idToken);
+
+        // Clear all cookies for the caller
+        this._cookieService.clearAll(response);
 
         // Write the full end session URL to the response body
         const data = {} as any;

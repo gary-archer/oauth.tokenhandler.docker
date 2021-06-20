@@ -19,7 +19,7 @@ The code is a little tricky, but can be implemented once as a toolbox component,
 
 ### Developer Setup
 
-Developers need to run the Express version of the Proxy API:
+Developers can run the Express version of the Proxy API for testing, with the SPA as a client:
 
 - git clone https://github.com/gary-archer/oauth.webproxyapi
 - cd oauth.webproxyapi
@@ -33,8 +33,8 @@ To enable a productive setup, these bash scripts provide some login automation:
 - [runHttpWorkflow.sh](./test/runHttpWorkflow.sh)
 - [runLambdaWorkflow.sh](./test/runLambdaWorkflow.sh)
 
-To check that all HTTP endpoints are working, this script runs the OAuth lifecycle events for a user session.\
-This results in OAuth requests including logins and dealing with inputs and outputs:
+To check that all HTTP endpoints are working, this script runs all OAuth lifecycle events for a user session.\
+This results in multiple OAuth requests including login redirects and dealing with inputs and outputs:
 
 - npm run http
 

@@ -4,7 +4,7 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
-An API that issues same site cookies for the [Final SPA](https://github.com/gary-archer/oauth.websample.final) as part of a `Back End for Front End` solution.
+An API that issues same site cookies for the [Final SPA](https://github.com/gary-archer/oauth.websample.final) as part of a [Back End for Front End](https://authguidance.com/2019/09/09/spa-back-end-for-front-end) solution.
 
 ### Deployment
 

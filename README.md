@@ -25,25 +25,21 @@ Developers need to run the Express version of the Proxy API:
 - cd oauth.webproxyapi
 - npm install && npm start
 
-### Back End for Front End Testing
+### Automation Scripts
 
-OAuth operations from the Authorization Code Flow are difficult to test since they rely on real user logins.\
-To enable a productive setup, these bash scripts do some login automation, though the code is a little hacky:
+Authorization Code Flow API operations are difficult to test since they rely on real user logins.\
+To enable a productive setup, these bash scripts provide some login automation:
 
 - [runHttpWorkflow.sh](./test/runHttpWorkflow.sh)
 - [runLambdaWorkflow.sh](./test/runLambdaWorkflow.sh)
 
-### Testing the HTTP Workflow
-
-To understand HTTP Message details it can be useful to run the SPA's workflow for an entire user session.\
-Then use an HTTP Proxy Tool to view the [Final SPA Messages](https://authguidance.com/2020/05/24/spa-and-api-final-http-messages/):
+To check that all HTTP endpoints are working, this script runs the OAuth lifecycle events for a user session.\
+This results in OAuth requests including logins and dealing with inputs and outputs:
 
 - npm run http
 
-### Testing the Lambda Workflow
-
-Testing the lambda operations for an SPA user session on a Developer PC can be done in a similar manner.\
-This causes a number of `sls invoke` calls to be triggered, each with valid input data:
+To test that all lambda operations are working on a Developer PC, the below commands can be run.\
+This does the equivalent thing, using `sls invoke` commands and dealing with inputs and outputs:
 
 - npm run build
 - npm run lambda

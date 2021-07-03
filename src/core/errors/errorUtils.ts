@@ -53,6 +53,19 @@ export class ErrorUtils {
     }
 
     /*
+     * Throw an exception for the SPA when there is a login response error from the Authorization Server
+     */
+    public static fromLoginResponseError(errorCode: string, errorDescription: string): ClientError {
+
+        let description = errorCode;
+        if (errorDescription) {
+            description += ` : ${errorDescription}`;
+        }
+
+        return new ClientError(400, ErrorCodes.loginResponseError, description);
+    }
+
+    /*
      * Indicate a cookie not sent, which could be a browser issue
      */
     public static fromMissingCookieError(name: string): ClientError {

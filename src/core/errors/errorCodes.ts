@@ -12,6 +12,9 @@ export class ErrorCodes {
     // An error to indicate a cookie not found, which could possibly be a browser issue
     public static readonly cookieNotFound = 'cookie_not_found';
 
+    // An error to represent a login response failure
+    public static readonly loginResponseError = 'login_response_failed';
+
     // A generic error to indicate data not found
     public static readonly invalidData = 'invalid_data';
 

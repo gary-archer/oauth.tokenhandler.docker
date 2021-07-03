@@ -3,6 +3,7 @@ import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {UrlHelper} from '../utilities/urlHelper';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
@@ -52,13 +53,38 @@ export class Authorizer {
     }
 
     /*
-     * Complete login by swapping the authorization code for tokens and storing tokens in secure cookies
+     * The SPA sends us the full URL when the page loads, and it may contain an authorization result
+     * Complete login if required, by swapping the authorization code for tokens and storing tokens in secure cookies
      */
     public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
-        // Check incoming details
+        // First do basic validation
         request.getLogEntry().setOperationName('endLogin');
         this._validateOrigin(request);
+
+        // Get the URL posted by the SPA
+        const url = request.getJsonField('url');
+        if (!url) {
+            throw ErrorUtils.fromMissingFieldError('url');
+        }
+
+        // Get the authorization response data
+        const query = UrlHelper.getQueryParameters(url);
+        const code = query['code'];
+        const state = query['state'];
+        const error = query['error'];
+        const errorDescription = query['error_description'];
+
+        // Inform the SPA that this is a normal page load and not a login response
+        if (!(state && code) && !(state && error)) {
+            response.setBody({handled: false});
+            return;
+        }
+
+        // Report Authorization Server errors back to the SPA, such as those sending an invalid scope
+        if (state && error) {
+            throw ErrorUtils.fromLoginResponseError(error, errorDescription);
+        }
 
         // Read the state cookie and then clear it
         const stateCookie = this._cookieService.readStateCookie(request);
@@ -68,15 +94,8 @@ export class Authorizer {
         this._cookieService.clearStateCookie(response);
 
         // Check that the value posted matches that in the cookie
-        const state = request.getJsonField('state');
         if (state !== stateCookie.state) {
             throw ErrorUtils.fromInvalidStateError();
-        }
-
-        // Get the code value
-        const code = request.getJsonField('code');
-        if (!code) {
-            throw ErrorUtils.fromMissingFieldError('code');
         }
 
         // Send the Authorization Code Grant message to the Authorization Server
@@ -103,7 +122,9 @@ export class Authorizer {
         this._cookieService.writeIdCookie(idToken, response);
 
         // Return a body consisting only of the anti forgery token
-        const data = {} as any;
+        const data = {
+            handled: true,
+        } as any;
         this._addAntiForgeryResponseData(response, data);
         response.setBody(data);
     }
@@ -272,7 +293,7 @@ export class Authorizer {
     private _logUserId(request: AbstractRequest, idToken: string): void {
 
         const decoded = decode(idToken, {complete: true});
-        if (decoded) {
+        if (decoded && decoded.payload.sub) {
             request.getLogEntry().setUserId(decoded.payload.sub);
         }
     }

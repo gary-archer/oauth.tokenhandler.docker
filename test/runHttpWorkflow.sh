@@ -53,17 +53,6 @@ function getCookieValue(){
 }
 
 #
-# Read until we get to the parameter and then return everything up to the next query parameter
-# We then return the value of the query parameter by returning the match in group 2
-#
-function getQueryParameterValue(){
-  local _URL=$1
-  local _PARAM_NAME=$2
-  local _PARAM_VALUE=$(echo $_URL | sed -r "s/^(.*)$_PARAM_NAME=(.[^&]*)(.*)$/\2/")
-  echo $_PARAM_VALUE
-}
-
-#
 # Render an error result returned from the API
 #
 function apiError() {
@@ -146,11 +135,9 @@ if [ $HTTP_STATUS != '302' ]; then
 fi
 
 #
-# Next get the code and state from the redirect response's query parameters, but without following the redirect
+# Next get the response URL
 #
 AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
-AUTH_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
-AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
 
 #
 # Next we end the login by asking the server to do an authorization code grant
@@ -163,7 +150,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/end" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 --cookie "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE" \
--d '{"code":"'$AUTH_CODE'", "state":"'$AUTH_STATE'"}' \
+-d '{"url":"'$AUTHORIZATION_RESPONSE_URL'"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered ending a login, status: $HTTP_STATUS"

@@ -45,17 +45,6 @@ function getCognitoCookieValue(){
 }
 
 #
-# Read until we get to the parameter and then return everything up to the next query parameter
-# We then return the value of the query parameter by returning the match in group 2
-#
-function getQueryParameterValue(){
-  local _URL=$1
-  local _PARAM_NAME=$2
-  local _PARAM_VALUE=$(echo $_URL | sed -r "s/^(.*)$_PARAM_NAME=(.[^&]*)(.*)$/\2/")
-  echo $_PARAM_VALUE
-}
-
-#
 # Get a cookie name passed in the first argument from the multi value headers passed in the second
 #
 function getLambdaResponseCookieValue(){
@@ -180,11 +169,9 @@ if [ $HTTP_STATUS != '302' ]; then
 fi
 
 #
-# Next get the code and state from the redirect response's query parameters, but without following the redirect
+# Next get the response
 #
 AUTHORIZATION_RESPONSE_URL=$(getCognitoHeaderValue 'location')
-AUTH_STATE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'state')
-AUTH_CODE=$(getQueryParameterValue $AUTHORIZATION_RESPONSE_URL 'code')
 
 #
 # Next write the input file for the end login request
@@ -199,7 +186,7 @@ content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID) \
 multiValueHeaders=$(jo cookie=$(jo -a "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE")) \
-body="{\\\""code\\\"":\\\""$AUTH_CODE\\\"", \\\""state\\\"":\\\""$AUTH_STATE\\\""}" \
+body="{\\\""url\\\"":\\\""$AUTHORIZATION_RESPONSE_URL\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
 

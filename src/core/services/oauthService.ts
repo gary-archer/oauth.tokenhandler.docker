@@ -65,6 +65,7 @@ export class OAuthService {
         const formData = new URLSearchParams();
         formData.append('grant_type', 'authorization_code');
         formData.append('client_id', this._clientConfiguration.clientId);
+        formData.append('client_secret', this._clientConfiguration.clientSecret);
         formData.append('code', code);
         formData.append('redirect_uri', this._clientConfiguration.redirectUri);
         formData.append('code_verifier', codeVerifier);
@@ -79,6 +80,7 @@ export class OAuthService {
         const formData = new URLSearchParams();
         formData.append('grant_type', 'refresh_token');
         formData.append('client_id', this._clientConfiguration.clientId);
+        formData.append('client_secret', this._clientConfiguration.clientSecret);
         formData.append('refresh_token', refreshToken);
         return this._postGrantMessage(formData);
     }

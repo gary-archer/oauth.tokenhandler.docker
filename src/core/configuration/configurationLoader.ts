@@ -12,6 +12,7 @@ export class ConfigurationLoader {
     public static load(): Configuration {
 
         const configurationBuffer = fs.readFileSync('api.config.json');
-        return JSON.parse(configurationBuffer.toString()) as Configuration;
+        const json = JSON.parse(configurationBuffer.toString());
+        return json as Configuration;
     }
 }

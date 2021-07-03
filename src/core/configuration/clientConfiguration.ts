@@ -7,6 +7,8 @@ export interface ClientConfiguration {
 
     clientId: string;
 
+    clientSecret: string;
+
     redirectUri: string;
 
     postLogoutRedirectUri: string;

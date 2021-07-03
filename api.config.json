@@ -3,7 +3,7 @@
         "port": 444,
         "sslCertificateFileName": "./certs/mycompany.com.ssl.p12",
         "sslCertificatePassword": "Password1",
-        "useHttpProxy": false,
+        "useHttpProxy": true,
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
@@ -20,7 +20,8 @@
     },
     "client": {
         "name": "finalspa",
-        "clientId": "4co5uvgmse68utsekh7p2sc0lg",
+        "clientId": "7b1b97q0d7eils1mo0m46oobr3",
+        "clientSecret": "bv8mbjf7s04n16o358qg4qe12842md4kdspubts22omfrfqk37e",
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
         "scope": "openid profile email https://api.authsamples.com/api/transactions_read",

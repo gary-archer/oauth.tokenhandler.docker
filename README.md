@@ -8,7 +8,7 @@ An API that issues same site cookies for the [Final SPA](https://github.com/gary
 
 ### Deployment
 
-- The API is deployed to AWS London as a low cost Serverless Lambda
+- The API is deployed to the AWS London region as a low cost Serverless Lambda
 - The API can also be run as an Express API, for local development or if Kubernetes deployment is preferred
 - The SPA is deployed to 20 global locations via AWS Cloudfront, at very low cost
 

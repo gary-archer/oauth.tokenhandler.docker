@@ -75,9 +75,20 @@ export class Authorizer {
         const error = query['error'];
         const errorDescription = query['error_description'];
 
-        // Inform the SPA that this is a normal page load and not a login response
         if (!(state && code) && !(state && error)) {
-            response.setBody({handled: false});
+
+            // Inform the SPA that this is a normal page load and not a login response
+            const pageLoadData = {
+                handled: false,
+            } as any;
+
+            // If there has been a page reload or a new browser tab opened, serve up the existing anti forgery token
+            const antiForgeryToken = this._cookieService.readAntiForgeryCookie(request);
+            if (antiForgeryToken) {
+                pageLoadData.antiForgeryToken = antiForgeryToken;
+            }
+
+            response.setBody(pageLoadData);
             return;
         }
 
@@ -121,12 +132,14 @@ export class Authorizer {
         this._cookieService.writeAuthCookie(refreshToken, response);
         this._cookieService.writeIdCookie(idToken, response);
 
-        // Return a body consisting only of the anti forgery token
-        const data = {
+        // Inform the SPA that that a login response was handled
+        const endLoginData = {
             handled: true,
         } as any;
-        this._addAntiForgeryResponseData(response, data);
-        response.setBody(data);
+
+        // Create an anti forgery cookie which will last for the duration of the multi tab browsing session
+        this._createAntiForgeryResponseData(response, endLoginData);
+        response.setBody(endLoginData);
     }
 
     /*
@@ -169,7 +182,6 @@ export class Authorizer {
         // Return a body consisting only of the access token and an anti forgery token
         const data = {} as any;
         data.accessToken = refreshTokenGrantData.access_token;
-        this._addAntiForgeryResponseData(response, data);
         response.setBody(data);
     }
 
@@ -273,9 +285,9 @@ export class Authorizer {
     }
 
     /*
-     * Add anti forgery details to the response when ending a login or when refreshing a token
+     * Add anti forgery details to the response when ending a login or on page load
      */
-    private _addAntiForgeryResponseData(response: AbstractResponse, data: any): void {
+    private _createAntiForgeryResponseData(response: AbstractResponse, data: any): void {
 
         // Get a random value
         const randomValue = this._cookieService.generateAntiForgeryValue();

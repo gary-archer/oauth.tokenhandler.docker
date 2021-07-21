@@ -250,9 +250,7 @@ fi
 #
 AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
-AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ACCESS_TOKEN=$(jq -r .accessToken <<< "$BODY")
-ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
 # Call the business API with an access token

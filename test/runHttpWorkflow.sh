@@ -186,14 +186,12 @@ if [ $HTTP_STATUS != '200' ]; then
 fi
 
 #
-# Get data that we will use later
+# Reget these values after every refresh
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 ACCESS_TOKEN=$(jq -r .accessToken <<< "$JSON")
-ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
 AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
-AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 
 #
 # Call the business API with an access token

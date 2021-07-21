@@ -77,21 +77,24 @@ export class Authorizer {
 
         if (!(state && code) && !(state && error)) {
 
-            // If this is a page reload once logged in, get the ID token and log the user ID
-            const existingIdToken = this._cookieService.readIdCookie(request);
-            if (existingIdToken) {
-                this._logUserId(request, existingIdToken);
-            }
-
             // Inform the SPA that this is a normal page load and not a login response
             const pageLoadData = {
                 handled: false,
             } as any;
 
-            // If this is a page reload once logged in, serve up the existing anti forgery token
+            const existingIdToken = this._cookieService.readIdCookie(request);
             const antiForgeryToken = this._cookieService.readAntiForgeryCookie(request);
-            if (antiForgeryToken) {
+            if (existingIdToken && antiForgeryToken) {
+
+                // Return data for the case where the user is already logged in
+                pageLoadData.isLoggedIn = true;
                 pageLoadData.antiForgeryToken = antiForgeryToken;
+                this._logUserId(request, existingIdToken);
+
+            } else {
+
+                // Return data for the case where the user is not logged in
+                pageLoadData.isLoggedIn = false;
             }
 
             response.setBody(pageLoadData);
@@ -140,6 +143,7 @@ export class Authorizer {
 
         // Inform the SPA that that a login response was handled
         const endLoginData = {
+            isLoggedIn: true,
             handled: true,
         } as any;
 

@@ -58,29 +58,29 @@ export class HttpServerConfiguration {
             origin: this._configuration.api.trustedWebOrigin,
             credentials: true,
         };
-        this._expressApp.use('/proxy/spa/*', cors(options) as any);
+        this._expressApp.use('/proxy/*', cors(options) as any);
 
         // Parse cookies and the request body
-        this._expressApp.use('/proxy/spa/*', cookieParser());
-        this._expressApp.use('/proxy/spa/*', express.json());
+        this._expressApp.use('/proxy/*', cookieParser());
+        this._expressApp.use('/proxy/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/proxy/spa/login/start',
+        this._expressApp.post('/proxy/login/start',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogin));
 
-        this._expressApp.post('/proxy/spa/login/end',
+        this._expressApp.post('/proxy/login/end',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
-        this._expressApp.post('/proxy/spa/token',
+        this._expressApp.post('/proxy/token',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refreshToken));
 
-        this._expressApp.post('/proxy/spa/token/expire',
+        this._expressApp.post('/proxy/token/expire',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expireSession));
 
-        this._expressApp.post('/proxy/spa/logout/start',
+        this._expressApp.post('/proxy/logout/start',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogout));
     }
 

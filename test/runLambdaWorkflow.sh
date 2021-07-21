@@ -98,7 +98,7 @@ mkdir -p logs
 # Write the input file for the startLogin request
 #
 jo -p \
-path=/proxy/spa/login/start \
+path=/proxy/login/start \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -178,7 +178,7 @@ AUTHORIZATION_RESPONSE_URL=$(getCognitoHeaderValue 'location')
 # Note that it is tricky to output the body parameters in the stringified form lambda expects
 #
 jo \
-path=/proxy/spa/login/end \
+path=/proxy/login/end \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -225,7 +225,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 # Invoke the refresh lambda to get an access token
 #
 echo "*** Calling refresh to get an access token in the client ..."
-createPostWithCookiesRequest '/proxy/spa/token'
+createPostWithCookiesRequest '/proxy/token'
 $SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refreshToken lambda"
@@ -272,7 +272,7 @@ fi
 # Next expire the session by rewriting the refresh token in the auth cookie, for test purposes
 #
 echo "*** Expiring the refresh token to force an end of session ..."
-createPostWithCookiesRequest '/proxy/spa/token/expire'
+createPostWithCookiesRequest '/proxy/token/expire'
 $SLS invoke local -f expireSession -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the expireSession lambda"
@@ -301,7 +301,7 @@ AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MUL
 # Next try to refresh the token again and we should get an invalid_grant error
 #
 echo "*** Calling refresh to get an access token when the session is expired ..."
-createPostWithCookiesRequest '/proxy/spa/token'
+createPostWithCookiesRequest '/proxy/token'
 $SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refreshToken lambda"

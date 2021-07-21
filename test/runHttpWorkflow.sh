@@ -17,13 +17,13 @@ RESPONSE_FILE=test/response.txt
 # Use these endpoints to test the API running locally
 #
 #WEB_BASE_URL='https://web.mycompany.com'
-#PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy/spa'
+#PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy'
 
 #
 # Use these endpoints to test the AWS deployed API endpoints
 #
 WEB_BASE_URL=https://web.authsamples.com
-PROXY_API_BASE_URL=https://api.authsamples.com/proxy/spa
+PROXY_API_BASE_URL=https://api.authsamples.com/proxy
 
 #
 # Enable this to view requests in an HTTP Proxy tool

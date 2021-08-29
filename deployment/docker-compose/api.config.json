@@ -1,0 +1,30 @@
+{
+    "host": {
+        "port": 8000,
+        "sslCertificateFileName": "./certs/mycompany.internal.ssl.p12",
+        "sslCertificatePassword": "Password1",
+        "useHttpProxy": false,
+        "httpProxyUrl": "http://127.0.0.1:8888"
+    },
+    "api": {
+        "name": "OAuthProxyApi",
+        "authorizeEndpoint": "https://login.mycompany.com/oauth/v2/oauth-authorize",
+        "tokenEndpoint": "https://login.mycompany.internal:8443/oauth/v2/oauth-token",
+        "endSessionEndpoint": "https://login.mycompany.com/oauth/v2/oauth-session/logout",
+        "cookieRootDomain": "mycompany.com",
+        "cookiePrefix": "mycompany",
+        "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
+        "trustedWebOrigin": "https://web.mycompany.com",
+        "provider": "standard",
+        "development": false
+    },
+    "client": {
+        "name": "finalspa",
+        "clientId": "finalspa",
+        "clientSecret": "ZZi85TJzEXS-V2gQTdL78nitMKTSzn8wL3G0BZlzW86Cf2AKpA70-V0qWVHhpdwo",
+        "redirectUri": "https://web.mycompany.com/spa/",
+        "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
+        "scope": "openid profile email transactions_read",
+        "path": "/proxy"
+    }
+}

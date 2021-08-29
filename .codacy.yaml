@@ -1,0 +1,9 @@
+---
+exclude_paths: [
+    '*',    
+    'certs/*',
+    'deployment/**',
+    'dist/**',
+    'environments/**',
+    'test/**'
+]

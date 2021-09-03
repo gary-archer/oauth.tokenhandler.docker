@@ -19,9 +19,8 @@ The code is a little tricky, but can be implemented once as a toolbox component,
 
 ### Developer Setup
 
-Developers can run the Express version of the Proxy API for testing, with the SPA as a client:
+Run the standard commands to start listening over SSL:
 
-- ./setup.sh
 - npm install
 - npm start
 

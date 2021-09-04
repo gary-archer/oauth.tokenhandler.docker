@@ -19,10 +19,9 @@ The code is a little tricky, but can be implemented once as a toolbox component,
 
 ### Developer Setup
 
-Run the standard commands to start listening over SSL:
+Run the start script to begin listening over SSL:
 
-- npm install
-- npm start
+- ./start.sh
 
 ### Automation Scripts
 

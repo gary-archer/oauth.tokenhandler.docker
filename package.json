@@ -21,7 +21,7 @@
   "dependencies": {
     "@middy/core": "1.4.0",
     "@middy/http-cors": "^1.4.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "cookie": "^0.4.1",
     "cookie-encrypter": "^1.0.1",
     "cookie-parser": "^1.4.5",

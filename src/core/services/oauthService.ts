@@ -137,7 +137,7 @@ export class OAuthService {
             const authServerResponse = await axios.request(options as AxiosRequestConfig);
             return authServerResponse.data;
 
-        } catch (e) {
+        } catch (e: any) {
 
             // See if we have a response body
             if (e.response && e.response.status && e.response.data) {

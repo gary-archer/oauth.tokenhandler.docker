@@ -189,12 +189,11 @@ fi
 # Reget these values after every refresh
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
-ACCESS_TOKEN=$(jq -r .accessToken <<< "$JSON")
 AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 
 #
-# Call the business API with an access token
+# Call the business API with the secure cookie
 #
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \

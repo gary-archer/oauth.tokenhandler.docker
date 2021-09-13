@@ -188,11 +188,7 @@ export class Authorizer {
         // Rewrite the id token cookie since the id token may have been renewed
         const newIdToken = refreshTokenGrantData.id_token;
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
-
-        // Return a body consisting only of the access token
-        const data = {} as any;
-        data.accessToken = refreshTokenGrantData.access_token;
-        response.setBody(data);
+        response.setStatusCode(204);
     }
 
     /*

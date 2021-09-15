@@ -8,7 +8,7 @@ import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point class for the OAuth Proxy API's logic, which performs an outline of processing
+ * The entry point class for the OAuth BFF API's logic, which performs an outline of processing
  */
 export class Authorizer {
 

@@ -1,4 +1,4 @@
-service: oauthproxyapi
+service: bff-api
 
 # Base details for AWS deployment
 provider:
@@ -47,7 +47,7 @@ functions:
     handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
-          path: /proxy/login/start
+          path: /bff/login/start
           method: post
           cors:
             origins:
@@ -61,7 +61,7 @@ functions:
     handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
-          path: /proxy/login/end
+          path: /bff/login/end
           method: post
           cors:
             origins:
@@ -75,7 +75,7 @@ functions:
     handler: dist/lambda/handlers/refreshToken.handler
     events:
       - http: 
-          path: /proxy/token
+          path: /bff/token
           method: post
           cors:
             origins:
@@ -89,7 +89,7 @@ functions:
     handler: dist/lambda/handlers/expireSession.handler
     events:
       - http: 
-          path: /proxy/token/expire
+          path: /bff/token/expire
           method: post
           cors:
             origins:
@@ -103,7 +103,7 @@ functions:
     handler: dist/lambda/handlers/startLogout.handler
     events:
       - http: 
-          path: /proxy/logout/start
+          path: /bff/logout
           method: post
           cors:
             origins:

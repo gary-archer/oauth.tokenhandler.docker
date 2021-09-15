@@ -1,6 +1,6 @@
 
 /*
- * Log configuration to cover our proxy API's use cases
+ * Log configuration to cover our BFF API's use cases
  */
 export interface LoggerOptions {
     lambda: boolean;

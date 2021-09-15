@@ -1,5 +1,5 @@
 #
-# The docker image for the Web Proxy API
+# The docker image for the Back End for Front End API
 # After building, files in the image can be viewed via the below commands
 # - docker run -it webproxyapi:1.0.0 sh
 #

@@ -13,8 +13,12 @@ See the [Final SPA](https://github.com/gary-archer/oauth.websample.final) for no
 
 ## API Driven Benefits
 
-- The SPA uses modern OpenID Connect security with only SameSite cookies in the browser
-- The SPA receives all of the benefits of an SPA architecture, unlike website solutions
+The SPA retains all of the benefits of an SPA architecture:
+
+- Best browser security
+- Full control over usability
+- Simple code
+- Deploy anywhere
 
 ## API Behaviour
 
@@ -28,7 +32,7 @@ Companies are advised to plug in a Back End for Front End API developed by secur
 
 - [Curity NodeJS](https://github.com/curityio/bff-node-express)
 
-## My Customiaztions
+## My Customizations
 
 This repo includes some customizations related to logging, expiry testing and automation.\
 The main downside of a Back End for Front End approach is a more complex developer setup.

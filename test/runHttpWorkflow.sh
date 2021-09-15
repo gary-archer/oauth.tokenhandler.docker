@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# A script to test HTTP messages that the SPA and browser will together send to the OAuth Web Proxy API
+# A script to test HTTP messages that the SPA and browser will together send to the OAuth BFF API
 # The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
 #
 BUSINESS_API_BASE_URL='https://api.authsamples.com'
@@ -17,13 +17,13 @@ RESPONSE_FILE=test/response.txt
 # Use these endpoints to test the API running locally
 #
 #WEB_BASE_URL='https://web.mycompany.com'
-#PROXY_API_BASE_URL='https://api.mycompany.com:444/proxy'
+#BFF_API_BASE_URL='https://api.mycompany.com:444/bff'
 
 #
 # Use these endpoints to test the AWS deployed API endpoints
 #
 WEB_BASE_URL=https://web.authsamples.com
-PROXY_API_BASE_URL=https://api.authsamples.com/proxy
+BFF_API_BASE_URL=https://api.authsamples.com/bff
 
 #
 # Enable this to view requests in an HTTP Proxy tool
@@ -71,7 +71,7 @@ function apiError() {
 #
 echo "*** Session ID is $SESSION_ID"
 echo "*** Requesting cross origin access"
-HTTP_STATUS=$(curl -i -s -X OPTIONS "$PROXY_API_BASE_URL/login/start" \
+HTTP_STATUS=$(curl -i -s -X OPTIONS "$BFF_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
@@ -80,10 +80,10 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
 fi
 
 #
-# Act as the SPA by calling the OAuth proxy API to start a login and get the request URI
+# Act as the SPA by calling the OAuth BFF API to start a login and get the request URI
 #
 echo "*** Creating login URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/start" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -143,7 +143,7 @@ AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
 # Next we end the login by asking the server to do an authorization code grant
 #
 echo "*** Finishing the login by processing the authorization code ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/login/end" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/login/end" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
 -H 'accept: application/json' \
@@ -171,7 +171,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
 # Next get an access token so that the client can make cross domain calls
 #
 echo "*** Calling refresh to get an access token in the client ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -212,7 +212,7 @@ fi
 # Next expire the refresh token in the auth cookie, for test purposes
 #
 echo "*** Expiring the refresh token ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token/expire" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token/expire" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -235,7 +235,7 @@ AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
 # Next try to refresh the token again and we should get an invalid_grant error
 #
 echo "*** Calling refresh to get an access token when the session is expired ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/token" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -253,7 +253,7 @@ fi
 # Next make a start logout request
 #
 echo "*** Calling start logout to clear cookies and get the end session request URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$PROXY_API_BASE_URL/logout/start" \
+HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/logout" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \

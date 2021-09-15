@@ -14,7 +14,7 @@ See the [Final SPA](https://github.com/gary-archer/oauth.websample.final) for no
 ## API Driven Benefits
 
 - The SPA uses modern OpenID Connect security with only SameSite cookies in the browser
-- All of the benefits of an SPA architecture, including best usability and deployment
+- The SPA receives all of the benefits of an SPA architecture, unlike website solutions
 
 ## API Behaviour
 

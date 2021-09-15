@@ -82,7 +82,7 @@ function createPostWithCookiesRequest() {
     x-mycompany-session-id=$SESSION_ID \
     "x-$COOKIE_PREFIX-aft-$APP_NAME=$ANTI_FORGERY_TOKEN") \
     multiValueHeaders=$(jo cookie=$(jo -a \
-    "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE", \
+    "$COOKIE_PREFIX-refresh-$APP_NAME=$REFRESH_COOKIE", \
     "$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
     "$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
 }
@@ -216,7 +216,7 @@ fi
 #
 # Get values we will use shortly
 #
-AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-refresh-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
 AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
@@ -248,7 +248,7 @@ fi
 #
 # Reget these values after every refresh
 #
-AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-refresh-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ACCESS_TOKEN=$(jq -r .accessToken <<< "$BODY")
 
@@ -295,7 +295,7 @@ fi
 #
 # Get the updated auth cookie, which now contains an invalid refresh token
 #
-AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-refresh-$APP_NAME" "$MULTI_VALUE_HEADERS")
 
 #
 # Next try to refresh the token again and we should get an invalid_grant error

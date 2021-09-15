@@ -16,14 +16,14 @@ RESPONSE_FILE=test/response.txt
 #
 # Use these endpoints to test the API running locally
 #
-#WEB_BASE_URL='https://web.mycompany.com'
-#BFF_API_BASE_URL='https://api.mycompany.com:444/bff'
+WEB_BASE_URL='https://web.mycompany.com'
+BFF_API_BASE_URL='https://api.mycompany.com:444/bff'
 
 #
 # Use these endpoints to test the AWS deployed API endpoints
 #
-WEB_BASE_URL=https://web.authsamples.com
-BFF_API_BASE_URL=https://api.authsamples.com/bff
+#WEB_BASE_URL=https://web.authsamples.com
+#BFF_API_BASE_URL=https://api.authsamples.com/bff
 
 #
 # Enable this to view requests in an HTTP Proxy tool
@@ -100,6 +100,7 @@ fi
 JSON=$(tail -n 1 $RESPONSE_FILE)
 AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$JSON")
 STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
+echo $AUTHORIZATION_REQUEST_URL
 
 #
 # Next invoke the redirect URI to start a login
@@ -163,41 +164,17 @@ fi
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
-AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-access-$APP_NAME")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-refresh-$APP_NAME")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-aft-$APP_NAME")
-
-#
-# Next get an access token so that the client can make cross domain calls
-#
-echo "*** Calling refresh to get an access token in the client ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token" \
--H "origin: $WEB_BASE_URL" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered getting an access token, status: $HTTP_STATUS"
-  apiError
-  exit
-fi
-
-#
-# Reget these values after every refresh
-#
-JSON=$(tail -n 1 $RESPONSE_FILE)
-AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
-ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 
 #
 # Call the business API with the secure cookie
 #
 echo "*** Calling cross domain API with an access token ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
--H "Authorization: Bearer $ACCESS_TOKEN" \
+-H "$COOKIE_PREFIX-access-$APP_NAME: ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -218,7 +195,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token/expire" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-refresh-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
   echo "*** Problem encountered expiring the refresh token, status: $HTTP_STATUS"
@@ -229,7 +206,7 @@ fi
 #
 # Get the updated auth cookie, which now contains an invalid refresh token
 #
-AUTH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-auth-$APP_NAME")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-refresh-$APP_NAME")
 
 #
 # Next try to refresh the token again and we should get an invalid_grant error
@@ -241,7 +218,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-refresh-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '400' ]; then
   echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
@@ -259,7 +236,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/logout" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-aft-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-auth-$APP_NAME=$AUTH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-refresh-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-aft-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered starting a logout, status: $HTTP_STATUS"

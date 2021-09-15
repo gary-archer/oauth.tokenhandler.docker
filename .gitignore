@@ -6,3 +6,5 @@ dist
 .tmp
 logs
 test/*.txt
+api-gateway/.certs
+api-gateway/kong-bff-plugin

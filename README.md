@@ -30,7 +30,8 @@ The SPA retains all of the benefits of an SPA architecture:
 
 Companies are advised to plug in a Back End for Front End API developed by security experts:
 
-- [Curity NodeJS](https://github.com/curityio/bff-node-express)
+- [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
+- [Curity BFF API Example](https://github.com/curityio/bff-node-express)
 
 ## My Customizations
 

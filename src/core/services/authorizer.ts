@@ -121,24 +121,28 @@ export class Authorizer {
         // Send the Authorization Code Grant message to the Authorization Server
         const authCodeGrantData = await this._oauthService.sendAuthorizationCodeGrant(code, stateCookie.codeVerifier);
 
-        // Get the refresh token from the response
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
             throw ErrorUtils.fromMessage('No refresh token was received in an authorization code grant response');
         }
 
-        // Get the id token from the response
-        // We do not currently validate the id token since it is received in a direct HTTPS request
+        const accessToken = authCodeGrantData.access_token;
+        if (!accessToken) {
+            throw ErrorUtils.fromMessage('No access token was received in an authorization code grant response');
+        }
+
+        // We do not validate the id token since it is received in a direct HTTPS request
         const idToken = authCodeGrantData.id_token;
         if (!idToken) {
             throw ErrorUtils.fromMessage('No id token was received in an authorization code grant response');
         }
 
-        // Include the OAuth user id in API logs
+        // Include the OAuth User ID in API logs
         this._logUserId(request, idToken);
 
-        // Write both the refresh token and id token to separate HTTP only encrypted same site cookies
-        this._cookieService.writeAuthCookie(refreshToken, response);
+        // Write tokens to separate HTTP only encrypted same site cookies
+        this._cookieService.writeRefreshCookie(refreshToken, response);
+        this._cookieService.writeAccessCookie(accessToken, response);
         this._cookieService.writeIdCookie(idToken, response);
 
         // Inform the SPA that that a login response was handled
@@ -163,9 +167,9 @@ export class Authorizer {
         this._validateAntiForgeryCookie(request);
 
         // Get the refresh token from the auth cookie
-        const refreshToken = this._cookieService.readAuthCookie(request);
+        const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
-            throw ErrorUtils.fromMissingCookieError('auth');
+            throw ErrorUtils.fromMissingCookieError('refresh');
         }
 
         // Get the id token from the id cookie
@@ -181,13 +185,14 @@ export class Authorizer {
         const refreshTokenGrantData =
             await this._oauthService.sendRefreshTokenGrant(refreshToken);
 
-        // Rewrite the refresh token cookie since the refresh token may have been renewed
+        // Rewrite cookies
         const newRefreshToken = refreshTokenGrantData.refresh_token;
-        this._cookieService.writeAuthCookie(newRefreshToken ?? refreshToken, response);
-
-        // Rewrite the id token cookie since the id token may have been renewed
         const newIdToken = refreshTokenGrantData.id_token;
+        this._cookieService.writeAccessCookie(refreshTokenGrantData.access_token, response);
+        this._cookieService.writeRefreshCookie(newRefreshToken ?? refreshToken, response);
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
+
+        // Return an empty response to the browser
         response.setStatusCode(204);
     }
 
@@ -231,9 +236,9 @@ export class Authorizer {
         this._validateAntiForgeryCookie(request);
 
         // Get the current refresh token
-        const refreshToken = this._cookieService.readAuthCookie(request);
+        const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
-            throw ErrorUtils.fromMissingCookieError('auth');
+            throw ErrorUtils.fromMissingCookieError('refresh');
         }
 
         // Get the id token from the id cookie
@@ -247,7 +252,7 @@ export class Authorizer {
 
         // Write a corrupted refresh token to the cookie, which will fail on the next token refresh attempt
         const expiredRefreshToken = `x${refreshToken}x`;
-        this._cookieService.writeAuthCookie(expiredRefreshToken, response);
+        this._cookieService.writeRefreshCookie(expiredRefreshToken, response);
         response.setStatusCode(204);
     }
 

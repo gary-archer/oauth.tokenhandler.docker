@@ -1,6 +1,6 @@
 TEST DRIVEN UPDATES
 -------------------
-1. Add the AT cookie
+1. expire to read the payload and handle both type='access' and type='refresh'
 
 2. Encrypt using Michal's iv method
 

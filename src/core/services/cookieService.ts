@@ -57,11 +57,11 @@ export class CookieService {
     }
 
     /*
-     * Write a same site auth cookie containing the refresh token
+     * Write a same site cookie containing the refresh token
      */
-    public writeAuthCookie(refreshToken: string, response: AbstractResponse): void {
+    public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('auth');
+        const cookieName = this._getCookieName('refresh');
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
@@ -69,15 +69,25 @@ export class CookieService {
     /*
      * Read the refresh token from the auth cookie
      */
-    public readAuthCookie(request: AbstractRequest): string | null {
+    public readRefreshCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('auth');
+        const cookieName = this._getCookieName('refresh');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
         }
 
         return null;
+    }
+
+    /*
+     * Write a same site cookie containing the access token
+     */
+    public writeAccessCookie(accessToken: string, response: AbstractResponse): void {
+
+        const cookieName = this._getCookieName('access');
+        const encryptedData = encryptCookie(accessToken, {key: this._encryptionKey});
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
     /*
@@ -155,7 +165,8 @@ export class CookieService {
         const options = this._getCookieOptions();
         options.expires = new Date(0);
 
-        response.addCookie(this._getCookieName('auth'), '', options);
+        response.addCookie(this._getCookieName('refresh'), '', options);
+        response.addCookie(this._getCookieName('access'), '', options);
         response.addCookie(this._getCookieName('id'), '', options);
         response.addCookie(this._getCookieName('aft'), '', options);
     }

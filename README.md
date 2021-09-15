@@ -5,7 +5,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
 A sample API that implements a [Back End for Front End](https://authguidance.com/2019/09/09/spa-back-end-for-front-end) security solution for SPAs.\
-An API driven approach is used, so that the SPA experiences best control and no cookie usability problems.
+An API driven approach is used, for best SPA control and zero cookie problems.
 
 ## Running the API
 
@@ -28,6 +28,7 @@ Companies are advised to plug in a Back End for Front End API developed by secur
 
 - [Curity NodeJS](https://github.com/curityio/bff-node-express)
 
-## My Custom Behaviour
+## My Customiaztions
 
-This repo includes some customizations related to logging, expiry testing and development automation.
+This repo includes some customizations related to logging, expiry testing and automation.\
+The main downside of a Back End for Front End approach is a more complex developer setup.

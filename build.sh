@@ -23,3 +23,13 @@ if [ $? -ne 0 ]; then
   echo "Problem encountered installing the BFF API dependencies"
   exit 1
 fi
+
+#
+# Set up the API gateway
+#
+cd api-gateway
+./build.sh
+if [ $? -ne 0 ]; then
+  echo "Problem encountered building the API gateway"
+  exit 1
+fi

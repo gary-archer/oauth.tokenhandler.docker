@@ -3,5 +3,6 @@
 .serverless
 node_modules
 dist
+.tmp
 logs
 test/*.txt

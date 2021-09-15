@@ -1,0 +1,25 @@
+_format_version: '2.1'
+_transform: true
+
+services:
+
+#
+# The route for my AWS cloud API, which is called by the SPA via https://api.mycompany.com:444/api
+#
+- name: sample-api
+  url: https://api.authsamples.com/api
+  routes:
+  - name: sample-api-route
+    paths:
+    - /api
+
+  plugins:
+
+  # The BFF plugin decrypts the secure cookie and forwards the access token to the API
+  - name: bff-token
+    config:
+      encryption_key: VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=
+      cookie_name_prefix: mycompany
+      trusted_web_origins:
+      - http://web.mycompany.com
+  

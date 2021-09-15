@@ -70,9 +70,9 @@ functions:
             headers: ${self:custom.allowedHeaders}
             allowCredentials: true
 
-  # Return a new access token to the Browser UI
-  refreshToken:
-    handler: dist/lambda/handlers/refreshToken.handler
+  # Refresh the access token stored in cookies, and usually the refresh token will also be renewed
+  refresh:
+    handler: dist/lambda/handlers/refresh.handler
     events:
       - http: 
           path: /bff/token
@@ -84,12 +84,12 @@ functions:
             headers: ${self:custom.allowedHeaders}
             allowCredentials: true
 
-  # Make the refresh token in the auth cookie act expired, for test purposes
-  expireSession:
-    handler: dist/lambda/handlers/expireSession.handler
+  # Get the end session URL and remove cookies
+  logout:
+    handler: dist/lambda/handlers/logout.handler
     events:
       - http: 
-          path: /bff/token/expire
+          path: /bff/logout
           method: post
           cors:
             origins:
@@ -98,12 +98,12 @@ functions:
             headers: ${self:custom.allowedHeaders}
             allowCredentials: true
 
-  # Get the end session URL and remove cookies
-  startLogout:
-    handler: dist/lambda/handlers/startLogout.handler
+  # An endpoint to expire tokens stored in cookies, for test purposes
+  expire:
+    handler: dist/lambda/handlers/expire.handler
     events:
       - http: 
-          path: /bff/logout
+          path: /bff/token/expire
           method: post
           cors:
             origins:
@@ -146,15 +146,15 @@ resources:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    RefreshTokenLogGroup:
+    RefreshLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    ExpireSessionLogGroup:
+    LogoutLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'
-    StartLogoutLogGroup:
+    ExpireLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: '5'

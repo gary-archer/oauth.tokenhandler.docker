@@ -74,14 +74,14 @@ export class HttpServerConfiguration {
         this._expressApp.post('/bff/login/end',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
-        this._expressApp.post('/bff/token',
-            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refreshToken));
+        this._expressApp.post('/bff/refresh',
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refresh));
 
-        this._expressApp.post('/bff/token/expire',
-            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expireSession));
+        this._expressApp.post('/bff/expire',
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expire));
 
         this._expressApp.post('/bff/logout',
-            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogout));
+            (rq, rs) => this._executeMethod(rq, rs, this._authorizer.logout));
     }
 
     /*

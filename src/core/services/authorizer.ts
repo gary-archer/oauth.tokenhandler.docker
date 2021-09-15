@@ -153,12 +153,12 @@ export class Authorizer {
     }
 
     /*
-     * Get a new access token using the refresh token in the auth cookie
+     * Write a new access token into the access token cookie
      */
-    public async refreshToken(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async refresh(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        request.getLogEntry().setOperationName('refreshToken');
+        request.getLogEntry().setOperationName('refresh');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -192,12 +192,41 @@ export class Authorizer {
     }
 
     /*
-     * Make the refresh token act expired for test purposes
+     * Return the logout URL and clear auth cookies
      */
-    public async expireSession(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async logout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
         // Check incoming details
-        request.getLogEntry().setOperationName('expireSession');
+        request.getLogEntry().setOperationName('logout');
+        this._validateOrigin(request);
+        this._validateAntiForgeryCookie(request);
+
+        // Get the id token from the id cookie
+        const idToken = this._cookieService.readIdCookie(request);
+        if (!idToken) {
+            throw ErrorUtils.fromMissingCookieError('id');
+        }
+
+        // Include the OAuth user id in API logs
+        this._logUserId(request, idToken);
+
+        // Clear all cookies for the caller
+        this._cookieService.clearAll(response);
+
+        // Write the full end session URL to the response body
+        const data = {} as any;
+        data.endSessionRequestUri = this._oauthService.getEndSessionRequestUri(idToken);
+        response.setBody(data);
+        response.setStatusCode(200);
+    }
+
+    /*
+     * Make the refresh and / or the access token inside secure cookies act expired, for testing purposes
+     */
+    public async expire(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+
+        // Check incoming details
+        request.getLogEntry().setOperationName('expire');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -220,35 +249,6 @@ export class Authorizer {
         const expiredRefreshToken = `x${refreshToken}x`;
         this._cookieService.writeAuthCookie(expiredRefreshToken, response);
         response.setStatusCode(204);
-    }
-
-    /*
-     * Return the logout URL and clear auth cookies
-     */
-    public async startLogout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
-
-        // Check incoming details
-        request.getLogEntry().setOperationName('startLogout');
-        this._validateOrigin(request);
-        this._validateAntiForgeryCookie(request);
-
-        // Get the id token from the id cookie
-        const idToken = this._cookieService.readIdCookie(request);
-        if (!idToken) {
-            throw ErrorUtils.fromMissingCookieError('id');
-        }
-
-        // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
-
-        // Clear all cookies for the caller
-        this._cookieService.clearAll(response);
-
-        // Write the full end session URL to the response body
-        const data = {} as any;
-        data.endSessionRequestUri = this._oauthService.getEndSessionRequestUri(idToken);
-        response.setBody(data);
-        response.setStatusCode(200);
     }
 
     /*
@@ -331,8 +331,8 @@ export class Authorizer {
     private _setupCallbacks(): void {
         this.startLogin = this.startLogin.bind(this);
         this.endLogin = this.endLogin.bind(this);
-        this.refreshToken = this.refreshToken.bind(this);
-        this.expireSession = this.expireSession.bind(this);
-        this.startLogout = this.startLogout.bind(this);
+        this.refresh = this.refresh.bind(this);
+        this.expire = this.expire.bind(this);
+        this.logout = this.logout.bind(this);
     }
 }

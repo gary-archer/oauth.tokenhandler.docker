@@ -1,0 +1,7 @@
+TEST DRIVEN UPDATES
+-------------------
+1. Add the AT cookie
+
+2. Encrypt using Michal's iv method
+
+3. Get expire working with the 2 methods

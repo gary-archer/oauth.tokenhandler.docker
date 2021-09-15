@@ -222,13 +222,13 @@ AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-aft-$APP_NAME" "$MULTI
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
-# Invoke the refresh lambda to get an access token
+# Invoke the refresh lambda to rewrite the access token
 #
-echo "*** Calling refresh to get an access token in the client ..."
+echo "*** Calling refresh to rewrite the access token cookie ..."
 createPostWithCookiesRequest '/bff/token'
-$SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
+$SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
-  echo "*** Problem encountered invoking the refreshToken lambda"
+  echo "*** Problem encountered invoking the refresh lambda"
   exit
 fi
 
@@ -273,9 +273,9 @@ fi
 #
 echo "*** Expiring the refresh token to force an end of session ..."
 createPostWithCookiesRequest '/bff/token/expire'
-$SLS invoke local -f expireSession -p $REQUEST_FILE > $RESPONSE_FILE
+$SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
-  echo "*** Problem encountered invoking the expireSession lambda"
+  echo "*** Problem encountered invoking the expire lambda"
   exit
 fi
 
@@ -300,11 +300,11 @@ AUTH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-auth-$APP_NAME" "$MUL
 #
 # Next try to refresh the token again and we should get an invalid_grant error
 #
-echo "*** Calling refresh to get an access token when the session is expired ..."
+echo "*** Calling refresh to rewrite the access token cookie ..."
 createPostWithCookiesRequest '/bff/token'
-$SLS invoke local -f refreshToken -p $REQUEST_FILE > $RESPONSE_FILE
+$SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
-  echo "*** Problem encountered invoking the refreshToken lambda"
+  echo "*** Problem encountered invoking the refresh lambda"
   exit
 fi
 

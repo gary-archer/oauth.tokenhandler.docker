@@ -35,5 +35,5 @@ Companies are advised to plug in a Back End for Front End API developed by secur
 
 ## My Customizations
 
-This repo includes some customizations related to logging, expiry testing and automation.\
+My BFF API includes customizations in the areas of logging, expiry testing and developer automation.\
 The main downside of a Back End for Front End approach is a more complex developer setup.

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#################################################################
+# Set up the Back End for Front End API on a development computer
+#################################################################
+
 #
 # Download SSL certificates
 #

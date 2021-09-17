@@ -13,13 +13,3 @@ if [ $? -ne 0 ]; then
     echo 'Problem encountered downloading webhost certificates'
     exit 1
 fi
-
-#
-# Get the API gateway plugin that decrypts cookies and then forwards tokens to APIs
-#
-rm -rf kong-bff-plugin
-git clone https://github.com/curityio/kong-bff-plugin
-if [ $? -ne 0 ]; then
-  echo "Problem encountered downloading the BFF plugin"
-  exit 1
-fi

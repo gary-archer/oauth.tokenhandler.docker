@@ -12,7 +12,7 @@ services:
       - 445:8000
     volumes:
       - ./kong.yml:/usr/local/kong/declarative/kong.yml
-      - ./kong-bff-plugin/plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token
+      - ./kong-bff-plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token
       - ./.certs/localhost/mycompany.com.ssl.pem:/usr/local/share/certs/mycompany.com.ssl.pem
       - ./.certs/localhost/mycompany.com.ssl.key:/usr/local/share/certs/mycompany.com.ssl.key
       - ./.certs/localhost/mycompany.com.ca.pem:/usr/local/share/certs/mycompany.com.ca.pem

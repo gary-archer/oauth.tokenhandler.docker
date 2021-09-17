@@ -1,7 +1,38 @@
+CURRENT STATUS
+--------------
+I am sending access tokens to cloud system and correctly getting data
+Next I need to complete flows and consolidate
+
+CONSOLIDATION
+-------------
+1. Put back https://github.com/ebourmalo/cookie-encrypter
+   Compare to main branch
+
+2. Customize BFF plugin and cookie names
+   Currently I use company-name-appname
+   Best options may require more thought
+   Should originate from path called on - perhaps:
+   - /dev
+   - /prod
+
+3. Error responses are poor:
+   - Code should be written to API logs
+   - If server code exists it should overwrite the client code in the queryable data
+   - Simple responses should be returned to the client
+
 TEST DRIVEN UPDATES
 -------------------
 1. expire to read the payload and handle both type='access' and type='refresh'
 
-2. Encrypt using Michal's iv method
+2. Get expire working with the 2 methods
 
-3. Get expire working with the 2 methods
+3. Get end to end scripts running
+
+MILESTONES
+----------
+1. Get this project working well on a developer PC
+   Web developers should only need to use gateway routing and nothing else
+   Update defaults in line with this
+   Think more about my own setup also
+
+2. Focus on cloud deployment

@@ -13,7 +13,7 @@
         "endSessionEndpoint": "https://login.authsamples.com/logout",
         "cookieRootDomain": "api.mycompany.com",
         "cookiePrefix": "mycompany",
-        "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
+        "cookieEncryptionKey": "gUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w",
         "trustedWebOrigin": "https://web.mycompany.com",
         "provider": "cognito",
         "development": true

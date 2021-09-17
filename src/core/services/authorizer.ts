@@ -169,7 +169,7 @@ export class Authorizer {
         // Get the refresh token from the auth cookie
         const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
-            throw ErrorUtils.fromMissingCookieError('refresh');
+            throw ErrorUtils.fromMissingCookieError('rt');
         }
 
         // Get the id token from the id cookie
@@ -238,7 +238,7 @@ export class Authorizer {
         // Get the current refresh token
         const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
-            throw ErrorUtils.fromMissingCookieError('refresh');
+            throw ErrorUtils.fromMissingCookieError('rt');
         }
 
         // Get the id token from the id cookie
@@ -279,7 +279,7 @@ export class Authorizer {
         // Get the cookie value
         const cookieValue = this._cookieService.readAntiForgeryCookie(request);
         if (!cookieValue) {
-            throw ErrorUtils.fromMissingCookieError('aft');
+            throw ErrorUtils.fromMissingCookieError('csrf');
         }
 
         // Check the client has sent a matching anti forgery request header

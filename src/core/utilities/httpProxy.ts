@@ -5,13 +5,11 @@ import url from 'url';
  */
 export class HttpProxy {
 
-    private _useProxy: boolean;
     private _proxyUrl: string;
     private _agent: any = null;
 
     public constructor(useProxy: boolean, proxyUrl: string) {
 
-        this._useProxy = useProxy;
         this._proxyUrl = proxyUrl;
         this._agent = null;
         this._setupCallbacks();

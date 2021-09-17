@@ -1,10 +1,9 @@
+node_modules
+dist
+logs
 .DS_store
 .certs
 .serverless
-node_modules
-dist
 .tmp
-logs
-test/*.txt
 api-gateway/.certs
-api-gateway/kong-bff-plugin
+test/*.txt

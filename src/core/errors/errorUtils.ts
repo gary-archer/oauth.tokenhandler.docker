@@ -136,20 +136,6 @@ export class ErrorUtils {
     }
 
     /*
-     * Handle failed cookie decryption
-     */
-    public static fromCookieDecryptionError(name: string, exception: any): ClientError {
-
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'Request data was received with an invalid value');
-
-        error.logContext = `${name}: ${this._getExceptionDetails(exception)}`;
-        return error;
-    }
-
-    /*
      * Handle failed HTTP connectivity
      */
     public static fromHttpRequestError(exception: any, url: string): ServerError {

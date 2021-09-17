@@ -1,11 +1,10 @@
 import {CookieSerializeOptions} from 'cookie';
-import {encryptCookie, decryptCookie} from 'cookie-encrypter';
 import {randomBytes} from 'crypto';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientConfiguration} from '../configuration/clientConfiguration';
-import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+import {CookieEncryptor} from '../utilities/cookieEncryptor';
 
 /*
  * A class to deal with cookie specific responsibilities
@@ -14,13 +13,11 @@ export class CookieService {
 
     private readonly _apiConfiguration: ApiConfiguration;
     private readonly _clientConfiguration: ClientConfiguration;
-    private readonly _encryptionKey: Buffer;
 
     public constructor(apiConfiguration: ApiConfiguration, clientConfiguration: ClientConfiguration) {
 
         this._apiConfiguration = apiConfiguration;
         this._clientConfiguration = clientConfiguration;
-        this._encryptionKey = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'base64');
     }
 
     /*
@@ -29,7 +26,11 @@ export class CookieService {
     public writeStateCookie(data: any, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName('state');
-        const encryptedData = encryptCookie(JSON.stringify(data), {key: this._encryptionKey});
+
+        const encryptedData = CookieEncryptor.encrypt(
+            JSON.stringify(data),
+            this._apiConfiguration.cookieEncryptionKey);
+
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -42,7 +43,10 @@ export class CookieService {
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
 
-            const serialized = this._decryptCookie(cookieName, encryptedData);
+            const serialized = CookieEncryptor.decrypt(
+                encryptedData,
+                this._apiConfiguration.cookieEncryptionKey);
+
             return JSON.parse(serialized);
         }
 
@@ -61,8 +65,12 @@ export class CookieService {
      */
     public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('refresh');
-        const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
+        const cookieName = this._getCookieName('rt');
+        
+        const encryptedData = CookieEncryptor.encrypt(
+            refreshToken,
+            this._apiConfiguration.cookieEncryptionKey);
+        
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -71,10 +79,13 @@ export class CookieService {
      */
     public readRefreshCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('refresh');
+        const cookieName = this._getCookieName('rt');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            return this._decryptCookie(cookieName, encryptedData);
+            
+            return CookieEncryptor.decrypt(
+                encryptedData,
+                this._apiConfiguration.cookieEncryptionKey);
         }
 
         return null;
@@ -85,8 +96,12 @@ export class CookieService {
      */
     public writeAccessCookie(accessToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('access');
-        const encryptedData = encryptCookie(accessToken, {key: this._encryptionKey});
+        const cookieName = this._getCookieName('at');
+
+        const encryptedData = CookieEncryptor.encrypt(
+            accessToken,
+            this._apiConfiguration.cookieEncryptionKey);
+
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -96,7 +111,11 @@ export class CookieService {
     public writeIdCookie(idToken: string, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName('id');
-        const encryptedData = encryptCookie(idToken, {key: this._encryptionKey});
+
+        const encryptedData = CookieEncryptor.encrypt(
+            idToken,
+            this._apiConfiguration.cookieEncryptionKey);
+
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -108,7 +127,10 @@ export class CookieService {
         const cookieName = this._getCookieName('id');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            return this._decryptCookie(cookieName, encryptedData);
+            
+            return CookieEncryptor.decrypt(
+                encryptedData,
+                this._apiConfiguration.cookieEncryptionKey);
         }
 
         return null;
@@ -119,8 +141,12 @@ export class CookieService {
      */
     public writeAntiForgeryCookie(response: AbstractResponse, value: string): void {
 
-        const cookieName = this._getCookieName('aft');
-        const encryptedData = encryptCookie(value, {key: this._encryptionKey});
+        const cookieName = this._getCookieName('csrf');
+
+        const encryptedData = CookieEncryptor.encrypt(
+            value,
+            this._apiConfiguration.cookieEncryptionKey);
+
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -129,7 +155,7 @@ export class CookieService {
      */
     public getAntiForgeryRequestHeaderName(): string {
 
-        const cookieName = this._getCookieName('aft');
+        const cookieName = this._getCookieName('csrf');
         return `x-${cookieName}`;
     }
 
@@ -138,10 +164,13 @@ export class CookieService {
      */
     public readAntiForgeryCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('aft');
+        const cookieName = this._getCookieName('csrf');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            return this._decryptCookie(cookieName, encryptedData);
+            
+            return CookieEncryptor.decrypt(
+                encryptedData,
+                this._apiConfiguration.cookieEncryptionKey);
         }
 
         return null;
@@ -165,10 +194,10 @@ export class CookieService {
         const options = this._getCookieOptions();
         options.expires = new Date(0);
 
-        response.addCookie(this._getCookieName('refresh'), '', options);
-        response.addCookie(this._getCookieName('access'), '', options);
+        response.addCookie(this._getCookieName('rt'), '', options);
+        response.addCookie(this._getCookieName('at'), '', options);
         response.addCookie(this._getCookieName('id'), '', options);
-        response.addCookie(this._getCookieName('aft'), '', options);
+        response.addCookie(this._getCookieName('csrf'), '', options);
     }
 
     /*
@@ -176,23 +205,6 @@ export class CookieService {
      */
     private _getCookieName(type: string) {
         return `${this._apiConfiguration.cookiePrefix}-${type}-${this._clientConfiguration.name}`;
-    }
-
-    /*
-     * A helper method to decrypt a cookie and report errors clearly
-     */
-    private _decryptCookie(cookieName: string, encryptedData: string) {
-
-        try {
-
-            // Try the AES decryption
-            return decryptCookie(encryptedData, {key: this._encryptionKey});
-
-        } catch (e) {
-
-            // In the event of crypto errors, log the details but return a generic error to the client
-            throw ErrorUtils.fromCookieDecryptionError(cookieName, e);
-        }
     }
 
     /*

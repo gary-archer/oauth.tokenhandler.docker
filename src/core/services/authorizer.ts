@@ -68,36 +68,16 @@ export class Authorizer {
             throw ErrorUtils.fromMissingFieldError('url');
         }
 
-        // Get the authorization response data
+        // Get data from the SPA
         const query = UrlHelper.getQueryParameters(url);
         const code = query['code'];
         const state = query['state'];
         const error = query['error'];
         const errorDescription = query['error_description'];
 
+        // Handle normal page loads, which are frequent
         if (!(state && code) && !(state && error)) {
-
-            // Inform the SPA that this is a normal page load and not a login response
-            const pageLoadData = {
-                handled: false,
-            } as any;
-
-            const existingIdToken = this._cookieService.readIdCookie(request);
-            const antiForgeryToken = this._cookieService.readAntiForgeryCookie(request);
-            if (existingIdToken && antiForgeryToken) {
-
-                // Return data for the case where the user is already logged in
-                pageLoadData.isLoggedIn = true;
-                pageLoadData.antiForgeryToken = antiForgeryToken;
-                this._logUserId(request, existingIdToken);
-
-            } else {
-
-                // Return data for the case where the user is not logged in
-                pageLoadData.isLoggedIn = false;
-            }
-
-            response.setBody(pageLoadData);
+            this._handlePageLoad(request, response);
             return;
         }
 
@@ -310,6 +290,34 @@ export class Authorizer {
         if (cookieValue !== headerValue) {
             throw ErrorUtils.fromInvalidAntiForgeryTokenError();
         }
+    }
+
+    /*
+     * Give the SPA the data it needs when it loads or the page is refreshed or a new browser tab is opened
+     */
+    private _handlePageLoad(request: AbstractRequest, response: AbstractResponse): void {
+
+        // Inform the SPA that this is a normal page load and not a login response
+        const pageLoadData = {
+            handled: false,
+        } as any;
+
+        const existingIdToken = this._cookieService.readIdCookie(request);
+        const antiForgeryToken = this._cookieService.readAntiForgeryCookie(request);
+        if (existingIdToken && antiForgeryToken) {
+
+            // Return data for the case where the user is already logged in
+            pageLoadData.isLoggedIn = true;
+            pageLoadData.antiForgeryToken = antiForgeryToken;
+            this._logUserId(request, existingIdToken);
+
+        } else {
+
+            // Return data for the case where the user is not logged in
+            pageLoadData.isLoggedIn = false;
+        }
+
+        response.setBody(pageLoadData);
     }
 
     /*

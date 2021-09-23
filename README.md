@@ -5,7 +5,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
 A sample API that implements a [Back End for Front End](https://authguidance.com/2019/09/09/spa-back-end-for-front-end) security solution for SPAs.\
-An API driven approach is used, for best SPA control and zero cookie problems.
+An API driven approach is used, for best SPA control and zero cookie / usability problems.
 
 ## Running the API
 
@@ -28,12 +28,8 @@ The SPA retains all of the benefits of an SPA architecture:
 
 ## Open Source Implementations
 
-Companies are advised to plug in a Back End for Front End API developed by security experts:
+Companies are advised to start with a Back End for Front End API developed by security experts.\
+My custom implementation did this and added some custom logic for expiry testing and API logging.
 
 - [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
-- [Curity BFF API Example](https://github.com/curityio/bff-node-express)
-
-## My Customizations
-
-My BFF API includes customizations of logging, expiry testing and developer automation.\
-The main downside of a Back End for Front End approach is a more complex developer setup.
+- [Curity Token Handler API](https://github.com/curityio/bff-node-express)

@@ -18,7 +18,7 @@ RESPONSE_FILE=test/response.txt
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-export HTTPS_PROXY='http://127.0.0.1:8888'
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file

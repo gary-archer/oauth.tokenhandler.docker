@@ -1,8 +1,8 @@
 TEST DRIVEN UPDATES TO IMPROVE MY PRODUCTIVITY
 ----------------------------------------------
-1. Get end to end lambda scripts running
+1. Get end to end lambda scripts running - see line 224
 
-SUNDAY: BLOG / MESSAGE
+BLOG / MESSAGE
 ----------------------
 Get blog updated early and say I am using the Curity design pattern, linking to the SPA repo.
 Mention my own token handler that allows me to test expiry and do custom logging.
@@ -24,10 +24,11 @@ MILESTONES
 ----------
 1. Blog updated
 
-2. SPA works locally with token handler API and plugin in Docker on port 444
+2. SPA works locally with token handler API and plugin running in Docker on port 444
+   Initial plan on updating APIs to port 446 and running Token Handler API on port 445
 
-3. Initial plan on updating APIs to port 446 and running Token Handler API on port 445
+3. Serverless project updated to handle secure cookies
 
 4. Cloud system updated and blog instructions still work
 
-5. Code merged
+5. Code merged for final SPA and token handler API

@@ -221,6 +221,19 @@ ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_V
 AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 #
 # Invoke the refresh lambda to rewrite the access token
 #

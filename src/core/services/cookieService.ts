@@ -54,7 +54,7 @@ export class CookieService {
     }
 
     /*
-     * Generate a field used to protect the auth cookie
+     * Generate a field used to protect cookies on data changing requests from the SPA
      */
     public generateAntiForgeryValue(): string {
         return randomBytes(32).toString('base64');
@@ -75,7 +75,7 @@ export class CookieService {
     }
 
     /*
-     * Read the refresh token from the auth cookie
+     * Read the refresh token from the cookie
      */
     public readRefreshCookie(request: AbstractRequest): string | null {
 
@@ -103,6 +103,23 @@ export class CookieService {
             this._apiConfiguration.cookieEncryptionKey);
 
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+    }
+
+    /*
+     * Read the access token from the cookie
+     */
+    public readAccessCookie(request: AbstractRequest): string | null {
+
+        const cookieName = this._getCookieName('at');
+        const encryptedData = request.getCookie(cookieName);
+        if (encryptedData) {
+            
+            return CookieEncryptor.decrypt(
+                encryptedData,
+                this._apiConfiguration.cookieEncryptionKey);
+        }
+
+        return null;
     }
 
     /*
@@ -160,7 +177,7 @@ export class CookieService {
     }
 
     /*
-     * Read the anti forgery value from the auth cookie
+     * Read the anti forgery value from the cookie
      */
     public readAntiForgeryCookie(request: AbstractRequest): string | null {
 
@@ -208,7 +225,7 @@ export class CookieService {
     }
 
     /*
-     * Both our auth cookie and anti forgery cookie use the same options
+     * All cookies use largely identical options
      */
     private _getCookieOptions(): CookieSerializeOptions {
 

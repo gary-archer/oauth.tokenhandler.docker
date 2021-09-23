@@ -3,12 +3,26 @@ CURRENT STATUS
 I am sending access tokens to cloud system and correctly getting data
 Next I need to complete flows and consolidate
 
+SUNDAY
+------
+Get blog updated early and say I am using the Curity design pattern.
+Mention my own token handler that allows me to test expiry and do custom logging.
+Delete most of my own stuff in this area.
+
+TEST DRIVEN UPDATES TO IMPROVE MY PRODUCTIVITY
+----------------------------------------------
+1. expire to read the payload and handle both type='access' and type='refresh'
+
+2. Get expire working with the 2 methods
+
+3. Get end to end scripts running
+
 CONSOLIDATION
 -------------
 1. Put back https://github.com/ebourmalo/cookie-encrypter
    Compare to main branch
 
-2. Customize BFF plugin and cookie names
+2. Use token handler and not BFF
    Currently I use company-name-appname
    Best options may require more thought
    Should originate from path called on - perhaps:
@@ -19,14 +33,6 @@ CONSOLIDATION
    - Code should be written to API logs
    - If server code exists it should overwrite the client code in the queryable data
    - Simple responses should be returned to the client
-
-TEST DRIVEN UPDATES
--------------------
-1. expire to read the payload and handle both type='access' and type='refresh'
-
-2. Get expire working with the 2 methods
-
-3. Get end to end scripts running
 
 MILESTONES
 ----------

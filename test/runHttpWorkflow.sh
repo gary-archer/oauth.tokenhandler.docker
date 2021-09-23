@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #
-# A script to test HTTP messages that the SPA and browser will together send to the OAuth BFF API
+# A script to test HTTP messages that the SPA sends to the token handler API
 # The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
 #
 WEB_BASE_URL='https://web.mycompany.com'
-BFF_API_BASE_URL='https://api.mycompany.com:444/bff'
+TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:445/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -61,7 +61,7 @@ function apiError() {
 #
 echo "*** Session ID is $SESSION_ID"
 echo "*** Requesting cross origin access"
-HTTP_STATUS=$(curl -i -s -X OPTIONS "$BFF_API_BASE_URL/login/start" \
+HTTP_STATUS=$(curl -i -s -X OPTIONS "$TOKEN_HANDLER_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
@@ -70,10 +70,10 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
 fi
 
 #
-# Act as the SPA by calling the OAuth BFF API to start a login and get the request URI
+# Act as the SPA by calling the token handler to start a login and get the request URI
 #
 echo "*** Creating login URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/login/start" \
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -90,7 +90,6 @@ fi
 JSON=$(tail -n 1 $RESPONSE_FILE)
 AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$JSON")
 STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
-echo $AUTHORIZATION_REQUEST_URL
 
 #
 # Next invoke the redirect URI to start a login
@@ -134,7 +133,7 @@ AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
 # Next we end the login by asking the server to do an authorization code grant
 #
 echo "*** Finishing the login by processing the authorization code ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/login/end" \
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/end" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
 -H 'accept: application/json' \
@@ -160,7 +159,7 @@ ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME")
 
 #
-# Call the business API with the secure cookie
+# Call the business API with the secure cookie containing an access token
 #
 echo "*** Calling cross domain API with a secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
@@ -175,13 +174,50 @@ if [ $HTTP_STATUS != '200' ]; then
   apiError
   exit
 fi
-exit
 
 #
-# Next expire the refresh token in the auth cookie, for test purposes
+# Next expire the access token in the secure cookie, for test purposes
 #
-echo "*** Expiring the refresh token ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token/expire" \
+echo "*** Expiring the access token ..."
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
+-H "origin: $WEB_BASE_URL" \
+-H 'content-type: application/json' \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-d '{"type":"access"}' \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '204' ]; then
+  echo "*** Problem encountered expiring the access token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
+
+#
+# Call the business with the expired access token cookie
+#
+echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '401' ]; then
+  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+
+#
+# Next try to refresh the access token
+#
+echo "*** Calling refresh to get a new access token ..."
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -190,21 +226,75 @@ HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token/expire" \
 --cookie "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
-  echo "*** Problem encountered expiring the refresh token, status: $HTTP_STATUS"
+  echo "*** Problem encountered refreshing the access token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
+ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
+
+#
+# Call the business API again with the new access token
+#
+echo "*** Calling cross domain API with a new access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
   apiError
   exit
 fi
 
 #
-# Get the updated auth cookie, which now contains an invalid refresh token
+# Next expire both the access token and refresh token in the secure cookies, for test purposes
 #
+echo "*** Expiring the refresh token ..."
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
+-H "origin: $WEB_BASE_URL" \
+-H 'content-type: application/json' \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-d '{"type":"refresh"}' \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '204' ]; then
+  echo "*** Problem encountered expiring the refresh token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
 REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
 
 #
-# Next try to refresh the token again and we should get an invalid_grant error
+# Call the business API again with the new access token
 #
-echo "*** Calling refresh to get an access token when the session is expired ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/token" \
+echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '401' ]; then
+  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
+  apiError
+  exit
+fi
+
+#
+# Next try to refresh the token and we should get an invalid_grant error
+#
+echo "*** Calling refresh to get a new access token when the session is expired ..."
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
@@ -222,7 +312,7 @@ fi
 # Next make a start logout request
 #
 echo "*** Calling start logout to clear cookies and get the end session request URL ..."
-HTTP_STATUS=$(curl -i -s -X POST "$BFF_API_BASE_URL/logout" \
+HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/logout" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \

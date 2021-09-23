@@ -98,7 +98,7 @@ mkdir -p logs
 # Write the input file for the startLogin request
 #
 jo -p \
-path=/bff/login/start \
+path=/token-handler/login/start \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -178,7 +178,7 @@ AUTHORIZATION_RESPONSE_URL=$(getCognitoHeaderValue 'location')
 # Note that it is tricky to output the body parameters in the stringified form lambda expects
 #
 jo \
-path=/bff/login/end \
+path=/token-handler/login/end \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -225,7 +225,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 # Invoke the refresh lambda to rewrite the access token
 #
 echo "*** Calling refresh to rewrite the access token cookie ..."
-createPostWithCookiesRequest '/bff/token'
+createPostWithCookiesRequest '/token-handler/token'
 $SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refresh lambda"
@@ -269,10 +269,10 @@ if [ $HTTP_STATUS != '200' ]; then
 fi
 
 #
-# Next expire the session by rewriting the refresh token in the auth cookie, for test purposes
+# Next expire the session by rewriting the refresh token in the refresh cookie, for test purposes
 #
 echo "*** Expiring the refresh token to force an end of session ..."
-createPostWithCookiesRequest '/bff/token/expire'
+createPostWithCookiesRequest '/token-handler/expire'
 $SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the expire lambda"
@@ -293,7 +293,7 @@ if [ $HTTP_STATUS != '204' ]; then
 fi
 
 #
-# Get the updated auth cookie, which now contains an invalid refresh token
+# Get the updated refresh cookie, which now contains an invalid refresh token
 #
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
 
@@ -301,7 +301,7 @@ REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MU
 # Next try to refresh the token again and we should get an invalid_grant error
 #
 echo "*** Calling refresh to rewrite the access token cookie ..."
-createPostWithCookiesRequest '/bff/token'
+createPostWithCookiesRequest '/token-handler/token'
 $SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refresh lambda"

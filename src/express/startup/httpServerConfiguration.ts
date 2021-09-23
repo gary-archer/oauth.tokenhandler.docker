@@ -58,29 +58,29 @@ export class HttpServerConfiguration {
             origin: this._configuration.api.trustedWebOrigin,
             credentials: true,
         };
-        this._expressApp.use('/bff/*', cors(options) as any);
+        this._expressApp.use('/token-handler/*', cors(options) as any);
 
         // Parse cookies and the request body
-        this._expressApp.use('/bff/*', cookieParser());
-        this._expressApp.use('/bff/*', express.json());
+        this._expressApp.use('/token-handler/*', cookieParser());
+        this._expressApp.use('/token-handler/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/bff/login/start',
+        this._expressApp.post('/token-handler/login/start',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogin));
 
-        this._expressApp.post('/bff/login/end',
+        this._expressApp.post('/token-handler/login/end',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
-        this._expressApp.post('/bff/refresh',
+        this._expressApp.post('/token-handler/refresh',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refresh));
 
-        this._expressApp.post('/bff/expire',
+        this._expressApp.post('/token-handler/expire',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expire));
 
-        this._expressApp.post('/bff/logout',
+        this._expressApp.post('/token-handler/logout',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.logout));
     }
 

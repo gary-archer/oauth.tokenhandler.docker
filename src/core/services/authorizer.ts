@@ -166,7 +166,7 @@ export class Authorizer {
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
-        // Get the refresh token from the auth cookie
+        // Get the refresh token from the cookie
         const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
             throw ErrorUtils.fromMissingCookieError('rt');
@@ -197,7 +197,7 @@ export class Authorizer {
     }
 
     /*
-     * Return the logout URL and clear auth cookies
+     * Return the logout URL and clear cookies
      */
     public async logout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
@@ -230,11 +230,21 @@ export class Authorizer {
      */
     public async expire(request: AbstractRequest, response: AbstractResponse): Promise<void> {
 
+        // Get whether to expire the access or refresh token
+        const type = request.getJsonField('type');
+        const operation = type === 'access' ? 'expireAccessToken' : 'expireRefreshToken';
+
         // Check incoming details
-        request.getLogEntry().setOperationName('expire');
+        request.getLogEntry().setOperationName(operation);
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
+        // Get the current refresh token
+        const accessToken = this._cookieService.readAccessCookie(request);
+        if (!accessToken) {
+            throw ErrorUtils.fromMissingCookieError('at');
+        }
+        
         // Get the current refresh token
         const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {
@@ -250,9 +260,16 @@ export class Authorizer {
         // Include the OAuth user id in API logs
         this._logUserId(request, idToken);
 
-        // Write a corrupted refresh token to the cookie, which will fail on the next token refresh attempt
-        const expiredRefreshToken = `x${refreshToken}x`;
-        this._cookieService.writeRefreshCookie(expiredRefreshToken, response);
+        // Always make the access cookie act expired to cause an API 401
+        const expiredAccessToken = `x${accessToken}x`;
+        this._cookieService.writeAccessCookie(expiredAccessToken, response);
+
+        // If requested, make the refresh cookie act expired, to cause a permanent API 401
+        if (type === 'refresh') {
+            const expiredRefreshToken = `x${refreshToken}x`;
+            this._cookieService.writeRefreshCookie(expiredRefreshToken, response);
+        }
+
         response.setStatusCode(204);
     }
 
@@ -272,7 +289,7 @@ export class Authorizer {
     }
 
     /*
-     * Extra mitigation in the event of malicious code calling this API and implicitly sending the auth cookie
+     * Extra cookies checks for data changing requests in line with OWASP
      */
     private _validateAntiForgeryCookie(request: AbstractRequest): void {
 

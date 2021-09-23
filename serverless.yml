@@ -47,7 +47,7 @@ functions:
     handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
-          path: /bff/login/start
+          path: /token-handler/login/start
           method: post
           cors:
             origins:
@@ -61,7 +61,7 @@ functions:
     handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
-          path: /bff/login/end
+          path: /token-handler/login/end
           method: post
           cors:
             origins:
@@ -75,7 +75,7 @@ functions:
     handler: dist/lambda/handlers/refresh.handler
     events:
       - http: 
-          path: /bff/token
+          path: /token-handler/token
           method: post
           cors:
             origins:
@@ -89,7 +89,7 @@ functions:
     handler: dist/lambda/handlers/logout.handler
     events:
       - http: 
-          path: /bff/logout
+          path: /token-handler/logout
           method: post
           cors:
             origins:
@@ -103,7 +103,7 @@ functions:
     handler: dist/lambda/handlers/expire.handler
     events:
       - http: 
-          path: /bff/token/expire
+          path: /token-handler/expire
           method: post
           cors:
             origins:

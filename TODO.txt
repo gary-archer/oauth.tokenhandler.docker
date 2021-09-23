@@ -1,3 +1,7 @@
+CURRENT STATE
+-------------
+Run scripts for build / deploy / test - keep this working and improve the implementation
+
 CODE CONSOLIDATION
 ------------------
 1. Get end to end lambda scripts running - up to around line 224
@@ -42,3 +46,6 @@ BLOG
 1. Get first part of blog updated and say I am using the Curity design pattern, linking to the SPA repo.
    Mention my own token handler that allows me to test expiry and do custom logging.
    Delete most of my own content in this area so that there is a very short page.
+
+2. Perhaps write some stuff on logging and automation
+   Think about the language, and perhaps use 'BFF API' as my own term differentiated from Curity

@@ -86,7 +86,7 @@ local function decrypt_cookie(encrypted_cookie, encryption_key)
 end
 
 --
--- The public entry point to decrypt the BFF cookie and then forward the token to the API
+-- The public entry point to decrypt the cookie and then forward the token to the API
 --
 function _M.run(config)
 

@@ -12,7 +12,7 @@ class CustomPackager {
     public async execute(): Promise<void> {
 
         // Unzip the default package created by the sls package command
-        const packageName = 'oauthbffapi';
+        const packageName = 'tokenhandlerapi';
         await this._unzipPackage(packageName);
 
         // Exclude Express specific code from AWS

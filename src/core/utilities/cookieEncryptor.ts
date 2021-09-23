@@ -1,8 +1,7 @@
 import crypto from 'crypto';
 
 /*
- * Based on the Curity solution:
- * https://github.com/curityio/bff-node-express/blob/master/src/lib/cookieEncrypter.ts
+ * TODO: put back the old solution
  */
 export class CookieEncryptor {
 
@@ -20,7 +19,7 @@ export class CookieEncryptor {
             cipher.update(payload, 'utf8', 'hex'),
             cipher.final('hex')
         ];
-    
+
         return parts.join('');
     }
 
@@ -29,10 +28,10 @@ export class CookieEncryptor {
      */
     public static decrypt(payload: string, symmetricKey: string): string {
 
-        const encryptedArray = payload.split(':')
-        const iv = Buffer.from(encryptedArray[0], 'hex')
-        const encrypted = encryptedArray[1]
-        const decipher = crypto.createDecipheriv('aes256', symmetricKey, iv)
-        return decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8')
+        const encryptedArray = payload.split(':');
+        const iv = Buffer.from(encryptedArray[0], 'hex');
+        const encrypted = encryptedArray[1];
+        const decipher = crypto.createDecipheriv('aes256', symmetricKey, iv);
+        return decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
     }
 }

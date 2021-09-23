@@ -101,14 +101,14 @@ export class HttpServerConfiguration {
             // Start listening over HTTPS
             const httpsServer = https.createServer(serverOptions, this._expressApp);
             httpsServer.listen(this._configuration.host.port, () => {
-                console.log(`OAuth BFF API is listening on HTTPS port ${this._configuration.host.port}`);
+                console.log(`Token Handler API is listening on HTTPS port ${this._configuration.host.port}`);
             });
 
         } else {
 
             // Otherwise listen over HTTP
             this._expressApp.listen(this._configuration.host.port, () => {
-                console.log(`OAuth BFF API is listening on HTTP port ${this._configuration.host.port}`);
+                console.log(`Token Handler API is listening on HTTP port ${this._configuration.host.port}`);
             });
         }
     }

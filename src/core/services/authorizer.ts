@@ -8,7 +8,7 @@ import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point class for the OAuth BFF API's logic, which performs an outline of processing
+ * The entry point class for the Token Handler API's logic, which performs an outline of processing
  */
 export class Authorizer {
 
@@ -224,7 +224,7 @@ export class Authorizer {
         if (!accessToken) {
             throw ErrorUtils.fromMissingCookieError('at');
         }
-        
+
         // Get the current refresh token
         const refreshToken = this._cookieService.readRefreshCookie(request);
         if (!refreshToken) {

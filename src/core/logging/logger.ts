@@ -20,7 +20,7 @@ export class Logger {
     public constructor(isLambda: boolean) {
         this._isLambda = isLambda;
         this._isDevelopment = true;
-        this._apiName = 'OAuthBffApi';
+        this._apiName = 'TokenHandlerApi';
     }
 
     /*

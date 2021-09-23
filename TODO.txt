@@ -1,39 +1,33 @@
 TEST DRIVEN UPDATES TO IMPROVE MY PRODUCTIVITY
 ----------------------------------------------
 1. Get end to end lambda scripts running
-2. Rename BFF to token-handler
 
 SUNDAY: BLOG / MESSAGE
 ----------------------
-Get blog updated early and say I am using the Curity design pattern.
+Get blog updated early and say I am using the Curity design pattern, linking to the SPA repo.
 Mention my own token handler that allows me to test expiry and do custom logging.
-Delete most of my own stuff in this area.
+Delete most of my own content in this area and use a very short page.
 
 CODE CONSOLIDATION
 ------------------
-1. Different cookie paths
+1. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
 
-2. Put back https://github.com/ebourmalo/cookie-encrypter
-   Compare to main branch
+2. Put back https://github.com/ebourmalo/cookie-encrypter from main branch
+   See if encryption is compatible with Michal's
+   If so then use the Curity BFF plugin and get rid of my extension
 
-3. Use token handler and not BFF
-   Currently I use company-name-appname
-
-4. Error responses are poor:
-   - Code should be written to API logs
-   - If server code exists it should overwrite the client code in the queryable data
-   - Simple responses should be returned to the client
+3. Error responses need improving:
+   - Simpler client side error codes and error code checking, along with status 401 (SPA does not use invalid_grant)
+   - More separated side error codes that are used for query purposes
 
 MILESTONES
 ----------
-1. Blog message
+1. Blog updated
 
-2. Get cloud deployment working and code updated
-   Also ensure that blog instructions are correct
+2. SPA works locally with token handler API and plugin in Docker on port 444
 
-3. Get this project working well on a developer PC
-   Web developers should only need to use gateway routing and nothing else
-   Update defaults in line with this
-   Think more about my own setup also
+3. Initial plan on updating APIs to port 446 and running Token Handler API on port 445
 
-4. Merge completed
+4. Cloud system updated and blog instructions still work
+
+5. Code merged

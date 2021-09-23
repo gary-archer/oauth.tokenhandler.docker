@@ -66,11 +66,11 @@ export class CookieService {
     public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName('rt');
-        
+
         const encryptedData = CookieEncryptor.encrypt(
             refreshToken,
             this._apiConfiguration.cookieEncryptionKey);
-        
+
         response.addCookie(cookieName, encryptedData, this._getCookieOptions());
     }
 
@@ -82,7 +82,7 @@ export class CookieService {
         const cookieName = this._getCookieName('rt');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            
+
             return CookieEncryptor.decrypt(
                 encryptedData,
                 this._apiConfiguration.cookieEncryptionKey);
@@ -113,7 +113,7 @@ export class CookieService {
         const cookieName = this._getCookieName('at');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            
+
             return CookieEncryptor.decrypt(
                 encryptedData,
                 this._apiConfiguration.cookieEncryptionKey);
@@ -144,7 +144,7 @@ export class CookieService {
         const cookieName = this._getCookieName('id');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            
+
             return CookieEncryptor.decrypt(
                 encryptedData,
                 this._apiConfiguration.cookieEncryptionKey);
@@ -184,7 +184,7 @@ export class CookieService {
         const cookieName = this._getCookieName('csrf');
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
-            
+
             return CookieEncryptor.decrypt(
                 encryptedData,
                 this._apiConfiguration.cookieEncryptionKey);

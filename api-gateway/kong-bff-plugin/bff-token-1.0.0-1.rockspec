@@ -4,7 +4,7 @@ source = {
   url = "."
 }
 description = {
-  summary = "A Kong custom plugin to implement the bff token pattern"
+  summary = "A Kong custom plugin to decrypt secure cookies and forward tokens"
 }
 dependencies = {
   "lua >= 5.1"

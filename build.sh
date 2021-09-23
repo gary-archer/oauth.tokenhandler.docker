@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#################################################################
-# Set up the Back End for Front End API on a development computer
-#################################################################
+########################################################
+# Set up the Token Handler API on a development computer
+########################################################
 
 #
 # Download SSL certificates
@@ -20,7 +20,7 @@ fi
 rm -rf node_modules
 npm install
 if [ $? -ne 0 ]; then
-  echo "Problem encountered installing the BFF API dependencies"
+  echo "Problem encountered installing the Token Handler API dependencies"
   exit 1
 fi
 

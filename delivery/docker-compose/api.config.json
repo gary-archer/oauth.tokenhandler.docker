@@ -7,7 +7,7 @@
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
-        "name": "OAuthBffApi",
+        "name": "TokenHandlerApi",
         "authorizeEndpoint": "https://login.mycompany.com/oauth/v2/oauth-authorize",
         "tokenEndpoint": "https://login.mycompany.internal:8443/oauth/v2/oauth-token",
         "endSessionEndpoint": "https://login.mycompany.com/oauth/v2/oauth-session/logout",
@@ -25,6 +25,6 @@
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
         "scope": "openid profile email transactions_read",
-        "path": "/bff"
+        "path": "/token-handler"
     }
 }

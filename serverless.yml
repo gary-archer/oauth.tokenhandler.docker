@@ -1,4 +1,4 @@
-service: bff-api
+service: token-handler-api
 
 # Base details for AWS deployment
 provider:

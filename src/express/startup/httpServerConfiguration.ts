@@ -114,7 +114,7 @@ export class HttpServerConfiguration {
     }
 
     /*
-     * Run outline processinf for the supplied function reference
+     * Run outline processing for the supplied function reference
      */
     private async _executeMethod(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
 

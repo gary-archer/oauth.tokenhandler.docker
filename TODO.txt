@@ -3,18 +3,24 @@ CODE CONSOLIDATION
 1. Get end to end lambda scripts running - up to around line 224
    See if there is scope for making this more resilient and supporting console.log statements
 
-2. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
+2. Get rid of app name suffix from cookies, for better Curity compatibility
 
-3. Put back https://github.com/ebourmalo/cookie-encrypter from main branch
+3. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
+
+4. Put back https://github.com/ebourmalo/cookie-encrypter from main branch
    See if encryption is compatible with Michal's
    If so then use the Curity BFF plugin and get rid of my extension
 
-4. Error responses need improving:
+5. package.json updates for latest Typescript, Serverless
+   Also get rid of tunnel-agent and compare to websample1.NEW API
+
+6. Error responses need improving, and perhaps borrow some ideas from bff-node-express:
    - Simpler client side error codes and error code checking, along with status 401 (SPA does not use invalid_grant)
    - More separated side error codes that are used for query purposes
 
 SPA
 ---
+Get this connected and working, and iron out issues
 Update the automation to use the Token Handler API and to call Docker
 
 MILESTONES

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-##############################################################
-# Run the Back End for Front End API on a development computer
-##############################################################
+#####################################################
+# Run the Token Handler API on a development computer
+#####################################################
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 

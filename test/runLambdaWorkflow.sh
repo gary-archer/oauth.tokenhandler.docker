@@ -6,7 +6,7 @@
 #
 
 WEB_BASE_URL='https://web.mycompany.com'
-BUSINESS_API_BASE_URL='https://api.authsamples.com'
+BUSINESS_API_BASE_URL='https://api.mycompany.com:445/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa
@@ -20,7 +20,7 @@ SLS=./node_modules/.bin/sls
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-#export HTTPS_PROXY='http://127.0.0.1:8888'
+export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file in a direct Cognito request
@@ -82,6 +82,7 @@ function createPostWithCookiesRequest() {
     x-mycompany-session-id=$SESSION_ID \
     "x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
     multiValueHeaders=$(jo cookie=$(jo -a \
+    "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
     "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
     "$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
     "$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
@@ -216,37 +217,44 @@ fi
 #
 # Get values we will use shortly
 #
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
 AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 #
-# Invoke the refresh lambda to rewrite the access token
+# Call the business API with the secure cookie containing an access token
 #
-echo "*** Calling refresh to rewrite the access token cookie ..."
-createPostWithCookiesRequest '/token-handler/token'
-$SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
-if [ $? -ne 0 ]; then
-  echo "*** Problem encountered invoking the refresh lambda"
+echo "*** Calling cross domain API with an access token ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
+  apiError "$(cat $RESPONSE_FILE)"
   exit
 fi
 
 #
-# Get data that we will use later
+# Invoke the refresh lambda to expire the access token
+#
+echo "*** Expiring the access token ..."
+createPostWithCookiesRequest '/token-handler/expire'
+$SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the expire lambda"
+  exit
+fi
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
+echo "NEW ACCESS COOKIE"
+
+#
+# Get updated cookies
 #
 JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
@@ -257,29 +265,15 @@ if [ $HTTP_STATUS -ne 200 ]; then
   apiError "$BODY"
   exit
 fi
-
-#
-# Reget these values after every refresh
-#
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
-ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
-ACCESS_TOKEN=$(jq -r .accessToken <<< "$BODY")
+echo $ACCESS_COOKIE
+exit
 
-#
-# Call the business API with an access token
-#
-echo "*** Calling cross domain API with an access token ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/api/companies" \
--H "Authorization: Bearer $ACCESS_TOKEN" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError "$(cat $RESPONSE_FILE)"
-  exit
-fi
+
+
+
+
 
 #
 # Next expire the session by rewriting the refresh token in the refresh cookie, for test purposes

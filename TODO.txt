@@ -19,7 +19,7 @@ details: "The argument 'encoding' is invalid for data of length 2305. Received '
    Decide some future behaviour, then get rid of this in logEntry.setServerError:
    - console.error(this._data.errorData);
 
-2. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
+4. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
 
 SPA
 ---

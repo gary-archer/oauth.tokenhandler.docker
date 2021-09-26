@@ -4,17 +4,17 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
-A sample API that implements a [Back End for Front End](https://authguidance.com/2019/09/09/spa-back-end-for-front-end) security solution for SPAs.\
-An API driven approach is used, to maintain all of the benefits of an SPA architecture.
+A sample API that enables an SPA to implement OpenID Connect in an API driven manner.
 
-## Open Source Implementations
+## Background
 
-Companies are advised to start with a Back End for Front End API developed by security experts.\
-My API started with the Curity implementation and added some custom logic for expiry testing and API logging.
+This repository uses the Curity solution, to maintain best all round SPA capabilities:
 
 - [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
 - [Curity Token Handler API](https://github.com/curityio/bff-node-express)
 
-## Running the API
+My API just has some custom logic related to expiry testing, API logging and deployment.
+
+## Further Information
 
 See the [Final SPA](https://github.com/gary-archer/oauth.websample.final) for notes on how to run an end-to-end solution.

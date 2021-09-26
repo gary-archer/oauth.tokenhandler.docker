@@ -4,7 +4,7 @@
         "sslCertificateFileName": "",
         "sslCertificatePassword": "",
         "useHttpProxy": false,
-        "httpProxyUrl": "http://127.0.0.1:8888"
+        "httpProxyUrl": ""
     },
     "api": {
         "name": "TokenHandlerApi",
@@ -16,7 +16,8 @@
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.authsamples.com",
         "provider": "cognito",
-        "development": false
+        "isDeployed": true,
+        "prettyPrinting": false
     },
     "client": {
         "clientId": "1hofhrb15jb9adqitlkec9s5ag",

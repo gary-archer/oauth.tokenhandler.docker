@@ -1,9 +1,12 @@
 #!/bin/bash
 
-#####################################################
-# Run the Token Handler API on a development computer
-#####################################################
+######################################################################
+# Run the Token Handler as Docker containers on a development computer
+######################################################################
 
+#
+# Set the current folder if this script is called from another script
+#
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 #
@@ -21,21 +24,11 @@ case "$(uname -s)" in
 esac
 
 #
-# Run the API gateway in a separate terminal window
+# Spin up Docker compose components
 #
-if [ "$PLATFORM" == 'MACOS' ]; then
-    open -a Terminal ./api-gateway/deploy.sh
-    
-else
-    GIT_BASH="C:\Program Files\Git\git-bash.exe"
-    "$GIT_BASH" -c ./api-gateway/deploy.sh &
-fi
-
-#
-# Then run this API
-#
-npm start
+docker compose -f delivery/localhost/docker-compose.yml down
+docker compose -f delivery/localhost/docker-compose.yml up --force-recreate --remove-orphans
 if [ $? -ne 0 ]; then
-    echo 'Problem encountered running the Back End for Front End API'
-    exit 1
+  echo "Problem encountered starting Docker components"
+  exit 1
 fi

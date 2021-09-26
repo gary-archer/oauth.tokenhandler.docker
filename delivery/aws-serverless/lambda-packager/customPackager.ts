@@ -22,7 +22,9 @@ class CustomPackager {
         await this._installDependencies(packageName, ['express', 'cookie-parser', 'cors']);
 
         // Copy in the deployed configuration
-        await fs.copy('deployment/lambda/api.config.json', `.serverless/${packageName}/api.config.json`);
+        await fs.copy(
+            'delivery/aws-serverless/environments/api.deployed.config.json',
+            `.serverless/${packageName}/api.config.json`);
 
         // Rezip the package
         await this._rezipPackage(packageName);
@@ -93,7 +95,7 @@ class CustomPackager {
             const childProcess = await ChildProcess.spawn(npmCommand, ['install'], options);
             console.log(childProcess.stdout);
 
-        } catch (e) {
+        } catch (e: any) {
 
             // Report install errors
             throw new Error(`Error installing npm packages for ${packageName}: ${e} : ${e.stderr.toString()}`);
@@ -125,7 +127,7 @@ class CustomPackager {
         const packager = new CustomPackager();
         await packager.execute();
 
-    } catch (e) {
+    } catch (e: any) {
 
         // Report errors
         console.log(`Packaging error: ${e}`);

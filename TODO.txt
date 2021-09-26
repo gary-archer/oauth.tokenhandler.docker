@@ -1,17 +1,20 @@
 DEPLOYMENT CONSOLIDATION
 ------------------------
-1. Use out of the box BFF-PLUGIN and delete files from my repo
+1. Update SPA README for delivery scenarios
+   Update folders to aws-serverless, improve structure and get all package.json commands working
 
-2. Make SPA spin up the Token Handler API run as a Docker container
-
-
-   Also have a local APIs setup where the Token Handler runs on port 446
+SERVERLESS
+----------
+1. Needs to handle cookies with the same logic as the BFF Plugin
+   If no token then process AT and CSRF cookies
 
 ERRORS
 ------
-1. Make encryption fail and decryption fail and verify error logs
+1. Make encryption and decryption fail and verify error logs
+   Use HTTP workflow, or lambda workflow with api.log file
 
 2. API 500s and API log output to handle better when running lambda tests
+   Currently goes to logs/api.log - at least rename this
    Decide some future behaviour, then get rid of this in logEntry.setServerError:
    - console.error(this._data.errorData);
 
@@ -24,14 +27,9 @@ ERRORS
 5. Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
    Capture errors but aim to prevent needing to read them
 
-SERVERLESS
-----------
-1. Needs to handle cookies with the same logic as the BFF Plugin
-   If no token then process AT and CSRF cookies
-
 FIRST MILESTONE
 ---------------
-1. Update cloud from branch
+1. Update cloud from branches
 
 2. Once working do the merges down and ensure READMEs are good
 
@@ -40,10 +38,15 @@ FIRST MILESTONE
 
 CODE CONSOLIDATION
 ------------------
-1. Use out of the box BFF-PLUGIN and delete files from my repo
+1. package.json updates for latest Typescript, Serverless
 
-2. package.json updates for latest Typescript, Serverless
+2. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
 
-3. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+3. Java and .Net Core final APIs to set credentials: true in their CORS options
 
-4. All final APIs to set credentials: true in their CORS options
+4. Also have a local APIs setup where the Token Handler runs on port 446
+
+5. Bug in plugin:
+   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
+
+6. Deal with expire errors in the UI and clearing them once working again

@@ -1,4 +1,4 @@
-service: token-handler-api
+service: tokenhandlerapi
 
 # Base details for AWS deployment
 provider:
@@ -13,7 +13,7 @@ provider:
 
 custom:
   # Each environment can have its own configuration file
-  config: ${file(environments/${opt:stage, 'local'}.yml)}
+  config: ${file(delivery/aws-serverless/environments/${opt:stage, 'local'}.yml)}
   
   # AWS deployed details
   customDomain:
@@ -116,11 +116,12 @@ functions:
 # The custom packager does further work in code
 package:
   patterns:
-  - '!api.config**'
   - '!.vscode/**'
-  - '!certs/**'
-  - '!deployment/**'
-  - '!environments/**'
+  - '!api.config.json'
+  - '!build.sh'
+  - '!deploy.sh'
+  - '!delivery/**'
+  - '!Dockerfile'
   - '!logs/**'
   - '!src/**'
   - '!test/**'

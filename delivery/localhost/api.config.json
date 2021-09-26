@@ -1,10 +1,10 @@
 {
     "host": {
-        "port": 446,
+        "port": 8000,
         "sslCertificateFileName": "./certs/mycompany.com.ssl.p12",
         "sslCertificatePassword": "Password1",
         "useHttpProxy": false,
-        "httpProxyUrl": "http://127.0.0.1:8888"
+        "httpProxyUrl": ""
     },
     "api": {
         "name": "TokenHandlerApi",
@@ -16,7 +16,7 @@
         "cookieEncryptionKey": "aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq",
         "trustedWebOrigin": "https://web.mycompany.com",
         "provider": "cognito",
-        "isDeployed": false,
+        "isDeployed": true,
         "prettyPrinting": true
     },
     "client": {

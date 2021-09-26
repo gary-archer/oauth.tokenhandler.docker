@@ -1,9 +1,8 @@
 node_modules
+certs
 dist
 logs
 .DS_store
-.certs
 .serverless
 .tmp
-api-gateway/.certs
 test/*.txt

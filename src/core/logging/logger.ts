@@ -11,7 +11,8 @@ import {LogEntry} from './logEntry';
 export class Logger {
 
     private readonly _isLambda: boolean;
-    private _isDevelopment: boolean;
+    private _isDeployed: boolean;
+    private _prettyPrinting: boolean;
     private _apiName: string;
 
     /*
@@ -19,7 +20,8 @@ export class Logger {
      */
     public constructor(isLambda: boolean) {
         this._isLambda = isLambda;
-        this._isDevelopment = true;
+        this._isDeployed = false;
+        this._prettyPrinting = false;
         this._apiName = 'TokenHandlerApi';
     }
 
@@ -27,7 +29,8 @@ export class Logger {
      * Initialise once the configuration file is loaded
      */
     public initialise(configuration: ApiConfiguration): void {
-        this._isDevelopment = configuration.development;
+        this._isDeployed = configuration.isDeployed;
+        this._prettyPrinting = configuration.prettyPrinting;
         this._apiName = configuration.name;
     }
 
@@ -78,19 +81,20 @@ export class Logger {
         const dataToLog = this._formatData(logEntry);
         if (this._isLambda) {
 
-            if (this._isDevelopment) {
-
-                // Write logs to a local file to avoid conflicting with the lambda response output
-                this._logToFile(dataToLog);
-            } else {
+            if (this._isDeployed) {
 
                 // Ensure that Cloudwatch logs use a bare format
                 this._logToConsoleRaw(dataToLog);
+
+            } else {
+
+                // During lambda development write logs to a local file to avoid conflicting with the lambda response
+                this._logToFile(dataToLog);
             }
 
         } else {
 
-            // When using Express we log to stdout, in either a bare or pretty JSON format
+            // When using Express we log to stdout, and deployed systems use a bare format to support log shipping
             this._logToConsole(dataToLog);
         }
     }
@@ -101,7 +105,7 @@ export class Logger {
      */
     private _formatData(logEntry: LogEntry): string {
 
-        if (this._isDevelopment) {
+        if (this._prettyPrinting) {
             return JSON.stringify(logEntry.getData(), null, 2);
         } else {
             return JSON.stringify(logEntry.getData());

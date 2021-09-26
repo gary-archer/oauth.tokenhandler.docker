@@ -4,7 +4,7 @@
         "sslCertificateFileName": "./certs/mycompany.internal.ssl.p12",
         "sslCertificatePassword": "Password1",
         "useHttpProxy": false,
-        "httpProxyUrl": "http://127.0.0.1:8888"
+        "httpProxyUrl": ""
     },
     "api": {
         "name": "TokenHandlerApi",
@@ -16,7 +16,8 @@
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.mycompany.com",
         "provider": "standard",
-        "development": false
+        "isDeployed": true,
+        "prettyPrinting": false
     },
     "client": {
         "clientId": "finalspa",

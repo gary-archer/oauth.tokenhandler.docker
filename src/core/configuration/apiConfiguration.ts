@@ -21,5 +21,7 @@ export interface ApiConfiguration {
 
     provider: string;
 
-    development: boolean;
+    isDeployed: boolean;
+
+    prettyPrinting: boolean;
 }

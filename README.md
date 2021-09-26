@@ -17,17 +17,18 @@ This combines the strongest browser security with all of the benefits of an SPA 
 ## My Token Handler
 
 This API implementation is for my own understanding and to focus on productive developer setups.\
-It has some custom code related to expiry testing, custom logging and developer deployments.
+It has some custom code related to expiry testing, custom logging and deployment.\
+The token handler API can run in either Express or as AWS Serverless Lambdas.
 
 ## Prerequisites
 
-Ensure that Docker Desktop and Node.js are installed as prerequisites.\
-Run commands via the terminal on macOS, or via Git Bash on Windows.
+First ensure that Docker Desktop and Node.js are installed.\
+Then run commands via the terminal on macOS, or via Git Bash on Windows.
 
 ## Quick Start
 
-Then execute these scripts to build and run the Token Handler as Docker.\
-This is the preferred setup for local web development when using this pattern.
+Execute these scripts to build and run the Token Handler as Docker HTTPS endpoints.\
+This is the preferred setup to externalise the plumbing during local web development.
 
 ```bash
 ./build.sh
@@ -36,7 +37,7 @@ This is the preferred setup for local web development when using this pattern.
 
 ## Testing the OAuth Flow via HTTP
 
-Run `curl` based tests against the OAuth endpoints for the deployed API:
+Once the system is deployed, run `curl` based tests against the OAuth endpoints for the deployed API:
 
 ```bash
 npm run http
@@ -45,7 +46,7 @@ npm run http
 ## Testing the OAuth Flow via Lambda Functions
 
 The API is deployed to AWS as a low cost Serverless Lambda to serve my [Online SPA](https://authguidance.com/home/code-samples-quickstart/).\
-Tests against the lambda entry points can be run using this command:
+Equivalent tests against the lambda entry points can be run using this command:
 
 ```bash
 npm run lambda

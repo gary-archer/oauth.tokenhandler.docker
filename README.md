@@ -14,7 +14,7 @@ This combines strongest browser security with all of the benefits of an SPA arch
 ## My Token Handler
 
 This API implementation is for my own understanding and to focus on productive developer setups.\
-It has some custom code related to expiry testing, custom logging and deployment.\
+It has some custom code related to expiry testing, custom logging and deployment automation.\
 The token handler API can run in either Express or as AWS Serverless Lambdas.
 
 ## Instructions

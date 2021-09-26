@@ -9,7 +9,7 @@ A sample API that enables an SPA to implement OpenID Connect in the optimal API 
 ## Modern Web Security
 
 My blog's [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses the Curity `Token Handler Pattern` for modern web security.\
-This combines the strongest browser security with all of the benefits of an SPA architecture:
+This combines strongest browser security with all of the benefits of an SPA architecture:
 
 - [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
 - [Curity Token Handler API](https://github.com/curityio/bff-node-express)
@@ -50,10 +50,3 @@ Equivalent tests against the lambda entry points can be run using this command:
 ```bash
 npm run lambda
 ```
-
-## Further Information
-
-See the following blog post for a more detailed walkthrough.\
-This describes additional options, including running the SPA's business API locally:
-
-- 

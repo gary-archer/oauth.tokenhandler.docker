@@ -1,18 +1,15 @@
-PREPARATION
------------
-1. Get rid of -finalspa in cookie suffix and run both test workflows
-
-2. Use out of the box BFF-PLUGIN and delete files from my repo
-
 SPA
 ---
 1. Use /token-handler in the SPA and get it basically working
    Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
    Capture errors but aim to prevent needing to read them
 
+DEPLOYMENT CONSOLIDATION
+------------------------
+1. Use out of the box BFF-PLUGIN and delete files from my repo
+
 2. Make the Token Handler API run as a Docker container
-   Also support running locally over port 446
-   Final APIs can stay on port 445
+   Also have a local APIs setup where the Token Handler runs on port 446
 
 ERRORS
 ------
@@ -44,6 +41,10 @@ FIRST MILESTONE
 
 CODE CONSOLIDATION
 ------------------
-1. package.json updates for latest Typescript, Serverless
+1. Use out of the box BFF-PLUGIN and delete files from my repo
 
-2. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+2. package.json updates for latest Typescript, Serverless
+
+3. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+
+4. All final APIs to set credentials: true in their CORS options

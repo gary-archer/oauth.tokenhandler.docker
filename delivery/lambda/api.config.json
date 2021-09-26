@@ -19,7 +19,6 @@
         "development": false
     },
     "client": {
-        "name": "finalspa",
         "clientId": "1hofhrb15jb9adqitlkec9s5ag",
         "clientSecret": "4766go5m19shkbujtdp8n9hlcea0ef26h3tso2sf6g3qr3cnqq4",
         "redirectUri": "https://web.authsamples.com/spa/",

@@ -19,7 +19,6 @@
         "development": true
     },
     "client": {
-        "name": "finalspa",
         "clientId": "7b1b97q0d7eils1mo0m46oobr3",
         "clientSecret": "bv8mbjf7s04n16o358qg4qe12842md4kdspubts22omfrfqk37e",
         "redirectUri": "https://web.mycompany.com/spa/",

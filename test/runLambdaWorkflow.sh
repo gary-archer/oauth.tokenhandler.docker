@@ -9,7 +9,6 @@ WEB_BASE_URL='https://web.mycompany.com'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
-APP_NAME=finalspa
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 SESSION_ID=$(uuidgen)
@@ -68,27 +67,6 @@ function apiError() {
 }
 
 #
-# A subroutine in order to avoid duplication
-#
-function createPostWithCookiesRequest() {
-
-  jo -p \
-    path=$1 \
-    httpMethod=POST \
-    headers=$(jo origin="$WEB_BASE_URL" \
-    accept=application/json \
-    content-type=application/json \
-    x-mycompany-api-client=lambdaTest \
-    x-mycompany-session-id=$SESSION_ID \
-    "x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
-    multiValueHeaders=$(jo cookie=$(jo -a \
-    "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-    "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-    "$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-    "$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) > $REQUEST_FILE
-}
-
-#
 # First remove logs from last time
 #
 echo "*** Session ID is $SESSION_ID"
@@ -134,7 +112,7 @@ fi
 # Get values we will use later
 #
 AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$BODY")
-STATE_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-state-$APP_NAME" "$MULTI_VALUE_HEADERS")
+STATE_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-state" "$MULTI_VALUE_HEADERS")
 
 #
 # Next invoke the redirect URI to start a login
@@ -185,7 +163,7 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID) \
-multiValueHeaders=$(jo cookie=$(jo -a "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE")) \
+multiValueHeaders=$(jo cookie=$(jo -a "$COOKIE_PREFIX-state=$STATE_COOKIE")) \
 body="{\\\""url\\\"":\\\""$AUTHORIZATION_RESPONSE_URL\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
@@ -216,10 +194,10 @@ fi
 #
 # Get values we will use shortly
 #
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
-REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
-ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id-$APP_NAME" "$MULTI_VALUE_HEADERS")
-AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
+ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id" "$MULTI_VALUE_HEADERS")
+AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
@@ -228,7 +206,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 echo "*** Calling cross domain API with an access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -250,12 +228,12 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
-"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+"x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 body="{\\\""type\\\"":\\\""access\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
@@ -282,7 +260,7 @@ if [ $HTTP_STATUS -ne '204' ]; then
   apiError "$BODY"
   exit
 fi
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
 
 #
 # Call the business API with the expired access token cookie
@@ -290,7 +268,7 @@ ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MUL
 echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -312,12 +290,12 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
-"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+"x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #
@@ -342,8 +320,8 @@ if [ $HTTP_STATUS -ne '204' ]; then
   apiError "$BODY"
   exit
 fi
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
-REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
 
 #
 # Call the business API with the new access token
@@ -351,7 +329,7 @@ REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MU
 echo "*** Calling cross domain API with a new access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -373,12 +351,12 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
-"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+"x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 body="{\\\""type\\\"":\\\""refresh\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
@@ -405,8 +383,8 @@ if [ $HTTP_STATUS -ne '204' ]; then
   apiError "$BODY"
   exit
 fi
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
-REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
 
 #
 # Call the business API with the new access token
@@ -414,7 +392,7 @@ REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MU
 echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -436,12 +414,12 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
-"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+"x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #
@@ -478,12 +456,12 @@ accept=application/json \
 content-type=application/json \
 x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
-"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+"x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
-"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #

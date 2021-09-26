@@ -9,7 +9,6 @@ TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:446/token-handler'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
-APP_NAME=finalspa
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 SESSION_ID=$(uuidgen)
@@ -18,7 +17,7 @@ RESPONSE_FILE=test/response.txt
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-#export HTTPS_PROXY='http://127.0.0.1:8888'
+export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -68,7 +67,7 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
   echo "*** Problem encountered requesting cross origin access, status: $HTTP_STATUS"
   exit
 fi
-
+exit
 #
 # Act as the SPA by calling the token handler to start a login and get the request URI
 #
@@ -89,7 +88,7 @@ fi
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$JSON")
-STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state-$APP_NAME")
+STATE_COOKIE=$(getCookieValue "$COOKIE_PREFIX-state")
 
 #
 # Next invoke the redirect URI to start a login
@@ -139,7 +138,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/end" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
---cookie "$COOKIE_PREFIX-state-$APP_NAME=$STATE_COOKIE" \
+--cookie "$COOKIE_PREFIX-state=$STATE_COOKIE" \
 -d '{"url":"'$AUTHORIZATION_RESPONSE_URL'"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
@@ -153,10 +152,10 @@ fi
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
-ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
-REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
-ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
-AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME")
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
+ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
+AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf")
 
 #
 # Call the business API with the secure cookie containing an access token
@@ -164,7 +163,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME")
 echo "*** Calling cross domain API with an access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -185,8 +184,8 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -d '{"type":"access"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
@@ -194,7 +193,7 @@ if [ $HTTP_STATUS != '204' ]; then
   apiError
   exit
 fi
-ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
 
 #
 # Call the business with the expired access token cookie
@@ -202,7 +201,7 @@ ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
 echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -222,17 +221,17 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
   echo "*** Problem encountered refreshing the access token, status: $HTTP_STATUS"
   apiError
   exit
 fi
-ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
-REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
-ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
+ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
 
 #
 # Call the business API again with the new access token
@@ -240,7 +239,7 @@ ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id-$APP_NAME")
 echo "*** Calling cross domain API with a new access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -261,8 +260,8 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -d '{"type":"refresh"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
@@ -270,8 +269,8 @@ if [ $HTTP_STATUS != '204' ]; then
   apiError
   exit
 fi
-ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at-$APP_NAME")
-REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
+ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
+REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
 
 #
 # Call the business API again with the new access token
@@ -279,7 +278,7 @@ REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt-$APP_NAME")
 echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -299,8 +298,8 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '400' ]; then
   echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
@@ -317,8 +316,8 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/logout" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
--H "x-$COOKIE_PREFIX-csrf-$APP_NAME: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling logout, status: $HTTP_STATUS"

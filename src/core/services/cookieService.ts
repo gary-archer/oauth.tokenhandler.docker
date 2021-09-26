@@ -189,7 +189,7 @@ export class CookieService {
      * Return a cookie of the form 'mycompany-auth-finalspa'
      */
     private _getCookieName(type: string) {
-        return `${this._apiConfiguration.cookiePrefix}-${type}-${this._clientConfiguration.name}`;
+        return `${this._apiConfiguration.cookiePrefix}-${type}`;
     }
 
     /*
@@ -226,7 +226,7 @@ export class CookieService {
             domain: this._apiConfiguration.cookieDomain,
 
             // Access and CSRF cookies are sent to APIs, whereas others are private to the token handler
-            path: type === (ACCESS_COOKIE || type === CSRF_COOKIE) ? '/' : this._clientConfiguration.path,
+            path: (type === ACCESS_COOKIE || type === CSRF_COOKIE) ? '/' : this._clientConfiguration.path,
 
             // Other domains cannot send the cookie, which reduces cross site request forgery risks
             sameSite: 'strict',

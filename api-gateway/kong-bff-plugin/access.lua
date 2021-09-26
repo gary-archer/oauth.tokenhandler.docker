@@ -109,8 +109,8 @@ function _M.run(config)
     end
 
     -- Next verify that the main cookie was received and get the access token
-    ngx.log(ngx.WARN, "Looking for " .. config.cookie_name_prefix .. "-at-finalspa")
-    local at_cookie, err = cookie:get(config.cookie_name_prefix .. "-at-finalspa")
+    ngx.log(ngx.WARN, "Looking for " .. config.cookie_name_prefix .. "-at")
+    local at_cookie, err = cookie:get(config.cookie_name_prefix .. "-at")
     if err or not at_cookie then
         ngx.log(ngx.WARN, get_error_message("No access token cookie was sent with the request", err))
         unauthorized_request_error_response(config)
@@ -125,7 +125,7 @@ function _M.run(config)
     -- For data changing requests we also expect a CSRF header to be sent with the double submit cookie
     if method == "POST" or method == "PUT" or method == "DELETE" or method == "PATCH" then
 
-        local csrf_cookie, err = cookie:get(config.cookie_name_prefix .. "-csrf-finalspa")
+        local csrf_cookie, err = cookie:get(config.cookie_name_prefix .. "-csrf")
         if err or not csrf_cookie then
             ngx.log(ngx.WARN, get_error_message("No CSRF cookie was sent with the request", err))
             unauthorized_request_error_response(config)

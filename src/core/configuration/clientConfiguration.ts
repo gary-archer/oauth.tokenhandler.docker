@@ -3,8 +3,6 @@
  */
 export interface ClientConfiguration {
 
-    name: string;
-
     clientId: string;
 
     clientSecret: string;

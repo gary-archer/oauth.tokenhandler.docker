@@ -1,44 +1,27 @@
-LAMBDA TESTS
-------------
-1. Put back cookie encryptor in API, to fix this error:
-
-details: "The argument 'encoding' is invalid for data of length 2305. Received 'hex'",
-    stack: [
-      "TypeError [ERR_INVALID_ARG_VALUE]: The argument 'encoding' is invalid for data of length 2305. Received 'hex'",
-      'at new NodeError (node:internal/errors:371:5)',
-      'at validateEncoding (node:internal/validators:194:11)',
-      'at Decipheriv.update (node:internal/crypto/cipher:174:5)',
-      'at Function.decrypt (/Users/gary/dev/oauth.webproxyapi/dist/core/utilities/cookieEncryptor.js:34:25)',
-      'at CookieService.readAccessCookie (/Users/gary/dev/oauth.webproxyapi/dist/core/services/cookieService.js:74:54)',
-      'at Authorizer.expire (/Users/gary/dev/oauth.webproxyapi/dist/core/services/authorizer.js:171:49)',
-
-2. Need to send expire with an object of {"type":"access"}
+FLOWS
+-----
+1. Need to send expire with an object of {"type":"access"}
    createPostWithCookiesRequest needs to support sending data as parameter 2
 
-3. API 500s and API log output to handle better when running lambda tests
-   Decide some future behaviour, then get rid of this in logEntry.setServerError:
-   - console.error(this._data.errorData);
+2. Get lambda flow completed
+
+3. Get rid of -finalspa in cookie suffix and run both test workflows
 
 4. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
 
-SPA
----
-1. Get rid of -finalspa in cookie suffix and run both test workflows
+5. Make encryption fail and decryption fail and verify error logs
+   API 500s and API log output to handle better when running lambda tests
+   Decide some future behaviour, then get rid of this in logEntry.setServerError:
+   - console.error(this._data.errorData);
 
-2. Use /token-handler in the SPA and get it basically working
+6. Use /token-handler in the SPA and get it basically working
 
 CODE CONSOLIDATION
 ------------------
 
-3. Put back https://github.com/ebourmalo/cookie-encrypter from main branch
-   See if encryption is compatible with Michal's
-   If so then use the Curity BFF plugin and get rid of my extension
-   Use a better encryption key
+1. package.json updates for latest Typescript, Serverless
 
-4. package.json updates for latest Typescript, Serverless
-   Also get rid of tunnel-agent and compare to websample1.NEW API
-
-5. Error responses need improving, and perhaps borrow some ideas from bff-node-express:
+2. Error responses need improving, and perhaps borrow some ideas from bff-node-express:
    - Simpler client side error codes and error code checking, along with status 401 (SPA does not use invalid_grant)
    - More separated side error codes that are used for query purposes
 
@@ -69,3 +52,7 @@ BLOG
 
 2. Perhaps write some stuff on logging and automation
    Think about the language, and perhaps use 'BFF API' as my own term differentiated from Curity
+
+MINOR
+-----
+1. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works

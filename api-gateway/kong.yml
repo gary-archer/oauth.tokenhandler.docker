@@ -18,7 +18,7 @@ services:
   # The token handler plugin decrypts the secure cookie and forwards the access token to the API
   - name: bff-token
     config:
-      encryption_key: gUkXp2s5v8y/B?E(H+KbPeShVmYq3t6w
+      encryption_key: aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq
       cookie_name_prefix: mycompany
       trusted_web_origins:
       - https://web.mycompany.com

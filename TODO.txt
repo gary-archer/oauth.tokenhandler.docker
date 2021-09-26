@@ -1,4 +1,7 @@
-Update READMEs with my pitch
+CURITY BUG
+----------
+1. Bug in plugin:
+   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
 
 SERVERLESS
 ----------
@@ -9,55 +12,40 @@ SERVERLESS
 ERRORS
 ------
 1. Make encryption and decryption fail and verify error logs
-   Use HTTP workflow, or lambda workflow with api.log file
+   Do this for both HTTP workflow and lambda workflows
 
-2. API 500s and API log output to handle better when running lambda tests
+2. Client should not need to read token handler error codes and should just deal with 401s
+   Return 401s to the SPA and a generic unauthorized error code
+   Ensure that BFF PLUGIN errors (code and message) are reported correctly by the SPA
 
 3. API logs to handle separate error details for service and client
    Distinct codes in the service, single code for the client
 
-4. Return 401s to the SPA rather than individual 400s and error codes
-   Client should not need to read error codes
+MILESTONES
+----------
+1. Update cloud from branches, then test on Windows, then merge code
+   Blog updated in a basic way, with deletion of junk, and sample instructions still working
 
-5. Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
-   Capture errors but aim to prevent needing to read them
+2. Local APIs work in a good way
+   Also the ability to run the Token Handler under development, on port 446
 
-FIRST MILESTONE
----------------
-1. Update cloud from branches
-
-2. Once working do the merges down and ensure READMEs are good
-
-3. Blog updated and sample instructions still work
-   Get rid of my BFF code but mention expiry testing and custom logging
+3. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
+   End to end Docker to get working again
 
 CODE CONSOLIDATION
 ------------------
-1. package.json updates for latest Typescript, Serverless
+1. Deal with expire errors in the UI and clearing them once working again
 
-2. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+2. Java and .Net Core final APIs to set credentials: true in their CORS options
 
-3. Java and .Net Core final APIs to set credentials: true in their CORS options
+3. package.json updates for latest Typescript, Serverless
 
-4. Also have a local APIs setup where the Token Handler runs on port 446
-
-5. Bug in plugin:
-   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
-
-6. Deal with expire errors in the UI and clearing them once working again
-
-7. Test on Windows
-
-LOCAL DEVELOPMENT
------------------
+4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
 
 BLOG
 ----
 1. Refer to Curity for security solution
+   Blog post theme should be productive developer setup techniques.
 
 2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
-   Or separation and a trickier developer setup.
-   Mention that cookies add complexity.
-
-3. Mention that the goal is a productive developer setup and we will show some techniques.
-
+   Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.

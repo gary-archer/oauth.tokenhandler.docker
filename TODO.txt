@@ -4,9 +4,7 @@ SERVERLESS
    Use a concept of access token retriever - either simple header lookup or more complex
    Decryption happens every time but the same caching mechanism is used, via a policy document
    If no token in the Authorization Header then look for AT and CSRF cookies
-   Extra lambda authorizer test case using cookied captured from HTTP proxy
    Code can focus on logic around decryption, and just return a generic 401 on error
-   Update error logging to a server code used in logs and a generic client code
 
 2. Update default setup to use business API at https://api.authsamples.com
    Cloud lambda can be updated and will remain backwards compatible
@@ -33,7 +31,9 @@ ERRORS
 2. API logs to handle separate error details for service and client
    Distinct codes in the service, single code for the client
 
-3. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
+3. Serverless error logging to a server code used in logs and a generic client code
+
+4. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
    End to end Docker to get working again
 
 INCREMENTAL

@@ -16,8 +16,8 @@ This combines the strongest browser security with all of the benefits of an SPA 
 
 ## My Token Handler
 
-This implementation is for my own understanding and to focus on productive developer setups.\
-It has some custom code related to expiry testing and custom logging.
+This API implementation is for my own understanding and to focus on productive developer setups.\
+It has some custom code related to expiry testing, custom logging and developer deployments.
 
 ## Prerequisites
 

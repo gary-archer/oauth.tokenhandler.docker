@@ -5,8 +5,8 @@
 # The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
 #
 WEB_BASE_URL='https://web.mycompany.com'
-TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:445/api'
+TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:446/token-handler'
+BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa

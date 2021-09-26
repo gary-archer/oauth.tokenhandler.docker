@@ -1,15 +1,16 @@
-FLOWS
------
+PREPARATION
+-----------
 1. Get rid of -finalspa in cookie suffix and run both test workflows
-   Use out of the box BFF-PLUGIN
+
+2. Use out of the box BFF-PLUGIN and delete files from my repo
 
 SPA
 ---
 1. Use /token-handler in the SPA and get it basically working
-   Ensure that BFF PLUGIN errors can be handled by the SPA
-   Capture errors but aim to prevent needing to read it
+   Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
+   Capture errors but aim to prevent needing to read them
 
-2. Make the Token Handler API run in Docker on port 444 by default
+2. Make the Token Handler API run as a Docker container
    Also support running locally over port 446
    Final APIs can stay on port 445
 

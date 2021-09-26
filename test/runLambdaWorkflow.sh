@@ -6,7 +6,7 @@
 #
 
 WEB_BASE_URL='https://web.mycompany.com'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:445/api'
+BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 APP_NAME=finalspa

@@ -4,10 +4,11 @@ _transform: true
 services:
 
 #
-# The route for the Business API, which is called by the SPA via https://api.mycompany.com:445/api
+# The SPA calls its business handler at https://api.mycompany.com:444/api
+# The gateway routes this back out to the host, to https://api.mycompany.com:445/api
 #
 - name: sample-api
-  url: https://api.authsamples.com/api
+  url: https://api.mycompany.com:445/api
   routes:
   - name: sample-api-route
     paths:

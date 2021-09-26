@@ -2,14 +2,15 @@ version: '3.8'
 services:
 
   #
-  # API calls from the SPA are routed via the API Gateway at the https://api.mycompany.com:445 base URL
-  # The plugin manages decrypting the secure cookie and forwarding an access token to the API
+  # API calls from the SPA are routed to APIs via the gateway at the https://api.mycompany.com:444 base URL
   #
   api-gateway:
     image: kong:2.5.0-alpine
     hostname: apigateway.mycompany.internal
+    extra_hosts:
+      - "api.mycompany.com:host-gateway"
     ports:
-      - 445:8000
+      - 444:8000
     volumes:
       - ./kong.yml:/usr/local/kong/declarative/kong.yml
       - ./kong-bff-plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token

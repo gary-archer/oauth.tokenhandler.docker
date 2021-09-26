@@ -54,7 +54,7 @@ npm run lambda
 
 ## Further Information
 
-See the following blog posts for a more detailed walkthrough and additional options, such as for local API development:
+See the following blog post for a more detailed walkthrough.\
+This describes additional options, including running the SPA's business API locally:
 
 - [Back End for Front End API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/)
-- [Final SPA](https://authguidance.com/2019/04/07/local-ui-setup/)

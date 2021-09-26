@@ -122,7 +122,6 @@ package:
   - '!deploy.sh'
   - '!delivery/**'
   - '!Dockerfile'
-  - '!logs/**'
   - '!src/**'
   - '!test/**'
   - '!ts*.json'

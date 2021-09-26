@@ -12,6 +12,18 @@ SERVERLESS
    Cloud lambda can be updated and will remain backwards compatible
    Once working I can deploy everything else
 
+MERGES
+------
+1. Above work done and cloud system works and works on Windows
+   Then update blog quickly and trim it down
+
+2. Final APIs run locally and kong.yml can be updated at deployment time with API URL
+   Java and .Net Core final APIs to set credentials: true in their CORS options
+   - First run the API
+   - Then run the SPA with './deploy.sh localapi' which should run this repo with './deploy.sh localapi'
+
+3. Also add a way to run the Token Handler API outside of Docker
+
 ERRORS
 ------
 1. Client should not need to read token handler error codes and should just deal with 401s
@@ -20,14 +32,6 @@ ERRORS
 
 2. API logs to handle separate error details for service and client
    Distinct codes in the service, single code for the client
-
-MILESTONES
-----------
-1. Update cloud from branches, then test on Windows, then merge code
-   Blog updated in a basic way, with deletion of junk, and sample instructions still working
-
-2. Local APIs work in a good way
-   Also the ability to run the Token Handler under development, on port 446
 
 3. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
    End to end Docker to get working again
@@ -42,28 +46,26 @@ INCREMENTAL
 
 4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
 
-CODE CONSOLIDATION
-------------------
+UI CONSOLIDATION
+----------------
 1. Deal with expire errors in the UI and clearing them once working again
-
-2. Java and .Net Core final APIs to set credentials: true in their CORS options
 
 BLOG
 ----
 1. Refer to Curity for security solution
    Blog post theme should be productive developer setup techniques.
 
-2. Discuss details of where logs go, eg on npm run lambda
-
-3. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
+2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
    Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.
 
+3. Discuss details of where logs go, eg on npm run lambda
+
 4. More about running the components after initial run of build script
-   Eg: stond and do a 'npm start'
+   Stress standard node - eg do a 'npm start' to restart
 
 CURITY
 ------
 1. Bug in plugin:
    https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
 
-2. Make sure web and token handler repos point nicely to docs
+2. Make sure web and token handler repos point nicely to docs as part of image updates

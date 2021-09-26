@@ -226,9 +226,9 @@ x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
 "x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
+"$COOKIE_PREFIX-id=$ID_COOKIE" \
 "$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 body="{\\\""type\\\"":\\\""access\\\""}" \
 | sed 's/\\\\\\/\\/g' \
@@ -288,9 +288,9 @@ x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
 "x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
+"$COOKIE_PREFIX-id=$ID_COOKIE" \
 "$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 
@@ -349,9 +349,9 @@ x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
 "x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
+"$COOKIE_PREFIX-id=$ID_COOKIE" \
 "$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 body="{\\\""type\\\"":\\\""refresh\\\""}" \
 | sed 's/\\\\\\/\\/g' \
@@ -412,9 +412,9 @@ x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
 "x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
+"$COOKIE_PREFIX-id=$ID_COOKIE" \
 "$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 
@@ -454,9 +454,9 @@ x-mycompany-api-client=lambdaTest \
 x-mycompany-session-id=$SESSION_ID \
 "x-$COOKIE_PREFIX-csrf=$ANTI_FORGERY_TOKEN") \
 multiValueHeaders=$(jo cookie=$(jo -a \
-"$COOKIE_PREFIX-at=$ACCESS_COOKIE", \
-"$COOKIE_PREFIX-rt=$REFRESH_COOKIE", \
-"$COOKIE_PREFIX-id=$ID_COOKIE", \
+"$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
+"$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
+"$COOKIE_PREFIX-id=$ID_COOKIE" \
 "$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
 | jq > $REQUEST_FILE
 

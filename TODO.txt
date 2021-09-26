@@ -44,6 +44,7 @@ MILESTONES
 
 5. Blog updated and sample instructions still work
 
+
 BLOG
 ----
 1. Get first part of blog updated and say I am using the Curity design pattern, linking to the SPA repo.

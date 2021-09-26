@@ -20,7 +20,7 @@ SLS=./node_modules/.bin/sls
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-export HTTPS_PROXY='http://127.0.0.1:8888'
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file in a direct Cognito request
@@ -124,7 +124,7 @@ JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
 BODY=$(jq -r .body <<< "$JSON")
 MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
-if [ $HTTP_STATUS -ne 200 ]; then
+if [ $HTTP_STATUS -ne '200' ]; then
   echo "*** Problem encountered starting a login, status: $HTTP_STATUS"
   apiError "$BODY"
   exit
@@ -175,8 +175,7 @@ fi
 AUTHORIZATION_RESPONSE_URL=$(getCognitoHeaderValue 'location')
 
 #
-# Next write the input file for the end login request
-# Note that it is tricky to output the body parameters in the stringified form lambda expects
+# Next write the input file for the end login request, and it is tricky to write body parameters as lambda expects
 #
 jo \
 path=/token-handler/login/end \
@@ -206,9 +205,9 @@ fi
 #
 JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
-BODY=$(jq -r .body <<< "$JSON")
 MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
-if [ $HTTP_STATUS -ne 200 ]; then
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS -ne '200' ]; then
   echo "*** Problem encountered ending a login, status: $HTTP_STATUS"
   apiError "$BODY"
   exit
@@ -241,45 +240,30 @@ if [ $HTTP_STATUS != '200' ]; then
 fi
 
 #
-# Invoke the refresh lambda to expire the access token
+# Create the request to call the expire endpoint, then expire the access token
+#
+jo -p \
+path='/token-handler/expire' \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID \
+"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+body="{\\\""type\\\"":\\\""access\\\""}" \
+| sed 's/\\\\\\/\\/g' \
+| jq > $REQUEST_FILE
+
+#
+# Ask the API to write the access token in the cookie with extra characters, then get the updated cookie
 #
 echo "*** Expiring the access token ..."
-createPostWithCookiesRequest '/token-handler/expire'
-$SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
-if [ $? -ne 0 ]; then
-  echo "*** Problem encountered invoking the expire lambda"
-  exit
-fi
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
-echo "NEW ACCESS COOKIE"
-
-#
-# Get updated cookies
-#
-JSON=$(cat $RESPONSE_FILE)
-HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
-BODY=$(jq -r .body <<< "$JSON")
-MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
-if [ $HTTP_STATUS -ne 200 ]; then
-  echo "*** Problem encountered refreshing an access token, status: $HTTP_STATUS"
-  apiError "$BODY"
-  exit
-fi
-ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
-REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
-echo $ACCESS_COOKIE
-exit
-
-
-
-
-
-
-#
-# Next expire the session by rewriting the refresh token in the refresh cookie, for test purposes
-#
-echo "*** Expiring the refresh token to force an end of session ..."
-createPostWithCookiesRequest '/token-handler/expire'
 $SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the expire lambda"
@@ -287,28 +271,59 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Check for the expected result
+# Handle failures then read the response data
 #
 JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
-BODY=$(jq -r .body <<< "$JSON")
 MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
-if [ $HTTP_STATUS != '204' ]; then
-  echo "*** Problem encountered expiring the refresh token, status: $HTTP_STATUS"
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS -ne '204' ]; then
+  echo "*** Problem encountered invoking the expire lambda, status: $HTTP_STATUS"
   apiError "$BODY"
+  exit
+fi
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
+
+#
+# Call the business API with the expired access token cookie
+#
+echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '401' ]; then
+  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
+  apiError "$(cat $RESPONSE_FILE)"
   exit
 fi
 
 #
-# Get the updated refresh cookie, which now contains an invalid refresh token
+# Write a request to refresh the access token
 #
-REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
+jo -p \
+path='/token-handler/refresh' \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID \
+"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+| jq > $REQUEST_FILE
 
 #
-# Next try to refresh the token again and we should get an invalid_grant error
+# Send a request to refresh the access token in the secure cookie
 #
-echo "*** Calling refresh to rewrite the access token cookie ..."
-createPostWithCookiesRequest '/token-handler/token'
+echo "*** Refreshing the access token ..."
 $SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refresh lambda"
@@ -316,23 +331,166 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Check for the expected error
+# Handle failures then read the response data
 #
 JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
 BODY=$(jq -r .body <<< "$JSON")
-if [ $HTTP_STATUS != '400' ]; then
-  echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
-  apiError $BODY
+if [ $HTTP_STATUS -ne '204' ]; then
+  echo "*** Problem encountered invoking the refresh lambda, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
+
+#
+# Call the business API with the new access token
+#
+echo "*** Calling cross domain API with a new access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '200' ]; then
+  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
+  apiError "$(cat $RESPONSE_FILE)"
   exit
 fi
 
 #
+# Create the request to call the expire endpoint, then expire both the refresh token and the access token
+#
+jo -p \
+path='/token-handler/expire' \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID \
+"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+body="{\\\""type\\\"":\\\""refresh\\\""}" \
+| sed 's/\\\\\\/\\/g' \
+| jq > $REQUEST_FILE
+
+#
+# Ask the API to make both the refresh token and secure token act expired
+#
+echo "*** Expiring the refresh token ..."
+$SLS invoke local -f expire -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the expire lambda"
+  exit
+fi
+
+#
+# Handle failures then read the response data
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS -ne '204' ]; then
+  echo "*** Problem encountered invoking the expire lambda, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at-$APP_NAME" "$MULTI_VALUE_HEADERS")
+REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt-$APP_NAME" "$MULTI_VALUE_HEADERS")
+
+#
+# Call the business API with the new access token
+#
+echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
+HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+-H "origin: $WEB_BASE_URL" \
+--cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
+-H 'accept: application/json' \
+-H 'x-mycompany-api-client: httpTest' \
+-H "x-mycompany-session-id: $SESSION_ID" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS != '401' ]; then
+  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
+  apiError "$(cat $RESPONSE_FILE)"
+  exit
+fi
+
+#
+# Write a request to refresh the access token
+#
+jo -p \
+path='/token-handler/refresh' \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID \
+"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+| jq > $REQUEST_FILE
+
+#
+# Send a request to refresh the access token in the secure cookie
+#
+echo "*** Calling refresh to get a new access token when the session is expired ..."
+$SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
+if [ $? -ne 0 ]; then
+  echo "*** Problem encountered invoking the refresh lambda"
+  exit
+fi
+
+#
+# Handle failures then read the response data
+#
+JSON=$(cat $RESPONSE_FILE)
+HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
+MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
+BODY=$(jq -r .body <<< "$JSON")
+if [ $HTTP_STATUS -ne '400' ]; then
+  echo "*** Problem encountered invoking the refresh lambda, status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
+# Next write a request to get an end session request from the API
+#
+jo -p \
+path='/token-handler/logout' \
+httpMethod=POST \
+headers=$(jo origin="$WEB_BASE_URL" \
+accept=application/json \
+content-type=application/json \
+x-mycompany-api-client=lambdaTest \
+x-mycompany-session-id=$SESSION_ID \
+"x-$COOKIE_PREFIX-csrf-$APP_NAME=$ANTI_FORGERY_TOKEN") \
+multiValueHeaders=$(jo cookie=$(jo -a \
+"$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE", \
+"$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE", \
+"$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE", \
+"$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE")) \
+| jq > $REQUEST_FILE
+
+#
 # Next start a logout request
 #
-echo "*** Calling start logout to clear cookies and get the end session request URL ..."
-createPostWithCookiesRequest '/logout'
-$SLS invoke local -f startLogout -p $REQUEST_FILE > $RESPONSE_FILE
+echo "*** Calling logout to clear cookies and get the end session request URL ..."
+$SLS invoke local -f logout -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the startLogout lambda"
   exit

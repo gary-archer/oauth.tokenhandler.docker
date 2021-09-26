@@ -5,7 +5,7 @@
 # The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
 #
 WEB_BASE_URL='https://web.mycompany.com'
-TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:446/token-handler'
+TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -17,7 +17,7 @@ RESPONSE_FILE=test/response.txt
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-export HTTPS_PROXY='http://127.0.0.1:8888'
+#export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file
@@ -67,7 +67,7 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
   echo "*** Problem encountered requesting cross origin access, status: $HTTP_STATUS"
   exit
 fi
-exit
+
 #
 # Act as the SPA by calling the token handler to start a login and get the request URI
 #

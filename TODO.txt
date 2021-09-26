@@ -2,6 +2,7 @@ DEPLOYMENT CONSOLIDATION
 ------------------------
 1. Update SPA README for delivery scenarios
    Update folders to aws-serverless, improve structure and get all package.json commands working
+   Run the proxy API from the SPA
 
 SERVERLESS
 ----------

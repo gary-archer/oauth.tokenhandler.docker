@@ -20,14 +20,13 @@ This API implementation is for my own understanding and to focus on productive d
 It has some custom code related to expiry testing, custom logging and deployment.\
 The token handler API can run in either Express or as AWS Serverless Lambdas.
 
-## Prerequisites
+## Instructions
 
-First ensure that Docker Desktop and Node.js are installed.\
-Then run commands via the terminal on macOS, or via Git Bash on Windows.
+- See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for details on the setup.
 
 ## Quick Start
 
-Execute these scripts to build and run the Token Handler as Docker HTTPS endpoints.\
+Once development domains and SSL trust are configured, run these commands to spin up the system.\
 This is the preferred setup to externalise the plumbing during local web development.
 
 ```bash
@@ -57,4 +56,4 @@ npm run lambda
 See the following blog post for a more detailed walkthrough.\
 This describes additional options, including running the SPA's business API locally:
 
-- [Back End for Front End API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/)
+- 

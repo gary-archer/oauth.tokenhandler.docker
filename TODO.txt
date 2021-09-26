@@ -8,20 +8,17 @@ SERVERLESS
    Code can focus on logic around decryption, and just return a generic 401 on error
    Update error logging to a server code used in logs and a generic client code
 
-2. Update default setup to use Cloud business API
+2. Update default setup to use business API at https://api.authsamples.com
    Cloud lambda can be updated and will remain backwards compatible
    Once working I can deploy everything else
 
 ERRORS
 ------
-1. Make encryption and decryption fail and verify error logs
-   Do this for both HTTP workflow and lambda workflows
-
-2. Client should not need to read token handler error codes and should just deal with 401s
+1. Client should not need to read token handler error codes and should just deal with 401s
    Return 401s to the SPA and a generic unauthorized error code
    Ensure that BFF PLUGIN errors (code and message) are reported correctly by the SPA
 
-3. API logs to handle separate error details for service and client
+2. API logs to handle separate error details for service and client
    Distinct codes in the service, single code for the client
 
 MILESTONES
@@ -35,16 +32,6 @@ MILESTONES
 3. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
    End to end Docker to get working again
 
-CODE CONSOLIDATION
-------------------
-1. Deal with expire errors in the UI and clearing them once working again
-
-2. Java and .Net Core final APIs to set credentials: true in their CORS options
-
-3. package.json updates for latest Typescript, Serverless
-
-4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
-
 INCREMENTAL
 -----------
 1. Use jose in NodeJS APIs
@@ -53,15 +40,25 @@ INCREMENTAL
 
 3. Get rid of url-parse
 
+4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+
+CODE CONSOLIDATION
+------------------
+1. Deal with expire errors in the UI and clearing them once working again
+
+2. Java and .Net Core final APIs to set credentials: true in their CORS options
+
 BLOG
 ----
 1. Refer to Curity for security solution
    Blog post theme should be productive developer setup techniques.
 
-2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
+2. Discuss details of where logs go, eg on npm run lambda
+
+3. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
    Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.
 
-3. More about running the components after initial run of build script
+4. More about running the components after initial run of build script
    Eg: stond and do a 'npm start'
 
 CURITY
@@ -69,4 +66,4 @@ CURITY
 1. Bug in plugin:
    https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
 
-2. Make sure repo points nicely to docs
+2. Make sure web and token handler repos point nicely to docs

@@ -14,14 +14,20 @@ This combines the strongest browser security with all of the benefits of an SPA 
 - [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
 - [Curity Token Handler API](https://github.com/curityio/bff-node-express)
 
-## Custom Token Handler
+## My Token Handler
 
 This implementation is for my own understanding and to focus on productive developer setups.\
 It has some custom code related to expiry testing and custom logging.
 
+## Prerequisites
+
+Ensure that Docker Desktop and Node.js are installed as prerequisites.\
+Run commands via the terminal on macOS, or via Git Bash on Windows.
+
 ## Quick Start
 
-Execute these scripts in sequence to run the Node.js API in Docker using Express:
+Then execute these scripts to build and run the Token Handler as Docker.\
+This is the preferred setup for local web development when using this pattern.
 
 ```bash
 ./build.sh
@@ -39,7 +45,7 @@ npm run http
 ## Testing the OAuth Flow via Lambda Functions
 
 The API is deployed to AWS as a low cost Serverless Lambda to serve my [Online SPA](https://authguidance.com/home/code-samples-quickstart/).\
-To test the lambda entry points, run the lambda tests:
+Tests against the lambda entry points can be run using this command:
 
 ```bash
 npm run lambda

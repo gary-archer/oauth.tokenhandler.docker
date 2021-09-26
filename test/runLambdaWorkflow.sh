@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#
-# A script to run Serverless lambdas locally and to deal with inputs and outputs
-# This uses the jo tool to write JSON objects and the jq tool to read JSON objects
-#
+#############################################################################################
+# A script to test the Serverless lambda SPA workflow locally, for productive API development
+# This requires the jo tool to write JSON objects and the jq tool to read JSON objects
+#############################################################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
@@ -15,10 +15,6 @@ SESSION_ID=$(uuidgen)
 REQUEST_FILE=test/request.txt
 RESPONSE_FILE=test/response.txt
 SLS=./node_modules/.bin/sls
-
-#
-# Enable this to view requests in an HTTP Proxy tool
-#
 #export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
@@ -67,11 +63,11 @@ function apiError() {
 }
 
 #
-# First remove logs from last time
+# Start by creating a session and the logs folder
 #
 echo "*** Session ID is $SESSION_ID"
-rm logs/api.log 2>/dev/null
-mkdir -p logs
+rm -rf .logs
+mkdir .logs
 
 #
 # Write the input file for the startLogin request

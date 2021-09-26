@@ -51,3 +51,9 @@ CODE CONSOLIDATION
    https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
 
 6. Deal with expire errors in the UI and clearing them once working again
+
+BLOG
+----
+1. All security credit to Curity
+   Blog post to focus on documenting a productive setup
+   Mention that cookies add complexity, but hopefully most of it can be outsourced

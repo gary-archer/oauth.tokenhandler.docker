@@ -1,9 +1,10 @@
 #!/bin/bash
 
-#
-# A script to test HTTP messages that the SPA sends to the token handler API
-# The script uses the jq tool to read JSON responses, so this must be installed as a prerequisite
-#
+##########################################################################################
+# A script to test the SPA's HTTP workflow against the API, for productive API development
+# The script uses the jq tool to read JSON responses
+##########################################################################################
+
 WEB_BASE_URL='https://web.mycompany.com'
 TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
 BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'

@@ -33,7 +33,7 @@ This is the preferred setup to externalise the plumbing during local web develop
 
 ## Testing the OAuth Flow via HTTP
 
-Once the system is deployed, run `curl` based tests against the OAuth endpoints for the deployed API:
+To test the API driven commands in the OAuth workflow I use `curl` based tests:
 
 ```bash
 npm run http
@@ -42,7 +42,7 @@ npm run http
 ## Testing the OAuth Flow via Lambda Functions
 
 The API is deployed to AWS as a low cost Serverless Lambda to serve my [Online SPA](https://authguidance.com/home/code-samples-quickstart/).\
-Equivalent tests against the lambda entry points can be run using this command:
+During lambda development I run equivalent tests to ensure that lambda functions work as expected:
 
 ```bash
 npm run lambda

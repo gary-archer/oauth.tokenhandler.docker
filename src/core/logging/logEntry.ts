@@ -53,7 +53,6 @@ export class LogEntry {
     public setServerError(error: ServerError): void {
 
         this._data.errorData = error.toLogFormat(this._data.apiName);
-        console.error(this._data.errorData);
         this._data.errorCode = error.errorCode;
         this._data.errorId = error.getInstanceId();
     }

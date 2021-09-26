@@ -15,9 +15,6 @@ ERRORS
    Use HTTP workflow, or lambda workflow with api.log file
 
 2. API 500s and API log output to handle better when running lambda tests
-   Currently goes to logs/api.log - at least rename this
-   Decide some future behaviour, then get rid of this in logEntry.setServerError:
-   - console.error(this._data.errorData);
 
 3. API logs to handle separate error details for service and client
    Distinct codes in the service, single code for the client
@@ -52,8 +49,12 @@ CODE CONSOLIDATION
 
 6. Deal with expire errors in the UI and clearing them once working again
 
+LOCAL DEVELOPMENT
+-----------------
+
 BLOG
 ----
-1. All security credit to Curity
-   Blog post to focus on documenting a productive setup
-   Mention that cookies add complexity, but hopefully most of it can be outsourced
+1. Refer to Curity for security solution
+
+2. Document the productive developer setup aspects
+   Mention that cookies add complexity

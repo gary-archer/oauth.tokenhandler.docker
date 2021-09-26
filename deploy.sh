@@ -26,8 +26,8 @@ esac
 #
 # Spin up Docker compose components
 #
-docker compose -f delivery/localhost/docker-compose.yml down
-docker compose -f delivery/localhost/docker-compose.yml up --force-recreate --remove-orphans
+docker compose -f delivery/docker-localweb/docker-compose.yml down
+docker compose -f delivery/docker-localweb/docker-compose.yml up --force-recreate --remove-orphans
 if [ $? -ne 0 ]; then
   echo "Problem encountered starting Docker components"
   exit 1

@@ -1,13 +1,12 @@
-CURITY BUG
-----------
-1. Bug in plugin:
-   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
-
 SERVERLESS
 ----------
 1. Needs to handle cookies with the same logic as the BFF Plugin
-   If no token then process AT and CSRF cookies
-   Consider a bash script to run lambdas
+   Use a concept of access token retriever - either simple header lookup or more complex
+   Decryption happens every time but the same caching mechanism is used, via a policy document
+   If no token in the Authorization Header then look for AT and CSRF cookies
+   Extra lambda authorizer test case using cookied captured from HTTP proxy
+   Code can focus on logic around decryption, and just return a generic 401 on error
+   Update error logging to a server code used in logs and a generic client code
 
 ERRORS
 ------
@@ -49,3 +48,8 @@ BLOG
 
 2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
    Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.
+
+CURITY BUG
+----------
+1. Bug in plugin:
+   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104

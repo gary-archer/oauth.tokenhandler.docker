@@ -161,7 +161,7 @@ AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf-$APP_NAME")
 #
 # Call the business API with the secure cookie containing an access token
 #
-echo "*** Calling cross domain API with a secure cookie ..."
+echo "*** Calling cross domain API with an access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
 --cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
@@ -293,7 +293,7 @@ fi
 #
 # Next try to refresh the token and we should get an invalid_grant error
 #
-echo "*** Calling refresh to get a new access token when the session is expired ..."
+echo "*** Trying to refresh the access token when the session is expired ..."
 HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
@@ -309,9 +309,9 @@ if [ $HTTP_STATUS != '400' ]; then
 fi
 
 #
-# Next make a start logout request
+# Next make a logout request
 #
-echo "*** Calling start logout to clear cookies and get the end session request URL ..."
+echo "*** Calling logout to clear cookies and get the end session request URL ..."
 HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/logout" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
@@ -321,7 +321,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/logout" \
 --cookie "$COOKIE_PREFIX-rt-$APP_NAME=$REFRESH_COOKIE;$COOKIE_PREFIX-id-$APP_NAME=$ID_COOKIE;$COOKIE_PREFIX-csrf-$APP_NAME=$AFT_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered starting a logout, status: $HTTP_STATUS"
+  echo "*** Problem encountered calling logout, status: $HTTP_STATUS"
   apiError
   exit
 fi

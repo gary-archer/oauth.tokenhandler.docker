@@ -225,7 +225,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 #
 # Call the business API with the secure cookie containing an access token
 #
-echo "*** Calling cross domain API with an access token ..."
+echo "*** Calling cross domain API with an access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
 --cookie "$COOKIE_PREFIX-at-$APP_NAME=$ACCESS_COOKIE" \
@@ -447,7 +447,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 #
 # Send a request to refresh the access token in the secure cookie
 #
-echo "*** Calling refresh to get a new access token when the session is expired ..."
+echo "*** Trying to refresh the access token when the session is expired ..."
 $SLS invoke local -f refresh -p $REQUEST_FILE > $RESPONSE_FILE
 if [ $? -ne 0 ]; then
   echo "*** Problem encountered invoking the refresh lambda"

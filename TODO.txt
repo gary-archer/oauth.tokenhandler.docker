@@ -1,59 +1,50 @@
 FLOWS
 -----
-1. Need to send expire with an object of {"type":"access"}
-   createPostWithCookiesRequest needs to support sending data as parameter 2
+1. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
 
-2. Get lambda flow completed
-
-3. Get rid of -finalspa in cookie suffix and run both test workflows
-
-4. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
-
-5. Make encryption fail and decryption fail and verify error logs
-   API 500s and API log output to handle better when running lambda tests
-   Decide some future behaviour, then get rid of this in logEntry.setServerError:
-   - console.error(this._data.errorData);
-
-6. Use /token-handler in the SPA and get it basically working
-
-CODE CONSOLIDATION
-------------------
-
-1. package.json updates for latest Typescript, Serverless
-
-2. Error responses need improving, and perhaps borrow some ideas from bff-node-express:
-   - Simpler client side error codes and error code checking, along with status 401 (SPA does not use invalid_grant)
-   - More separated side error codes that are used for query purposes
+2. Get rid of -finalspa in cookie suffix and run both test workflows
+   Use out of the box BFF-PLUGIN
 
 SPA
 ---
-Get this connected and working, and iron out issues
-Update the automation to use the Token Handler API and to call Docker
+1. Use /token-handler in the SPA and get it basically working
+   Ensure that BFF PLUGIN errors can be handled by the SPA
+   Capture errors but aim to prevent needing to read it
 
-MILESTONES
+2. Make the Token Handler API run in Docker on port 444 by default
+   Also support running locally over port 446
+   Final APIs can stay on port 445
+
+ERRORS
+------
+1. Make encryption fail and decryption fail and verify error logs
+
+2. API 500s and API log output to handle better when running lambda tests
+   Decide some future behaviour, then get rid of this in logEntry.setServerError:
+   - console.error(this._data.errorData);
+
+3. API logs to handle separate error details for service and client
+   Distinct codes in the service, single code for the client
+
+4. Return 401s to the SPA rather than individual 400s and error codes
+   Client should not need to read error codes
+
+SERVERLESS
 ----------
-1. SPA works locally with token handler API and plugin running in Docker on port 444
-   Initial plan on updating APIs to port 446 and running Token Handler API on port 445
+1. Needs to handle cookies with the same logic as the BFF Plugin
+   If no token then process AT and CSRF cookies
 
-2. Serverless project updated to handle secure cookies, similar to a reverse proxy plugin
-   Use a single lambda authorizer to reduce incompatibilities.
+FIRST MILESTONE
+---------------
+1. Update cloud from branch
 
-3. Cloud system updated and SPA redeployed from branch
+2. Once working do the merges down and ensure READMEs are good
 
-4. Code merged for final SPA and token handler API, and repo renamed to oauth.tokenhandlerapi
+3. Blog updated and sample instructions still work
+   Get rid of my BFF code but mention expiry testing and custom logging
 
-5. Blog updated and sample instructions still work
+CODE CONSOLIDATION
+------------------
+1. package.json updates for latest Typescript, Serverless
 
-
-BLOG
-----
-1. Get first part of blog updated and say I am using the Curity design pattern, linking to the SPA repo.
-   Mention my own token handler that allows me to test expiry and do custom logging.
-   Delete most of my own content in this area so that there is a very short page.
-
-2. Perhaps write some stuff on logging and automation
-   Think about the language, and perhaps use 'BFF API' as my own term differentiated from Curity
-
-MINOR
------
-1. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+2. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works

@@ -11,7 +11,7 @@ export interface ApiConfiguration {
 
     endSessionEndpoint: string;
 
-    cookieRootDomain: string,
+    cookieDomain: string,
 
     cookiePrefix: string,
 

@@ -1,8 +1,6 @@
 FLOWS
 -----
-1. Private cookie paths of /token-handler for state, ID and refresh tokens which never need to be sent to other paths.
-
-2. Get rid of -finalspa in cookie suffix and run both test workflows
+1. Get rid of -finalspa in cookie suffix and run both test workflows
    Use out of the box BFF-PLUGIN
 
 SPA

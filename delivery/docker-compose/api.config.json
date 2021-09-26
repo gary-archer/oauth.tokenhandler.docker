@@ -11,7 +11,7 @@
         "authorizeEndpoint": "https://login.mycompany.com/oauth/v2/oauth-authorize",
         "tokenEndpoint": "https://login.mycompany.internal:8443/oauth/v2/oauth-token",
         "endSessionEndpoint": "https://login.mycompany.com/oauth/v2/oauth-session/logout",
-        "cookieRootDomain": "mycompany.com",
+        "cookieDomain": "mycompany.com",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "VBb1KIxUHo6dYgvhWoVsVlvTb6zSqtLXsptGcKEcAh8=",
         "trustedWebOrigin": "https://web.mycompany.com",

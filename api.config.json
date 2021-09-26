@@ -11,7 +11,7 @@
         "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "endSessionEndpoint": "https://login.authsamples.com/logout",
-        "cookieRootDomain": "api.mycompany.com",
+        "cookieDomain": "api.mycompany.com",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq",
         "trustedWebOrigin": "https://web.mycompany.com",

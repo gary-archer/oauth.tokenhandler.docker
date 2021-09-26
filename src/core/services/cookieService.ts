@@ -7,6 +7,12 @@ import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
 
+const STATE_COOKIE   = 'state';
+const ACCESS_COOKIE  = 'at';
+const REFRESH_COOKIE = 'rt';
+const ID_COOKIE      = 'id';
+const CSRF_COOKIE    = 'csrf';
+
 /*
  * A class to deal with cookie specific responsibilities
  */
@@ -28,9 +34,9 @@ export class CookieService {
      */
     public writeStateCookie(data: any, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('state');
+        const cookieName = this._getCookieName(STATE_COOKIE);
         const encryptedData = encryptCookie(JSON.stringify(data), {key: this._encryptionKey});
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions(STATE_COOKIE));
     }
 
     /*
@@ -38,7 +44,7 @@ export class CookieService {
      */
     public readStateCookie(request: AbstractRequest): any {
 
-        const cookieName = this._getCookieName('state');
+        const cookieName = this._getCookieName(STATE_COOKIE);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
 
@@ -61,9 +67,9 @@ export class CookieService {
      */
     public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('rt');
+        const cookieName = this._getCookieName(REFRESH_COOKIE);
         const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions(REFRESH_COOKIE));
     }
 
     /*
@@ -71,7 +77,7 @@ export class CookieService {
      */
     public readRefreshCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('rt');
+        const cookieName = this._getCookieName(REFRESH_COOKIE);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -85,9 +91,9 @@ export class CookieService {
      */
     public writeAccessCookie(accessToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('at');
+        const cookieName = this._getCookieName(ACCESS_COOKIE);
         const encryptedData = encryptCookie(accessToken, {key: this._encryptionKey});
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions(ACCESS_COOKIE));
     }
 
     /*
@@ -95,7 +101,7 @@ export class CookieService {
      */
     public readAccessCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('at');
+        const cookieName = this._getCookieName(ACCESS_COOKIE);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -109,9 +115,9 @@ export class CookieService {
      */
     public writeIdCookie(idToken: string, response: AbstractResponse): void {
 
-        const cookieName = this._getCookieName('id');
+        const cookieName = this._getCookieName(ID_COOKIE);
         const encryptedData = encryptCookie(idToken, {key: this._encryptionKey});
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions(ID_COOKIE));
     }
 
     /*
@@ -119,7 +125,7 @@ export class CookieService {
      */
     public readIdCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('id');
+        const cookieName = this._getCookieName(ID_COOKIE);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -133,9 +139,9 @@ export class CookieService {
      */
     public writeAntiForgeryCookie(response: AbstractResponse, value: string): void {
 
-        const cookieName = this._getCookieName('csrf');
+        const cookieName = this._getCookieName(CSRF_COOKIE);
         const encryptedData = encryptCookie(value, {key: this._encryptionKey});
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions());
+        response.addCookie(cookieName, encryptedData, this._getCookieOptions(CSRF_COOKIE));
     }
 
     /*
@@ -143,7 +149,7 @@ export class CookieService {
      */
     public getAntiForgeryRequestHeaderName(): string {
 
-        const cookieName = this._getCookieName('csrf');
+        const cookieName = this._getCookieName(CSRF_COOKIE);
         return `x-${cookieName}`;
     }
 
@@ -152,7 +158,7 @@ export class CookieService {
      */
     public readAntiForgeryCookie(request: AbstractRequest): string | null {
 
-        const cookieName = this._getCookieName('csrf');
+        const cookieName = this._getCookieName(CSRF_COOKIE);
         const encryptedData = request.getCookie(cookieName);
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
@@ -165,10 +171,7 @@ export class CookieService {
      * Clear the temporary state cookie used during login
      */
     public clearStateCookie(response: AbstractResponse): void {
-
-        const options = this._getCookieOptions();
-        options.expires = new Date(0);
-        response.addCookie(this._getCookieName('state'), '', options);
+        response.addCookie(this._getCookieName(STATE_COOKIE), '', this._getExpireCookieOptions(STATE_COOKIE));
     }
 
     /*
@@ -176,13 +179,10 @@ export class CookieService {
      */
     public clearAll(response: AbstractResponse): void {
 
-        const options = this._getCookieOptions();
-        options.expires = new Date(0);
-
-        response.addCookie(this._getCookieName('rt'), '', options);
-        response.addCookie(this._getCookieName('at'), '', options);
-        response.addCookie(this._getCookieName('id'), '', options);
-        response.addCookie(this._getCookieName('csrf'), '', options);
+        response.addCookie(this._getCookieName(REFRESH_COOKIE), '', this._getExpireCookieOptions(REFRESH_COOKIE));
+        response.addCookie(this._getCookieName(ACCESS_COOKIE),  '', this._getExpireCookieOptions(ACCESS_COOKIE));
+        response.addCookie(this._getCookieName(ID_COOKIE),      '', this._getExpireCookieOptions(ID_COOKIE));
+        response.addCookie(this._getCookieName(CSRF_COOKIE),    '', this._getExpireCookieOptions(CSRF_COOKIE));
     }
 
     /*
@@ -212,24 +212,34 @@ export class CookieService {
     /*
      * All cookies use largely identical options
      */
-    private _getCookieOptions(): CookieSerializeOptions {
+    private _getCookieOptions(type: string): CookieSerializeOptions {
 
         return {
 
-            // The cookie cannot be read by Javascript code, but any logged in user can get the cookie via HTTP tools
+            // The cookie cannot be read by Javascript code
             httpOnly: true,
 
             // The cookie can only be sent over an HTTPS connection
             secure: true,
 
-            // The cookie written will be usable for the SPA in a sibling web domain
-            domain: this._apiConfiguration.cookieRootDomain,
+            // The cookie written is only used (by default) in the API domain
+            domain: this._apiConfiguration.cookieDomain,
 
-            // The cookie is only sent during OAuth related requests, and all Web / API requests are cookieless
-            path: this._clientConfiguration.path,
+            // Access and CSRF cookies are sent to APIs, whereas others are private to the token handler
+            path: type === (ACCESS_COOKIE || type === CSRF_COOKIE) ? '/' : this._clientConfiguration.path,
 
-            // Other domains cannot send the cookie, which reduces cross site scripting risks
+            // Other domains cannot send the cookie, which reduces cross site request forgery risks
             sameSite: 'strict',
         };
+    }
+
+    /*
+     * Get options when expiring a cookie
+     */
+    private _getExpireCookieOptions(type: string): CookieSerializeOptions {
+
+        const options = this._getCookieOptions(type);
+        options.expires = new Date(0);
+        return options;
     }
 }

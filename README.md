@@ -9,10 +9,7 @@ A sample API that enables an SPA to implement OpenID Connect in the optimal API 
 ## Modern Web Security
 
 My blog's [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/web-oauth-via-bff) for modern web security.\
-This combines strongest browser security with all of the benefits of an SPA architecture:
-
-- [Curity SPA Example](https://github.com/curityio/web-oauth-via-bff)
-- [Curity Token Handler API](https://github.com/curityio/bff-node-express)
+This combines strongest browser security with all of the benefits of an SPA architecture.
 
 ## My Token Handler
 

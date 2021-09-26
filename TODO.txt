@@ -1,13 +1,10 @@
-DEPLOYMENT CONSOLIDATION
-------------------------
-1. Update SPA README for delivery scenarios
-   Update folders to aws-serverless, improve structure and get all package.json commands working
-   Run the proxy API from the SPA
+Update READMEs with my pitch
 
 SERVERLESS
 ----------
 1. Needs to handle cookies with the same logic as the BFF Plugin
    If no token then process AT and CSRF cookies
+   Consider a bash script to run lambdas
 
 ERRORS
 ------
@@ -49,6 +46,8 @@ CODE CONSOLIDATION
 
 6. Deal with expire errors in the UI and clearing them once working again
 
+7. Test on Windows
+
 LOCAL DEVELOPMENT
 -----------------
 
@@ -56,5 +55,9 @@ BLOG
 ----
 1. Refer to Curity for security solution
 
-2. Document the productive developer setup aspects
-   Mention that cookies add complexity
+2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
+   Or separation and a trickier developer setup.
+   Mention that cookies add complexity.
+
+3. Mention that the goal is a productive developer setup and we will show some techniques.
+

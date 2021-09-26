@@ -8,6 +8,10 @@ SERVERLESS
    Code can focus on logic around decryption, and just return a generic 401 on error
    Update error logging to a server code used in logs and a generic client code
 
+2. Update default setup to use Cloud business API
+   Cloud lambda can be updated and will remain backwards compatible
+   Once working I can deploy everything else
+
 ERRORS
 ------
 1. Make encryption and decryption fail and verify error logs

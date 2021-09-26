@@ -32,7 +32,7 @@ else
 fi
 
 #
-# Then run the back end for front end API
+# Then run this API
 #
 npm start
 if [ $? -ne 0 ]; then

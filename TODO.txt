@@ -1,14 +1,10 @@
-SPA
----
-1. Use /token-handler in the SPA and get it basically working
-   Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
-   Capture errors but aim to prevent needing to read them
-
 DEPLOYMENT CONSOLIDATION
 ------------------------
 1. Use out of the box BFF-PLUGIN and delete files from my repo
 
-2. Make the Token Handler API run as a Docker container
+2. Make SPA spin up the Token Handler API run as a Docker container
+
+
    Also have a local APIs setup where the Token Handler runs on port 446
 
 ERRORS
@@ -24,6 +20,9 @@ ERRORS
 
 4. Return 401s to the SPA rather than individual 400s and error codes
    Client should not need to read error codes
+
+5. Ensure that BFF PLUGIN errors can be handled by the SPA, as 401s
+   Capture errors but aim to prevent needing to read them
 
 SERVERLESS
 ----------

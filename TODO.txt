@@ -45,6 +45,14 @@ CODE CONSOLIDATION
 
 4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
 
+INCREMENTAL
+-----------
+1. Use jose in NodeJS APIs
+
+2. SPAs to do DOM updates as for sample1.NEW
+
+3. Get rid of url-parse
+
 BLOG
 ----
 1. Refer to Curity for security solution
@@ -53,7 +61,12 @@ BLOG
 2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
    Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.
 
-CURITY BUG
-----------
+3. More about running the components after initial run of build script
+   Eg: stond and do a 'npm start'
+
+CURITY
+------
 1. Bug in plugin:
    https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
+
+2. Make sure repo points nicely to docs

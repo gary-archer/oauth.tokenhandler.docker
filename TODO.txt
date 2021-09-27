@@ -1,11 +1,23 @@
 SERVERLESS
 ----------
-1. Update default setup to use business API at https://api.authsamples.com
-   This should work but I get a gateway 401 that needs debugging
-   This will probably be something related to cookie dependencies
+1. Running Charles Proxy locally causes problems for outgoing calls from Docker
+   This makes debugging of the current problem difficult
+   Token Handler API cannot call login.authsamples.com
 
-2. SPA expected to be slow since lambda caching will not work
+2. Running SPA locally with cookies and pointing to cloud API gets this error after expire access token.
+   I have removed custom lambda responses from the example API's serverless.yml.
+
+   I think this is the default CORS response from the gateway when the authorizer fails???
+   To resolve this I need to deploy 2 instances of the serverless API for dev and deployed clients
+
+   Access to XMLHttpRequest at 'https://api.mycompany.com:444/api/companies/4/transactions' from origin
+   'https://web.mycompany.com' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header
+   in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+   The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.
+
+3. SPA is slow since lambda caching will not work
    This is a blocking issue, since I cannot cache anything in the lambdas themselves
+   Confirm behaviour in Cloudwatch logs
 
 MERGES
 ------
@@ -52,8 +64,7 @@ UI CONSOLIDATION
 
 BLOG
 ----
-1. Refer to Curity for security solution
-   Blog post theme should be productive developer setup techniques.
+1. Blog post theme should be productive developer setup techniques.
 
 2. Landscape is either simpler setup via ASP.Net / Spring Boot but with many follow on issues.
    Cookies add a lot of complexity and Docker is the best you can do, though separation it tricky.
@@ -62,10 +73,3 @@ BLOG
 
 4. More about running the components after initial run of build script
    Stress standard node - eg do a 'npm start' to restart
-
-CURITY
-------
-1. Bug in plugin:
-   https://github.com/curityio/kong-bff-plugin/blob/master/plugin/access.lua#L104
-
-2. Make sure web and token handler repos point nicely to docs as part of image updates

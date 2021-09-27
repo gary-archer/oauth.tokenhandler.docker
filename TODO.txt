@@ -1,14 +1,11 @@
 SERVERLESS
 ----------
-1. Needs to handle cookies with the same logic as the BFF Plugin
-   Use a concept of access token retriever - either simple header lookup or more complex
-   Decryption happens every time but the same caching mechanism is used, via a policy document
-   If no token in the Authorization Header then look for AT and CSRF cookies
-   Code can focus on logic around decryption, and just return a generic 401 on error
+1. Update default setup to use business API at https://api.authsamples.com
+   This should work but I get a gateway 401 that needs debugging
+   This will probably be something related to cookie dependencies
 
-2. Update default setup to use business API at https://api.authsamples.com
-   Cloud lambda can be updated and will remain backwards compatible
-   Once working I can deploy everything else
+2. SPA expected to be slow since lambda caching will not work
+   This is a blocking issue, since I cannot cache anything in the lambdas themselves
 
 MERGES
 ------
@@ -35,6 +32,9 @@ ERRORS
 
 4. Lessons learned from WebSample1 / End-to-End / SPA revamp consolidated
    End to end Docker to get working again
+
+5. Better error codes and responses for CSRF conditions in Serverless API
+   Same server / client logging differences as above
 
 INCREMENTAL
 -----------

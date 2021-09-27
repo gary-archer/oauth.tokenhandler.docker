@@ -31,7 +31,7 @@ custom:
     - X-Api-Key
     - X-Amz-Security-Token
     - X-Amz-User-Agent
-    - x-mycompany-aft-finalspa
+    - x-mycompany-csrf
     - x-mycompany-api-client
     - x-mycompany-correlation-id
     - x-mycompany-session-id

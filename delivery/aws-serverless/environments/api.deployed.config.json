@@ -20,8 +20,8 @@
         "prettyPrinting": false
     },
     "client": {
-        "clientId": "1hofhrb15jb9adqitlkec9s5ag",
-        "clientSecret": "4766go5m19shkbujtdp8n9hlcea0ef26h3tso2sf6g3qr3cnqq4",
+        "clientId": "2mlkj8c8bou2a5kh5m35l4ih0d",
+        "clientSecret": "18ie26s93heku8u1ol0k0g07o8ti6cktn0b84cqmkbchhj8ltr0g",
         "redirectUri": "https://web.authsamples.com/spa/",
         "postLogoutRedirectUri": "https://web.authsamples.com/spa/loggedout.html",
         "scope": "openid profile email https://api.authsamples.com/api/transactions_read",

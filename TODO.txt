@@ -6,7 +6,10 @@ GOAL
 
 CURRENT FOCUS
 -------------
-1. Serverless API to update so that secure cookies work and are efficient.
+1. Verify that local system works with spa2
+   I need to update Cognito with a PROD spa2 entry and edit the DEV entry
+
+2. Serverless API to update so that secure cookies work and are efficient.
    To be efficient requires an AWS cache.
 
 DOCKER PRODUCTIVITY
@@ -55,6 +58,8 @@ CONSOLIDATION
 4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
 
 5. SPA should indicate token-handler and not proxyApi
+
+6. API logging to get rid of separate authorizer log entry
 
 UI CONSOLIDATION
 ----------------

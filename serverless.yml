@@ -1,4 +1,4 @@
-service: tokenhandlerapi
+service: tokenhandlerapi2
 
 # Base details for AWS deployment
 provider:
@@ -19,6 +19,7 @@ custom:
   customDomain:
     domainName: ${self:custom.config.settings.apiHostName}
     certificateName: '*.${self:custom.config.settings.certificateDomainName}'
+    basePath: token-handler2
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 
@@ -47,7 +48,7 @@ functions:
     handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
-          path: /token-handler/login/start
+          path: /login/start
           method: post
           cors:
             origins:
@@ -61,7 +62,7 @@ functions:
     handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
-          path: /token-handler/login/end
+          path: /login/end
           method: post
           cors:
             origins:
@@ -75,7 +76,7 @@ functions:
     handler: dist/lambda/handlers/refresh.handler
     events:
       - http: 
-          path: /token-handler/token
+          path: /refresh
           method: post
           cors:
             origins:
@@ -89,7 +90,7 @@ functions:
     handler: dist/lambda/handlers/logout.handler
     events:
       - http: 
-          path: /token-handler/logout
+          path: /logout
           method: post
           cors:
             origins:
@@ -103,7 +104,7 @@ functions:
     handler: dist/lambda/handlers/expire.handler
     events:
       - http: 
-          path: /token-handler/expire
+          path: /expire
           method: post
           cors:
             origins:

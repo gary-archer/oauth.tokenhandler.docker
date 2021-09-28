@@ -1,23 +1,19 @@
-SERVERLESS
-----------
+OBJECTIVE
+---------
+1. Solution updated to best browser security
+   Also must have good developer productivity and code portability
+
+CURRENT FOCUS
+-------------
+1. Serverless API to update so that secure cookies work.
+   This requires an AWS cache and getting rid of lambda authorizer.
+   It requires a bit of care in terms of testing.
+
+DOCKER PRODUCTIVITY
+-------------------
 1. Running Charles Proxy locally causes problems for outgoing calls from Docker
    This makes debugging of the current problem difficult
    Token Handler API cannot call login.authsamples.com
-
-2. Running SPA locally with cookies and pointing to cloud API gets this error after expire access token.
-   I have removed custom lambda responses from the example API's serverless.yml.
-
-   I think this is the default CORS response from the gateway when the authorizer fails???
-   To resolve this I need to deploy 2 instances of the serverless API for dev and deployed clients
-
-   Access to XMLHttpRequest at 'https://api.mycompany.com:444/api/companies/4/transactions' from origin
-   'https://web.mycompany.com' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Origin' header
-   in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
-   The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.
-
-3. SPA is slow since lambda caching will not work
-   This is a blocking issue, since I cannot cache anything in the lambdas themselves
-   Confirm behaviour in Cloudwatch logs
 
 MERGES
 ------
@@ -48,8 +44,8 @@ ERRORS
 5. Better error codes and responses for CSRF conditions in Serverless API
    Same server / client logging differences as above
 
-INCREMENTAL
------------
+CONSOLIDATION
+-------------
 1. Use jose in NodeJS APIs
 
 2. SPAs to do DOM updates as for sample1.NEW
@@ -57,6 +53,8 @@ INCREMENTAL
 3. Get rid of url-parse
 
 4. Get rid of tunnel-agent, as for websample1.NEW and check HTTP proxy still works
+
+5. SPA should indicate token-handler and not proxyApi
 
 UI CONSOLIDATION
 ----------------

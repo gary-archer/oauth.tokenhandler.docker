@@ -12,7 +12,7 @@ class CustomPackager {
     public async execute(): Promise<void> {
 
         // Unzip the default package created by the sls package command
-        const packageName = 'tokenhandlerapi';
+        const packageName = 'tokenhandlerapi2';
         await this._unzipPackage(packageName);
 
         // Exclude Express specific code from AWS

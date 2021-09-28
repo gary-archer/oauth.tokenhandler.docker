@@ -195,9 +195,7 @@ REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id" "$MULTI_VALUE_HEADERS")
 AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
-echo $ACCESS_COOKIE
-echo $AFT_COOKIE
-echo $ANTI_FORGERY_TOKEN
+
 #
 # Call the business API with the secure cookie containing an access token
 #

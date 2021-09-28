@@ -6,11 +6,13 @@ GOAL
 
 CURRENT FOCUS
 -------------
-1. Serverless API does not return error responses with the correct CORS headers.
+1. Use the error custom header to check CORS for token handler 4xx and 5xx responses
+
+2. Serverless API does not return error responses with the correct CORS headers.
    Maybe this is a gateway problem that requires custom resources in serverless.yml.
    Though I hope that only applies to authorizers?
 
-2. Then Serverless API needs to be updated to be more efficient.
+3. Then Serverless API needs to be updated to be more efficient.
    This requires an AWS cache - and the Serverless API is therefore the main focus.
 
 DEVELOPER PRODUCTIVITY

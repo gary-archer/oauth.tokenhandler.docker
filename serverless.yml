@@ -135,10 +135,9 @@ plugins:
   - serverless-plugin-scripts
   - serverless-domain-manager
 
+# Limit cloudwatch log retention 
 resources:
   Resources:
-
-    # Limit cloudwatch log retention 
     StartLoginLogGroup:
       Type: 'AWS::Logs::LogGroup'
       Properties:

@@ -6,11 +6,10 @@ GOAL
 
 CURRENT FOCUS
 -------------
-1. Verify that local system works with spa2
-   I need to update Cognito with a PROD spa2 entry and edit the DEV entry
+1. Serverless API does not return error responses with the correct CORS headers
 
-2. Serverless API to update so that secure cookies work and are efficient.
-   To be efficient requires an AWS cache.
+2. Then Serverless API needs to be updated to be more efficient.
+   This requires an AWS cache - and the Serverless API is therefore the main focus.
 
 DOCKER PRODUCTIVITY
 -------------------
@@ -76,3 +75,7 @@ BLOG
 
 4. More about running the components after initial run of build script
    Stress standard node - eg do a 'npm start' to restart
+
+README
+------
+1. Indicate that I am updating my stuff in line with Curity pattern

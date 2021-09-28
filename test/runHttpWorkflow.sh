@@ -5,11 +5,12 @@
 # The script uses the jq tool to read JSON responses
 ##########################################################################################
 
-WEB_BASE_URL='https://web.mycompany.com'
-TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
-#TOKEN_HANDLER_BASE_URL='https://api.authsamples.com/token-handler'
-#BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
+#WEB_BASE_URL='https://web.mycompany.com'
+#TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/token-handler'
+#BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
+WEB_BASE_URL='https://web.authsamples.com'
+TOKEN_HANDLER_BASE_URL='https://api.authsamples.com/token-handler'
+BUSINESS_API_BASE_URL='https://api.authsamples.com/api2'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
@@ -20,7 +21,7 @@ RESPONSE_FILE=test/response.txt
 #
 # Enable this to view requests in an HTTP Proxy tool
 #
-#export HTTPS_PROXY='http://127.0.0.1:8888'
+export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
 # A simple routine to get a header value from an HTTP response file

@@ -1,13 +1,13 @@
-OBJECTIVE
----------
+GOAL
+----
 1. Solution updated to best browser security
-   Also must have good developer productivity and code portability
+   Also must have good developer productivity for local web developers
+   Also must have best code portability for APIs
 
 CURRENT FOCUS
 -------------
-1. Serverless API to update so that secure cookies work.
-   This requires an AWS cache and getting rid of lambda authorizer.
-   It requires a bit of care in terms of testing.
+1. Serverless API to update so that secure cookies work and are efficient.
+   To be efficient requires an AWS cache.
 
 DOCKER PRODUCTIVITY
 -------------------

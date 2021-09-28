@@ -12,6 +12,7 @@
         "tokenEndpoint": "https://login.mycompany.internal:8443/oauth/v2/oauth-token",
         "endSessionEndpoint": "https://login.mycompany.com/oauth/v2/oauth-session/logout",
         "cookieDomain": "api.mycompany.com",
+        "cookiePath": "/token-handler",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq",
         "trustedWebOrigin": "https://web.mycompany.com",
@@ -24,7 +25,6 @@
         "clientSecret": "ZZi85TJzEXS-V2gQTdL78nitMKTSzn8wL3G0BZlzW86Cf2AKpA70-V0qWVHhpdwo",
         "redirectUri": "https://web.mycompany.com/spa/",
         "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
-        "scope": "openid profile email transactions_read",
-        "path": "/token-handler"
+        "scope": "openid profile email transactions_read"
     }
 }

@@ -12,6 +12,4 @@ export interface ClientConfiguration {
     postLogoutRedirectUri: string;
 
     scope: string;
-
-    path: string;
 }

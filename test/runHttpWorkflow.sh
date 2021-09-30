@@ -159,7 +159,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
 ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
 REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
-AFT_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf")
+CSRF_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf")
 
 #
 # Call the business API with the secure cookie containing an access token
@@ -189,7 +189,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -d '{"type":"access"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
@@ -226,7 +226,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
   echo "*** Problem encountered refreshing the access token, status: $HTTP_STATUS"
@@ -265,7 +265,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -d '{"type":"refresh"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then
@@ -282,7 +282,7 @@ REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
 echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
 HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
@@ -303,7 +303,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/refresh" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '400' ]; then
   echo "*** The expected 400 error did not occur, status: $HTTP_STATUS"
@@ -321,7 +321,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/logout" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$AFT_COOKIE" \
+--cookie "$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered calling logout, status: $HTTP_STATUS"

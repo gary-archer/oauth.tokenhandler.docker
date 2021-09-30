@@ -198,7 +198,7 @@ fi
 ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
 ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id" "$MULTI_VALUE_HEADERS")
-AFT_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_HEADERS")
+CSRF_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
@@ -234,7 +234,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 "$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
 "$COOKIE_PREFIX-id=$ID_COOKIE" \
-"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-csrf=$CSRF_COOKIE")) \
 body="{\\\""type\\\"":\\\""access\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
@@ -296,7 +296,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 "$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
 "$COOKIE_PREFIX-id=$ID_COOKIE" \
-"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-csrf=$CSRF_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #
@@ -357,7 +357,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 "$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
 "$COOKIE_PREFIX-id=$ID_COOKIE" \
-"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-csrf=$CSRF_COOKIE")) \
 body="{\\\""type\\\"":\\\""refresh\\\""}" \
 | sed 's/\\\\\\/\\/g' \
 | jq > $REQUEST_FILE
@@ -420,7 +420,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 "$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
 "$COOKIE_PREFIX-id=$ID_COOKIE" \
-"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-csrf=$CSRF_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #
@@ -462,7 +462,7 @@ multiValueHeaders=$(jo cookie=$(jo -a \
 "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 "$COOKIE_PREFIX-rt=$REFRESH_COOKIE" \
 "$COOKIE_PREFIX-id=$ID_COOKIE" \
-"$COOKIE_PREFIX-csrf=$AFT_COOKIE")) \
+"$COOKIE_PREFIX-csrf=$CSRF_COOKIE")) \
 | jq > $REQUEST_FILE
 
 #

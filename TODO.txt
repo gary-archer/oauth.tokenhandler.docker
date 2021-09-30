@@ -1,41 +1,28 @@
-GOAL
-----
-1. Solution updated to best browser security
-   Also must have good developer productivity for local web developers
-   Also must have best code portability for APIs
+API WORK
+--------
+1. Serverless API consolidation
 
-CURRENT FOCUS
--------------
-1. Use the error custom header to check CORS for token handler 4xx and 5xx responses
-
-2. Serverless API does not return error responses with the correct CORS headers.
-   Maybe this is a gateway problem that requires custom resources in serverless.yml.
-   Though I hope that only applies to authorizers?
-
-3. Then Serverless API needs to be updated to be more efficient.
-   This requires an AWS cache - and the Serverless API is therefore the main focus.
-
-DEVELOPER PRODUCTIVITY
-----------------------
-1. Running Charles Proxy locally causes problems for outgoing calls from Docker
+2. Running Charles Proxy locally causes problems for outgoing calls from Docker
    This makes debugging of the current problem difficult
    Token Handler API cannot call login.authsamples.com
+   Fix this before the merge
 
-2. When running locally, use NGINX to modify the CORS response header for 401s and 500s
-   The Serverless API may end up being hard coded to return https://web.authsamples.com
-   Change this for developer environments to https://web.authsamples.com
+3. Run on Windows and check that the developer setup basically works
 
-MERGES
+4. Cache interface and basic local verification
+
+SETUPS
 ------
-1. Above work done and cloud system works and works on Windows
-   Then update blog quickly and trim it down
-
-2. Final APIs run locally and kong.yml can be updated at deployment time with API URL
+1. Final APIs run locally and kong.yml can be updated at deployment time with API URL
    Java and .Net Core final APIs to set credentials: true in their CORS options
    - First run the API
    - Then run the SPA with './deploy.sh localapi' which should run this repo with './deploy.sh localapi'
 
-3. Also add a way to run the Token Handler API outside of Docker
+2. Add a way to run the Token Handler API outside of Docker
+
+DOC
+---
+1. Update blog quickly and aim to delete code
 
 ERRORS
 ------
@@ -83,6 +70,11 @@ BLOG
 
 4. More about running the components after initial run of build script
    Stress standard node - eg do a 'npm start' to restart
+
+5. Lambda authorizer has only basic capabilities.
+   So it is better to use a more portable option, since the API will need persistence anyway:
+   - Cache using policy document based on Authorization header, but no support for cookies
+   - Also CORS error responses cannot be dynamically controlled
 
 README
 ------

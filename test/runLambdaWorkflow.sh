@@ -6,7 +6,8 @@
 #############################################################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
+#BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
+BUSINESS_API_BASE_URL='https://api.authsamples.com/api2'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
@@ -15,6 +16,10 @@ SESSION_ID=$(uuidgen)
 REQUEST_FILE=test/request.txt
 RESPONSE_FILE=test/response.txt
 SLS=./node_modules/.bin/sls
+
+#
+# Enable this to view requests in an HTTP Proxy tool
+#
 #export HTTPS_PROXY='http://127.0.0.1:8888'
 
 #
@@ -200,7 +205,7 @@ ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 # Call the business API with the secure cookie containing an access token
 #
 echo "*** Calling cross domain API with an access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
+HTTP_STATUS=$(curl -i -s "$BUSINESS_API_BASE_URL/companies" \
 -H "origin: $WEB_BASE_URL" \
 --cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -H 'accept: application/json' \

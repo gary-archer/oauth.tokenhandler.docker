@@ -1,15 +1,16 @@
 API WORK
 --------
-1. Serverless API consolidation
+1. Run local SPA2 on Windows and check that it all works end-to-end
 
-2. Running Charles Proxy locally causes problems for outgoing calls from Docker
+2. Serverless API cache
+   Start with local Docker redis and verify the coding + API key security
+   Consider a useCache option in configuration
+   Then run a cache in AWS
+
+3. Running Charles Proxy locally causes problems for outgoing calls from Docker
    This makes debugging of the current problem difficult
    Token Handler API cannot call login.authsamples.com
    Fix this before the merge
-
-3. Run on Windows and check that the developer setup basically works
-
-4. Cache interface and basic local verification
 
 SETUPS
 ------

@@ -1,4 +1,4 @@
-service: tokenhandlerapi2
+service: tokenhandlerapi
 
 # Base details for AWS deployment
 provider:

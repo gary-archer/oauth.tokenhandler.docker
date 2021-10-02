@@ -10,7 +10,7 @@
 #BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
 WEB_BASE_URL='https://web.authsamples.com'
 TOKEN_HANDLER_BASE_URL='https://api.authsamples.com/token-handler'
-BUSINESS_API_BASE_URL='https://api.authsamples.com/api2'
+BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'

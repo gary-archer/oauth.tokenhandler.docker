@@ -1,0 +1,8 @@
+.DS_store
+.tmp
+.logs
+.serverless
+node_modules
+certs
+dist
+test/*.txt

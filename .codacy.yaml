@@ -1,0 +1,10 @@
+---
+exclude_paths: [
+    '*',    
+    'api-gateway/*',
+    'certs/*',
+    'delivery/**',
+    'dist/**',
+    'environments/**',
+    'test/**'
+]

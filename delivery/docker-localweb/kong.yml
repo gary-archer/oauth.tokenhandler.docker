@@ -1,0 +1,39 @@
+#
+# Routing when developing an SPA and calling a token handler running in Docker
+#
+
+_format_version: '2.1'
+_transform: true
+
+services:
+
+  #
+  # The SPA calls the gateway at https://api.mycompany.com:444/token-handler to make OAuth calls
+  # The gateway then calls the Token Handler API, which calls the public Authorization Server
+  #
+- name: token-handler-api
+  url: https://api-internal.mycompany.com:8000/token-handler
+  routes:
+  - name: token-handler-api-route
+    paths:
+    - /token-handler
+
+  #
+  # The SPA calls the gateway URL https://api.mycompany.com:444/api to make API calls
+  # The gateway then uses a plugin to decrypt secure cookies, then calls the public API with the access token
+  #
+- name: sample-api
+  url: https://api.authsamples.com/api
+  routes:
+  - name: sample-api-route
+    paths:
+    - /api
+
+  plugins:
+  - name: bff-token
+    config:
+      encryption_key: aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq
+      cookie_name_prefix: mycompany
+      trusted_web_origins:
+      - https://web.mycompany.com
+  

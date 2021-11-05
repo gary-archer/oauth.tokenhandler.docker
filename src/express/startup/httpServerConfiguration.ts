@@ -15,9 +15,9 @@ import {ExpressRequestAdapter} from '../request/expressRequestAdapter';
 import {ExpressResponseAdapter} from '../request/expressResponseAdapter';
 
 /*
- * An internal type for readability
+ * A private type for readability
  */
-type AbstractRequestHandler = (request: AbstractRequest, response: AbstractResponse) => Promise<any>;
+type ExpressRequestHandler = (request: AbstractRequest, response: AbstractResponse) => Promise<any>;
 
 /*
  * Configure Express API behaviour
@@ -116,7 +116,7 @@ export class HttpServerConfiguration {
     /*
      * Run outline processing for the supplied function reference
      */
-    private async _executeMethod(rq: Request, rs: Response, fn: AbstractRequestHandler): Promise<void> {
+    private async _executeMethod(rq: Request, rs: Response, fn: ExpressRequestHandler): Promise<void> {
 
         const logEntry = this._logger.createLogEntry();
         const request = new ExpressRequestAdapter(rq, logEntry);

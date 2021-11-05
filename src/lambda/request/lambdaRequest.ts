@@ -1,3 +1,4 @@
+import {APIGatewayProxyEvent} from 'aws-lambda';
 import cookie from 'cookie';
 import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractRequest} from '../../core/request/abstractRequest';
@@ -7,11 +8,11 @@ import {AbstractRequest} from '../../core/request/abstractRequest';
  */
 export class LambdaRequest implements AbstractRequest {
 
-    private readonly _event: any;
+    private readonly _event: APIGatewayProxyEvent;
     private readonly _body: any;
     private readonly _logEntry: LogEntry;
 
-    public constructor(event: any, logEntry: LogEntry) {
+    public constructor(event: APIGatewayProxyEvent, logEntry: LogEntry) {
 
         this._event = event;
         this._body = this._event.body ? JSON.parse(this._event.body) : {};
@@ -46,7 +47,7 @@ export class LambdaRequest implements AbstractRequest {
 
             const found = Object.keys(this._event.headers).find((h) => h.toLowerCase() === name);
             if (found) {
-                return this._event.headers[found];
+                return this._event.headers[found] as string;
             }
         }
 
@@ -74,11 +75,11 @@ export class LambdaRequest implements AbstractRequest {
 
     private _getMultiValueHeader(name: string): string[] {
 
-        if (this._event.headers) {
+        if (this._event.multiValueHeaders) {
 
             const found = Object.keys(this._event.multiValueHeaders).find((h) => h.toLowerCase() === name);
             if (found) {
-                return this._event.multiValueHeaders[found];
+                return this._event.multiValueHeaders[found] as string[];
             }
         }
 

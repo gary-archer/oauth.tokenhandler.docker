@@ -1,31 +1,34 @@
 import middy from '@middy/core';
 import cors from '@middy/http-cors';
-import {Context, Handler} from 'aws-lambda';
-import {Container} from './container';
-
-// A custom type for readability
-export type AsyncHandler = (event: any, context: Context) => Promise<any>;
+import {APIGatewayProxyEvent, APIGatewayProxyResult, Context} from 'aws-lambda';
+import {LambdaExecutor} from './lambdaExecutor';
 
 /*
- * A class to manage setup for the lambda before it executes
+ * A shorthand type for this module
  */
-export class LambdaStartup {
+type AsyncHandler = (event: APIGatewayProxyEvent, context: Context) => Promise<APIGatewayProxyResult>;
 
-    private readonly _container: Container;
+/*
+ * Configure lambdas with cross cutting concerns
+ */
+export class LambdaConfiguration {
 
-    public constructor(container: Container) {
-        this._container = container;
+    private readonly _executor: LambdaExecutor;
+
+    public constructor(executor: LambdaExecutor) {
+        this._executor = executor;
     }
 
     /*
      * Deal with cross cutting concerns in a single place for all lambdas
      */
-    public enrichHandler(baseHandler: AsyncHandler): Handler {
+    public enrichHandler(baseHandler: AsyncHandler)
+        : middy.MiddyfiedHandler<APIGatewayProxyEvent, APIGatewayProxyResult> | AsyncHandler {
 
         try {
 
             // Run startup logic
-            const configuration = this._container.initialize();
+            const configuration = this._executor.initialize();
             const corsOptions = {
                 origins: [configuration.api.trustedWebOrigin],
                 credentials: true,
@@ -42,7 +45,7 @@ export class LambdaStartup {
 
             // Handle any problems configuring the lambda
             return async () => {
-                return this._container.handleStartupError(e);
+                return this._executor.handleStartupError(e);
             };
         }
     }

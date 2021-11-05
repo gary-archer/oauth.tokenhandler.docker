@@ -19,7 +19,7 @@ The token handler API can run in either Express or as AWS Serverless Lambdas.
 
 ## Instructions
 
-- See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for details on the developer setup.
+See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for details on the developer setup.
 
 ## Quick Start
 

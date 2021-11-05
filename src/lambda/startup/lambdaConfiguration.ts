@@ -1,7 +1,7 @@
 import middy from '@middy/core';
 import cors from '@middy/http-cors';
 import {APIGatewayProxyEvent, APIGatewayProxyResult, Context} from 'aws-lambda';
-import {Container} from './container';
+import {LambdaExecutor} from './lambdaExecutor';
 
 /*
  * A shorthand type for this module
@@ -9,14 +9,14 @@ import {Container} from './container';
 type AsyncHandler = (event: APIGatewayProxyEvent, context: Context) => Promise<APIGatewayProxyResult>;
 
 /*
- * A class to manage setup for the lambda before it executes
+ * Configure lambdas with cross cutting concerns
  */
-export class LambdaStartup {
+export class LambdaConfiguration {
 
-    private readonly _container: Container;
+    private readonly _executor: LambdaExecutor;
 
-    public constructor(container: Container) {
-        this._container = container;
+    public constructor(executor: LambdaExecutor) {
+        this._executor = executor;
     }
 
     /*
@@ -28,7 +28,7 @@ export class LambdaStartup {
         try {
 
             // Run startup logic
-            const configuration = this._container.initialize();
+            const configuration = this._executor.initialize();
             const corsOptions = {
                 origins: [configuration.api.trustedWebOrigin],
                 credentials: true,
@@ -45,7 +45,7 @@ export class LambdaStartup {
 
             // Handle any problems configuring the lambda
             return async () => {
-                return this._container.handleStartupError(e);
+                return this._executor.handleStartupError(e);
             };
         }
     }

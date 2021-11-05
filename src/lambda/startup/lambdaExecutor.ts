@@ -13,9 +13,14 @@ import {LambdaRequest} from '../request/lambdaRequest';
 import {LambdaResponse} from '../request/lambdaResponse';
 
 /*
- * A primitive DI container class to manage objects and provide some shared entry points
+ * A private type for readability
  */
-export class Container {
+type LambdaRequestHandler = (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>;
+
+/*
+ * An executor class to run lambdas in a common manner
+ */
+export class LambdaExecutor {
 
     private _configuration: Configuration | null;
     private _httpProxy: HttpProxy | null;
@@ -42,10 +47,8 @@ export class Container {
     /*
      * Do the work of the authorizer method when the lambda is called
      */
-    public async executeLambda(
-        event: APIGatewayProxyEvent,
-        fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>)
-            : Promise<APIGatewayProxyResult> {
+    public async executeLambda(event: APIGatewayProxyEvent, fn: LambdaRequestHandler)
+        : Promise<APIGatewayProxyResult> {
 
         // Create the authorizer
         const configuration = this._configuration!;

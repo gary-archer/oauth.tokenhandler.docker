@@ -1,18 +1,15 @@
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {Authorizer} from '../../core/services/authorizer';
-import {Container} from '../startup/container';
-import {LambdaStartup} from '../startup/lambdaStartup';
+import {LambdaConfiguration} from '../startup/lambdaConfiguration';
+import {LambdaExecutor} from '../startup/lambdaExecutor';
 
-const container = new Container();
-
-// The callback invoked at runtime invokes an auto wired object
+// The handler called at runtime invokes a shared executor
+const executor = new LambdaExecutor();
 const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    return container.executeLambda(event, (a: Authorizer) => a.expire);
+    return executor.executeLambda(event, (a: Authorizer) => a.expire);
 };
 
-// Auto wire objects into the container, and wrap the handler in middleware
-const startup = new LambdaStartup(container);
-const handler = startup.enrichHandler(baseHandler);
-
-// Return the enriched handler
+// Configure cross cutting concerns and return an enriched handler
+const configuration = new LambdaConfiguration(executor);
+const handler = configuration.enrichHandler(baseHandler);
 export {handler};

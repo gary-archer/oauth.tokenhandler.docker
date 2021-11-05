@@ -1,3 +1,4 @@
+import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {Authorizer} from '../../core/services/authorizer';
 import {Container} from '../startup/container';
 import {LambdaStartup} from '../startup/lambdaStartup';
@@ -5,7 +6,7 @@ import {LambdaStartup} from '../startup/lambdaStartup';
 const container = new Container();
 
 // The callback invoked at runtime invokes an auto wired object
-const baseHandler = async (event: any): Promise<void> => {
+const baseHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     return container.executeLambda(event, (a: Authorizer) => a.expire);
 };
 

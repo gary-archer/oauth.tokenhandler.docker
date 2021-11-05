@@ -1,10 +1,12 @@
 import middy from '@middy/core';
 import cors from '@middy/http-cors';
-import {Context, Handler} from 'aws-lambda';
+import {APIGatewayProxyEvent, APIGatewayProxyResult, Context} from 'aws-lambda';
 import {Container} from './container';
 
-// A custom type for readability
-export type AsyncHandler = (event: any, context: Context) => Promise<any>;
+/*
+ * A shorthand type for this module
+ */
+type AsyncHandler = (event: APIGatewayProxyEvent, context: Context) => Promise<APIGatewayProxyResult>;
 
 /*
  * A class to manage setup for the lambda before it executes
@@ -20,7 +22,8 @@ export class LambdaStartup {
     /*
      * Deal with cross cutting concerns in a single place for all lambdas
      */
-    public enrichHandler(baseHandler: AsyncHandler): Handler {
+    public enrichHandler(baseHandler: AsyncHandler)
+        : middy.MiddyfiedHandler<APIGatewayProxyEvent, APIGatewayProxyResult> | AsyncHandler {
 
         try {
 

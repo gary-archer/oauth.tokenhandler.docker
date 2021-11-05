@@ -1,3 +1,4 @@
+import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda';
 import {Configuration} from '../../core/configuration/configuration';
 import {ConfigurationLoader} from '../../core/configuration/configurationLoader';
 import {ErrorUtils} from '../../core/errors/errorUtils';
@@ -42,8 +43,9 @@ export class Container {
      * Do the work of the authorizer method when the lambda is called
      */
     public async executeLambda(
-        event: any,
-        fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>): Promise<void> {
+        event: APIGatewayProxyEvent,
+        fn: (a: Authorizer) => (rq: AbstractRequest, rs: AbstractResponse) => Promise<void>)
+            : Promise<APIGatewayProxyResult> {
 
         // Create the authorizer
         const configuration = this._configuration!;

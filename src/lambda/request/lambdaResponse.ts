@@ -1,3 +1,4 @@
+import {APIGatewayProxyResult} from 'aws-lambda';
 import cookie, {CookieSerializeOptions} from 'cookie';
 import {ClientError} from '../../core/errors/clientError';
 import {LogEntry} from '../../core/logging/logEntry';
@@ -8,13 +9,13 @@ import {AbstractResponse} from '../../core/request/abstractResponse';
  */
 export class LambdaResponse implements AbstractResponse {
 
-    private readonly _data: any;
+    private readonly _data: APIGatewayProxyResult;
     private readonly _logEntry: LogEntry;
 
     public constructor(logEntry: LogEntry) {
 
         this._logEntry = logEntry;
-        this._data = {};
+        this._data = {} as APIGatewayProxyResult;
         this._data.statusCode = 200;
         this._data.headers = {};
         this._data.multiValueHeaders = {};
@@ -25,7 +26,7 @@ export class LambdaResponse implements AbstractResponse {
     }
 
     public addHeader(name: string, value: string): void {
-        this._data.headers[name] = value;
+        this._data.headers![name] = value;
     }
 
     public addCookie(name: string, value: string, options: CookieSerializeOptions): void {
@@ -53,13 +54,13 @@ export class LambdaResponse implements AbstractResponse {
 
         const data = {
             statusCode : this._data.statusCode,
-        } as any;
+        } as APIGatewayProxyResult;
 
-        if (Object.keys(this._data.headers).length > 0) {
+        if (Object.keys(this._data.headers!).length > 0) {
             data.headers = this._data.headers;
         }
 
-        if (Object.keys(this._data.multiValueHeaders).length > 0) {
+        if (Object.keys(this._data.multiValueHeaders!).length > 0) {
             data.multiValueHeaders = this._data.multiValueHeaders;
         }
 
@@ -76,13 +77,13 @@ export class LambdaResponse implements AbstractResponse {
 
     private _createCookieMultiValueHeader(): string[] {
 
-        const found = Object.keys(this._data.multiValueHeaders).find((k) => k.toLowerCase() === 'set-cookie');
+        const found = Object.keys(this._data.multiValueHeaders!).find((k) => k.toLowerCase() === 'set-cookie');
         if (found) {
-            return this._data.multiValueHeaders[found];
+            return this._data.multiValueHeaders![found] as string[];
         }
 
         const cookies: string[] = [];
-        this._data.multiValueHeaders['set-cookie'] = cookies;
+        this._data.multiValueHeaders!['set-cookie'] = cookies;
         return cookies;
     }
 }

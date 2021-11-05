@@ -48,10 +48,3 @@ During lambda development I run equivalent tests to ensure that the lambda workf
 npm run lambda
 ```
 
-## Free Resources
-
-To shut down Docker when finished with the API, run this command:
-
-```bash
-./shutdown.sh
-```

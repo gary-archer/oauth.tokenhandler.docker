@@ -25,8 +25,10 @@ fi
 # If also running a proxy tool such as Charles on the host, the proxy root CA may cause SSL trust problems
 # To resolve this, set an environment variable that includes both the below CA and the proxy root CA
 #
-if [[ -z "${TOKEN_HANDLER_CA_CERTS}" ]]; then
-  TOKEN_HANDLER_CA_CERTS='/usr/api/certs/mycompany.com.ca.pem'
+if [[ -z "$TOKEN_HANDLER_CA_CERTS" ]]; then
+  cp ./certs/localhost/mycompany.com.ca.pem ./certs/
+else
+  cp $TOKEN_HANDLER_CA_CERTS ./certs/trusted.ca.pem
 fi
 
 #

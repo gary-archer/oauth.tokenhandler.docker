@@ -10,24 +10,37 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 #
-# Get the platform
+# The token handler on a developer PC is configured to forward API requests to a cloud API
+# This can be overridden to one of the final APIs running locally if required
 #
-case "$(uname -s)" in
+if [ "$1" == 'LOCALAPI' ]; then
+  BUSINESS_API_URL='https://api.mycompany.com:445/api'
+else
+  BUSINESS_API_URL='https://api.authsamples.com/api'
+fi
 
-  Darwin)
-    PLATFORM="MACOS"
- 	;;
+#
+# If the token handler calls a local API, this ensures that SSL trust works
+# If also running a proxy tool such as Charles on the host, the proxy root CA may cause SSL trust problems
+# To resolve this, set an environment variable that includes both the below CA and the proxy root CA
+#
+if [[ -z "${TOKEN_HANDLER_CA_CERTS}" ]]; then
+  TOKEN_HANDLER_CA_CERTS='/usr/api/certs/mycompany.com.ca.pem'
+fi
 
-  MINGW64*)
-    PLATFORM="WINDOWS"
-	;;
-esac
+#
+# Do some string manipulation to update kong.yml with the runtime value for the Business API URL
+#
+ESCAPED_URL=$(echo $BUSINESS_API_URL | sed "s/\//\\\\\//g")
+KONG_YML_DATA=$(cat ./delivery/docker-local/kong.template.yml)
+KONG_YML_DATA=$(sed "s/BUSINESS_API_URL/$ESCAPED_URL/g" <<< "$KONG_YML_DATA")
+echo "$KONG_YML_DATA" > ./delivery/docker-local/kong.yml
 
 #
 # Spin up Docker compose components
 #
-docker compose -f delivery/docker-localweb/docker-compose.yml down
-docker compose -f delivery/docker-localweb/docker-compose.yml up --force-recreate --remove-orphans
+docker compose -f delivery/docker-local/docker-compose.yml down
+docker compose -f delivery/docker-local/docker-compose.yml up --force-recreate --remove-orphans
 if [ $? -ne 0 ]; then
   echo "Problem encountered starting Docker components"
   exit 1

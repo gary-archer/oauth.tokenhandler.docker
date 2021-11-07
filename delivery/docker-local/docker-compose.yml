@@ -13,7 +13,7 @@ services:
       - 444:8000
     volumes:
       - ./kong.yml:/usr/local/kong/declarative/kong.yml
-      - ../../.tmp/kong-bff-plugin/plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token
+      - ../../dependencies/kong-bff-plugin/plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token
       - ../../certs/mycompany.com.ssl.pem:/usr/local/share/certs/mycompany.com.ssl.pem
       - ../../certs/mycompany.com.ssl.key:/usr/local/share/certs/mycompany.com.ssl.key
       - ../../certs/mycompany.com.ca.pem:/usr/local/share/certs/mycompany.com.ca.pem
@@ -41,4 +41,4 @@ services:
       - ../../certs/mycompany.com.ssl.p12:/usr/api/certs/mycompany.com.ssl.p12
       - ../../certs/mycompany.com.ca.pem:/usr/api/certs/mycompany.com.ca.pem
     environment:
-      NODE_EXTRA_CA_CERTS: '/usr/api/certs/mycompany.com.ca.pem'
+      NODE_EXTRA_CA_CERTS: "${TOKEN_HANDLER_CA_CERTS}"

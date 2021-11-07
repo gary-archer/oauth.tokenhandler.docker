@@ -8,24 +8,23 @@
 # Set the current folder if this script is called from another script
 #
 cd "$(dirname "${BASH_SOURCE[0]}")"
-rm -rf .tmp
-mkdir .tmp
+rm -rf dependencies
 
 #
 # Download SSL certificates
 #
 rm -rf certs
-git clone https://github.com/gary-archer/oauth.developmentcertificates ./.tmp/certs
+git clone https://github.com/gary-archer/oauth.developmentcertificates ./dependencies/certs
 if [ $? -ne 0 ]; then
     echo 'Problem encountered downloading API certificates'
     exit 1
 fi
-cp -R .tmp/certs/localhost ./certs
+cp -R dependencies/certs/localhost ./certs
 
 #
 # Download the Curity reverse proxy plugin
 #
-git clone https://github.com/curityio/kong-bff-plugin ./.tmp/kong-bff-plugin
+git clone https://github.com/curityio/kong-bff-plugin ./dependencies/kong-bff-plugin
 if [ $? -ne 0 ]; then
     echo 'Problem encountered downloading the Curity token handler plugin'
     exit 1
@@ -42,7 +41,7 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Build the API code
+# Build the token handler API's code
 #
 npm run buildRelease
 if [ $? -ne 0 ]; then

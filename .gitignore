@@ -1,8 +1,8 @@
 .DS_store
-.tmp
-.logs
-.serverless
-node_modules
+dependencies
 certs
+node_modules
 dist
 test/*.txt
+.serverless
+.logs

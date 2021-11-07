@@ -13,8 +13,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # The token handler on a developer PC is configured to forward API requests to a cloud API
 # This can be overridden to one of the final APIs running locally if required
 #
-BUSINESS_API_URL='https://api.authsamples.com/api'
-#BUSINESS_API_URL='https://api.mycompany.com:445/api'
+if [ "$1" == 'LOCALAPI' ]; then
+  BUSINESS_API_URL='https://api.mycompany.com:445/api'
+else
+  BUSINESS_API_URL='https://api.authsamples.com/api'
+fi
 
 #
 # If the token handler calls a local API, this ensures that SSL trust works

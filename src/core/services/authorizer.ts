@@ -241,12 +241,12 @@ export class Authorizer {
         this._logUserId(request, idToken);
 
         // Always make the access cookie act expired to cause an API 401
-        const expiredAccessToken = `x${accessToken}x`;
+        const expiredAccessToken = `${accessToken}x`;
         this._cookieService.writeAccessCookie(expiredAccessToken, response);
 
         // If requested, make the refresh cookie act expired, to cause a permanent API 401
         if (type === 'refresh') {
-            const expiredRefreshToken = `x${refreshToken}x`;
+            const expiredRefreshToken = `${refreshToken}x`;
             this._cookieService.writeRefreshCookie(expiredRefreshToken, response);
         }
 

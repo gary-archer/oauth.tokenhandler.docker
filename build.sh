@@ -50,6 +50,17 @@ if [ $? -ne 0 ]; then
 fi
 
 #
+# If the token handler calls a local API, this ensures that SSL trust works
+# If also running a proxy tool such as Charles on the host, the proxy root CA may cause SSL trust problems
+# To resolve this, set an environment variable that includes both the below CA and the proxy root CA
+#
+if [[ -z "$TOKEN_HANDLER_CA_CERTS" ]]; then
+  cp ./certs/mycompany.com.ca.pem ./trusted.ca.pem
+else
+  cp $TOKEN_HANDLER_CA_CERTS ./trusted.ca.pem
+fi
+
+#
 # Build the API's Docker container
 #
 docker build -f ./Dockerfile -t tokenhandlerapi:1.0.0 .

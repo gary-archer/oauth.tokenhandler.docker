@@ -4,5 +4,6 @@ certs
 node_modules
 dist
 test/*.txt
+trusted.ca.pem
 .serverless
 .logs

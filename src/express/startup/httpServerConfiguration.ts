@@ -58,29 +58,29 @@ export class HttpServerConfiguration {
             origin: this._configuration.api.trustedWebOrigin,
             credentials: true,
         };
-        this._expressApp.use('/token-handler/*', cors(options) as any);
+        this._expressApp.use('/tokenhandler/*', cors(options) as any);
 
         // Parse cookies and the request body
-        this._expressApp.use('/token-handler/*', cookieParser());
-        this._expressApp.use('/token-handler/*', express.json());
+        this._expressApp.use('/tokenhandler/*', cookieParser());
+        this._expressApp.use('/tokenhandler/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/token-handler/login/start',
+        this._expressApp.post('/tokenhandler/login/start',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogin));
 
-        this._expressApp.post('/token-handler/login/end',
+        this._expressApp.post('/tokenhandler/login/end',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
-        this._expressApp.post('/token-handler/refresh',
+        this._expressApp.post('/tokenhandler/refresh',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refresh));
 
-        this._expressApp.post('/token-handler/expire',
+        this._expressApp.post('/tokenhandler/expire',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expire));
 
-        this._expressApp.post('/token-handler/logout',
+        this._expressApp.post('/tokenhandler/logout',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.logout));
     }
 

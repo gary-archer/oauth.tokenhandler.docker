@@ -33,7 +33,7 @@ services:
   #
   # OAuth calls and issuing of secure cookies for the SPA are handled by this utility API
   #
-  token-handler-api:
+  tokenhandler-api:
     image: tokenhandlerapi:1.0.0
     hostname: api-internal.mycompany.com
     volumes:

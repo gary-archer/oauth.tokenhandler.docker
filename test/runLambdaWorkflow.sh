@@ -6,8 +6,8 @@
 #############################################################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
-#BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
-BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
+BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
+#BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
@@ -78,7 +78,7 @@ mkdir .logs
 # Write the input file for the startLogin request
 #
 jo -p \
-path=/token-handler/login/start \
+path=/tokenhandler/login/start \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -157,7 +157,7 @@ AUTHORIZATION_RESPONSE_URL=$(getCognitoHeaderValue 'location')
 # Next write the input file for the end login request, and it is tricky to write body parameters as lambda expects
 #
 jo \
-path=/token-handler/login/end \
+path=/tokenhandler/login/end \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -222,7 +222,7 @@ fi
 # Create the request to call the expire endpoint, then expire the access token
 #
 jo -p \
-path='/token-handler/expire' \
+path='/tokenhandler/expire' \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -284,7 +284,7 @@ fi
 # Write a request to refresh the access token
 #
 jo -p \
-path='/token-handler/refresh' \
+path='/tokenhandler/refresh' \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -345,7 +345,7 @@ fi
 # Create the request to call the expire endpoint, then expire both the refresh token and the access token
 #
 jo -p \
-path='/token-handler/expire' \
+path='/tokenhandler/expire' \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -408,7 +408,7 @@ fi
 # Write a request to refresh the access token
 #
 jo -p \
-path='/token-handler/refresh' \
+path='/tokenhandler/refresh' \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \
@@ -450,7 +450,7 @@ fi
 # Next write a request to get an end session request from the API
 #
 jo -p \
-path='/token-handler/logout' \
+path='/tokenhandler/logout' \
 httpMethod=POST \
 headers=$(jo origin="$WEB_BASE_URL" \
 accept=application/json \

@@ -8,15 +8,15 @@ _transform: true
 services:
 
   #
-  # The SPA calls the gateway at https://api.mycompany.com:444/token-handler to make OAuth calls
+  # The SPA calls the gateway at https://api.mycompany.com:444/tokenhandler to make OAuth calls
   # The gateway then calls the Token Handler API, which calls the public Authorization Server
   #
-- name: token-handler-api
-  url: https://api-internal.mycompany.com:8000/token-handler
+- name: tokenhandler-api
+  url: https://api-internal.mycompany.com:8000/tokenhandler
   routes:
-  - name: token-handler-api-route
+  - name: tokenhandler-api-route
     paths:
-    - /token-handler
+    - /tokenhandler
 
   #
   # The SPA calls the gateway URL https://api.mycompany.com:444/api to make API calls

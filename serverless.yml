@@ -19,7 +19,7 @@ custom:
   customDomain:
     domainName: ${self:custom.config.settings.apiHostName}
     certificateName: '*.${self:custom.config.settings.certificateDomainName}'
-    basePath: token-handler
+    basePath: tokenhandler
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 

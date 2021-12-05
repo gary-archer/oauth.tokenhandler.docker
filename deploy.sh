@@ -21,17 +21,6 @@ else
 fi
 
 #
-# If the token handler calls a local API, this ensures that SSL trust works
-# If also running a proxy tool such as Charles on the host, the proxy root CA may cause SSL trust problems
-# To resolve this, set an environment variable that includes both the below CA and the proxy root CA
-#
-if [[ -z "$TOKEN_HANDLER_CA_CERTS" ]]; then
-  cp ./certs/localhost/mycompany.com.ca.pem ./certs/
-else
-  cp $TOKEN_HANDLER_CA_CERTS ./certs/trusted.ca.pem
-fi
-
-#
 # Do some string manipulation to update kong.yml with the runtime value for the Business API URL
 #
 ESCAPED_URL=$(echo $BUSINESS_API_URL | sed "s/\//\\\\\//g")

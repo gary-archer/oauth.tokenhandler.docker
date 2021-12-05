@@ -39,6 +39,3 @@ services:
     volumes:
       - ./api.config.json:/usr/api/api.config.json
       - ../../certs/mycompany.com.ssl.p12:/usr/api/certs/mycompany.com.ssl.p12
-      - ../../certs/trusted.ca.pem:/usr/api/certs/trusted.ca.pem
-    environment:
-      NODE_EXTRA_CA_CERTS: '/usr/api/certs/trusted.ca.pem'

@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
     echo 'Problem encountered downloading API certificates'
     exit 1
 fi
-cp -R dependencies/certs/localhost ./certs
+cp -R dependencies/certs/certs ./certs
 
 #
 # Download the Curity reverse proxy plugin

@@ -14,16 +14,16 @@ services:
     volumes:
       - ./kong.yml:/usr/local/kong/declarative/kong.yml
       - ../../dependencies/kong-bff-plugin/plugin:/usr/local/share/lua/5.1/kong/plugins/bff-token
-      - ../../certs/mycompany.com.ssl.pem:/usr/local/share/certs/mycompany.com.ssl.pem
-      - ../../certs/mycompany.com.ssl.key:/usr/local/share/certs/mycompany.com.ssl.key
-      - ../../certs/mycompany.com.ca.pem:/usr/local/share/certs/mycompany.com.ca.pem
+      - ../../certs/mycompany.ssl.pem:/usr/local/share/certs/mycompany.ssl.pem
+      - ../../certs/mycompany.ssl.key:/usr/local/share/certs/mycompany.ssl.key
+      - ../../certs/mycompany.ca.pem:/usr/local/share/certs/mycompany.ca.pem
     environment:
       KONG_DATABASE: 'off'
       KONG_DECLARATIVE_CONFIG: '/usr/local/kong/declarative/kong.yml'
       KONG_PROXY_LISTEN: '0.0.0.0:8000 ssl'
-      KONG_SSL_CERT: '/usr/local/share/certs/mycompany.com.ssl.pem'
-      KONG_SSL_CERT_KEY: './usr/local/share/certs/mycompany.com.ssl.key'
-      KONG_LUA_SSL_TRUSTED_CERTIFICATE: './usr/local/share/certs/mycompany.com.ca.pem'
+      KONG_SSL_CERT: '/usr/local/share/certs/mycompany.ssl.pem'
+      KONG_SSL_CERT_KEY: './usr/local/share/certs/mycompany.ssl.key'
+      KONG_LUA_SSL_TRUSTED_CERTIFICATE: './usr/local/share/certs/mycompany.ca.pem'
       KONG_LOG_LEVEL: 'info'
       KONG_PLUGINS: 'bundled,bff-token'
       KONG_NGINX_PROXY_PROXY_BUFFERS: '16 64k'
@@ -38,4 +38,4 @@ services:
     hostname: api-internal.mycompany.com
     volumes:
       - ./api.config.json:/usr/api/api.config.json
-      - ../../certs/mycompany.com.ssl.p12:/usr/api/certs/mycompany.com.ssl.p12
+      - ../../certs/mycompany.ssl.p12:/usr/api/certs/mycompany.ssl.p12

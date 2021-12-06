@@ -55,7 +55,7 @@ fi
 # To resolve this, set an environment variable that includes both the below CA and the proxy root CA
 #
 if [[ -z "$TOKEN_HANDLER_CA_CERTS" ]]; then
-  cp ./certs/mycompany.com.ca.pem ./trusted.ca.pem
+  cp ./certs/mycompany.ca.pem ./trusted.ca.pem
 else
   cp $TOKEN_HANDLER_CA_CERTS ./trusted.ca.pem
 fi

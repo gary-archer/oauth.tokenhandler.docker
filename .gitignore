@@ -1,9 +1,8 @@
 .DS_store
-dependencies
+resources
 certs
 node_modules
 dist
 test/*.txt
-trusted.ca.pem
 .serverless
 .logs

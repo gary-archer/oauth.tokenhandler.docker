@@ -4,47 +4,48 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
-A sample API that enables an SPA to implement OpenID Connect in the optimal API driven manner.
+An API that implements OpenID Connect security on behalf of a Single Page Application, in the optimal API driven manner.
 
 ## Modern Web Security
 
-My blog's [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/web-oauth-via-bff) for modern web security.\
+My blog's [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/web-oauth-via-bff) and calls this API to perform OAuth work.\
 This combines strongest browser security with all of the benefits of an SPA architecture.
 
-## My Token Handler
+## Custom Token Handler API
 
-This API implementation is for my own understanding and to focus on productive developer setups.\
-It has some custom code related to expiry testing, custom logging and deployment automation.\
-The token handler API can run in either Express or as AWS Serverless Lambdas.
+This implementation has some custom code related to expiry testing, custom logging and deployment automation:
 
-## Instructions
-
-See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for details on the developer setup.
+- Runs as a Serverless Lambda for my deployed cloud system
+- Runs in Express when I want to deploy it to Kubernetes
 
 ## Quick Start
 
-Once development domains and SSL trust are configured, run these commands to spin up the system.\
-This is the preferred setup to externalise the plumbing during local web development.
+Add these development domains to your hosts file:
+
+```text
+127.0.0.1 web.mycompany.com api.mycompany.com
+::1       localhost
+````
+
+Then run these commands to build and run the API:
 
 ```bash
 ./build.sh
-./deploy.sh
+./run.sh
 ```
 
-## Testing the OAuth Flow via HTTP
-
-To test the API driven workflow I use `curl` based tests and bash scripting to deal with inputs and outputs:
+Test Express operations via this command:
 
 ```bash
 npm run http
 ```
 
-## Testing the OAuth Flow via Lambda Functions
-
-The API is deployed to AWS as a low cost Serverless Lambda to serve my [Online SPA](https://authguidance.com/home/code-samples-quickstart/).\
-During lambda development I run equivalent tests to ensure that the lambda workflow is correct:
+Test Lambda operations via this command:
 
 ```bash
 npm run lambda
 ```
 
+## Blog Post
+
+See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for further details.

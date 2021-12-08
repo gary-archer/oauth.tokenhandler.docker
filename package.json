@@ -11,7 +11,7 @@
     "http": "./test/runHttpWorkflow.sh",
     "lambda": "./test/runLambdaWorkflow.sh",
     "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
-    "customPackager": "ts-node aws/lambda-packager/customPackager.ts",
+    "customPackager": "ts-node aws-packager/customPackager.ts",
     "deploy": "sls deploy --stage deployed --package .serverless",
     "remove": "sls remove --stage deployed"
   },

@@ -13,7 +13,7 @@ provider:
 
 custom:
   # Each environment can have its own configuration file
-  config: ${file(aws/environments/${opt:stage, 'local'}.yml)}
+  config: ${file(serverless-environments/${opt:stage, 'local'}.yml)}
   
   # AWS deployed details
   customDomain:
@@ -122,10 +122,11 @@ package:
   - '!api.config.json'
   - '!build.sh'
   - '!run.sh'
-  - '!aws/**'
+  - '!aws-packager/**'
   - '!certs/**'
   - '!Dockerfile'
   - '!src/**'
+  - '!serverless-environments/**'
   - '!test/**'
   - '!ts*.json'
   - '!package*.json'

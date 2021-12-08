@@ -22,9 +22,7 @@ class CustomPackager {
         await this._installDependencies(packageName, ['express', 'cookie-parser', 'cors']);
 
         // Copy in the deployed configuration
-        await fs.copy(
-            'aws/environments/api.deployed.config.json',
-            `.serverless/${packageName}/api.config.json`);
+        await fs.copy('aws-packager/api.deployed.config.json', `.serverless/${packageName}/api.config.json`);
 
         // Rezip the package
         await this._rezipPackage(packageName);

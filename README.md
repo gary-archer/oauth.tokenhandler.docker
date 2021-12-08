@@ -4,12 +4,11 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
-A utility API to implement API driven OpenID Connect security for a Single Page Application.
+A utility to implement API driven OpenID Connect security for a Single Page Application.
 
 ## Modern Web Security
 
-My blog's [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/web-oauth-via-bff) and calls this API to perform OAuth work.\
-This combines strongest browser security with all of the benefits of an SPA architecture.
+The [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/web-oauth-via-bff) and calls this API to perform OAuth related work.
 
 ## Custom Token Handler API
 

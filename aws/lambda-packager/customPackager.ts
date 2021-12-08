@@ -23,7 +23,7 @@ class CustomPackager {
 
         // Copy in the deployed configuration
         await fs.copy(
-            'delivery/aws-serverless/environments/api.deployed.config.json',
+            'aws/environments/api.deployed.config.json',
             `.serverless/${packageName}/api.config.json`);
 
         // Rezip the package

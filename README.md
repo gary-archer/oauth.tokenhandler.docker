@@ -47,5 +47,9 @@ npm run lambda
 
 ## Blog Post
 
-See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for further information.\
-This includes details on AWS Serverless and Kubernetes deployment.
+See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for further information on these topics:
+
+- OAuth implementation
+- Elasticsearch logging
+- Serverless deployment
+- Kubernetes deployment

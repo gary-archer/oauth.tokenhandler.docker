@@ -13,7 +13,7 @@ provider:
 
 custom:
   # Each environment can have its own configuration file
-  config: ${file(delivery/aws-serverless/environments/${opt:stage, 'local'}.yml)}
+  config: ${file(aws/environments/${opt:stage, 'local'}.yml)}
   
   # AWS deployed details
   customDomain:

@@ -132,6 +132,6 @@ export class Logger {
      * This is not efficient but is only used when 'sls invoke local -f' is used during development
      */
     private _logToFile(data: string): void {
-        fs.appendFileSync('./.logs/api.log', data);
+        fs.appendFileSync('./test/logs/api.log', data);
     }
 }

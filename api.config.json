@@ -1,6 +1,6 @@
 {
     "host": {
-        "port": 446,
+        "port": 444,
         "sslCertificateFileName": "./certs/mycompany.ssl.p12",
         "sslCertificatePassword": "Password1",
         "useHttpProxy": false,

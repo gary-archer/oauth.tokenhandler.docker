@@ -14,12 +14,11 @@ rm -rf resources
 # Download SSL certificates
 #
 rm -rf certs
-git clone https://github.com/gary-archer/oauth.developmentcertificates ./resources/certs
+git clone https://github.com/gary-archer/oauth.developmentcertificates ./certs
 if [ $? -ne 0 ]; then
     echo 'Problem encountered downloading API certificates'
     exit 1
 fi
-cp -R resources/certs/certs ./certs
 
 #
 # Install API dependencies

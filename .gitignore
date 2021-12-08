@@ -1,8 +1,8 @@
 .DS_store
-resources
 certs
 node_modules
 dist
 test/*.txt
+logs
 .serverless
-.logs
+

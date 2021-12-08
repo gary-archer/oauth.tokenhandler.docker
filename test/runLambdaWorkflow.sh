@@ -1,20 +1,17 @@
 #!/bin/bash
 
-#############################################################################################
-# A script to test the Serverless lambda SPA workflow locally, for productive API development
-# This requires the jo tool to write JSON objects and the jq tool to read JSON objects
-#############################################################################################
+############################################################
+# A script to test the token handler API's lambda operations
+############################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
-#BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 SESSION_ID=$(uuidgen)
-REQUEST_FILE=test/request.txt
-RESPONSE_FILE=test/response.txt
+REQUEST_FILE=request.txt
+RESPONSE_FILE=response.txt
 SLS=./node_modules/.bin/sls
 
 #
@@ -71,8 +68,8 @@ function apiError() {
 # Start by creating a session and the logs folder
 #
 echo "*** Session ID is $SESSION_ID"
-rm -rf .logs
-mkdir .logs
+rm -rf test/logs
+mkdir test/logs
 
 #
 # Write the input file for the startLogin request
@@ -202,23 +199,6 @@ CSRF_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_H
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
 #
-# Call the business API with the secure cookie containing an access token
-#
-echo "*** Calling cross domain API with an access token in the secure cookie ..."
-HTTP_STATUS=$(curl -i -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError "$(cat $RESPONSE_FILE)"
-  exit
-fi
-
-#
 # Create the request to call the expire endpoint, then expire the access token
 #
 jo -p \
@@ -262,23 +242,6 @@ if [ $HTTP_STATUS -ne '204' ]; then
   exit
 fi
 ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
-
-#
-# Call the business API with the expired access token cookie
-#
-echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '401' ]; then
-  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
-  apiError "$(cat $RESPONSE_FILE)"
-  exit
-fi
 
 #
 # Write a request to refresh the access token
@@ -325,23 +288,6 @@ ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_H
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
 
 #
-# Call the business API with the new access token
-#
-echo "*** Calling cross domain API with a new access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError "$(cat $RESPONSE_FILE)"
-  exit
-fi
-
-#
 # Create the request to call the expire endpoint, then expire both the refresh token and the access token
 #
 jo -p \
@@ -386,23 +332,6 @@ if [ $HTTP_STATUS -ne '204' ]; then
 fi
 ACCESS_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-at" "$MULTI_VALUE_HEADERS")
 REFRESH_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-rt" "$MULTI_VALUE_HEADERS")
-
-#
-# Call the business API with the new access token
-#
-echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '401' ]; then
-  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
-  apiError "$(cat $RESPONSE_FILE)"
-  exit
-fi
 
 #
 # Write a request to refresh the access token

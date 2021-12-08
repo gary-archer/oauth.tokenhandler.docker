@@ -1,16 +1,11 @@
 #!/bin/bash
 
-##########################################################################################
-# A script to test the SPA's HTTP workflow against the API, for productive API development
-# The script uses the jq tool to read JSON responses
-##########################################################################################
+##################################################################
+# A script to test the token handler API's Express HTTP operations
+##################################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
 TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/tokenhandler'
-BUSINESS_API_BASE_URL='https://api.mycompany.com:444/api'
-#WEB_BASE_URL='https://web.authsamples.com'
-#TOKEN_HANDLER_BASE_URL='https://api.authsamples.com/tokenhandler'
-#BUSINESS_API_BASE_URL='https://api.authsamples.com/api'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
@@ -162,23 +157,6 @@ ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
 CSRF_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf")
 
 #
-# Call the business API with the secure cookie containing an access token
-#
-echo "*** Calling cross domain API with an access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError
-  exit
-fi
-
-#
 # Next expire the access token in the secure cookie, for test purposes
 #
 echo "*** Expiring the access token ..."
@@ -198,23 +176,6 @@ if [ $HTTP_STATUS != '204' ]; then
   exit
 fi
 ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
-
-#
-# Call the business with the expired access token cookie
-#
-echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '401' ]; then
-  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
-  apiError
-  exit
-fi
 
 #
 # Next try to refresh the access token
@@ -238,23 +199,6 @@ REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
 ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
 
 #
-# Call the business API again with the new access token
-#
-echo "*** Calling cross domain API with a new access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '200' ]; then
-  echo "*** Problem encountered calling the API with an access token, status: $HTTP_STATUS"
-  apiError
-  exit
-fi
-
-#
 # Next expire both the access token and refresh token in the secure cookies, for test purposes
 #
 echo "*** Expiring the refresh token ..."
@@ -275,23 +219,6 @@ if [ $HTTP_STATUS != '204' ]; then
 fi
 ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
 REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
-
-#
-# Call the business API again with the new access token
-#
-echo "*** Calling cross domain API with an expired access token in the secure cookie ..."
-HTTP_STATUS=$(curl -s "$BUSINESS_API_BASE_URL/companies" \
--H "origin: $WEB_BASE_URL" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
--H 'accept: application/json' \
--H 'x-mycompany-api-client: httpTest' \
--H "x-mycompany-session-id: $SESSION_ID" \
--o $RESPONSE_FILE -w '%{http_code}')
-if [ $HTTP_STATUS != '401' ]; then
-  echo "*** The expected 401 did not occur when calling the API with an expired access token, status: $HTTP_STATUS"
-  apiError
-  exit
-fi
 
 #
 # Next try to refresh the token and we should get an invalid_grant error

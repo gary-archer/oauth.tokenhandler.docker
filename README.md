@@ -4,7 +4,7 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.webproxyapi/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.webproxyapi?targetFile=package.json)
 
-An API that implements OpenID Connect security on behalf of a Single Page Application in an API driven manner.
+A utility API to implement API driven OpenID Connect security for a Single Page Application.
 
 ## Modern Web Security
 
@@ -48,4 +48,5 @@ npm run lambda
 
 ## Blog Post
 
-See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for further details.
+See the [Token Handler API](https://authguidance.com/2019/04/08/web-reverse-proxy-implementation/) blog post for further information.\
+This includes details on AWS Serverless and Kubernetes deployment.

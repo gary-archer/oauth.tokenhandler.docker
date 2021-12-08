@@ -14,8 +14,8 @@ The [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curit
 
 This implementation has some custom code related to expiry testing, custom logging and deployment automation:
 
-- Runs as a Serverless Lambda for my deployed cloud system
-- Runs in Express when I want to deploy it to Kubernetes
+- Runs as a Serverless Lambda when deployed to the AWS cloud
+- Runs in Express as a development token handler, or for Kubernetes developer deployments
 
 ## Quick Start
 

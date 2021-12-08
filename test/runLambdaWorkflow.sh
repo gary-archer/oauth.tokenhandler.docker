@@ -10,8 +10,8 @@ COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 SESSION_ID=$(uuidgen)
-REQUEST_FILE=request.txt
-RESPONSE_FILE=response.txt
+REQUEST_FILE=test/request.txt
+RESPONSE_FILE=test/response.txt
 SLS=./node_modules/.bin/sls
 
 #

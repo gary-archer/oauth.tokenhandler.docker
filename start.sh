@@ -1,8 +1,8 @@
 #!/bin/bash
 
-######################################################################
-# Set up the Token Handler to be run in Express or as lambda functions
-######################################################################
+############################################################
+# A convenience script to start the Token Handler in Express
+############################################################
 
 #
 # Set the current folder if this script is called from another script
@@ -31,7 +31,7 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Build the token handler API's code
+# Build all of the token handler API's code including lambda functions
 #
 npm run build
 if [ $? -ne 0 ]; then
@@ -39,3 +39,11 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+#
+# Start the Express API
+#
+npm start
+if [ $? -ne 0 ]; then
+  echo "Problem encountered starting the Token Handler API"
+  exit 1
+fi

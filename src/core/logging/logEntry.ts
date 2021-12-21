@@ -25,8 +25,8 @@ export class LogEntry {
         sessionId: string | null): void {
 
         this._data.performance.start();
-        this._data.requestVerb = method;
-        this._data.requestPath = path;
+        this._data.method = method;
+        this._data.path = path;
 
         // Our callers can supply a custom header so that we can keep track of who is calling each API
         if (clientApplicationName) {
@@ -47,7 +47,7 @@ export class LogEntry {
     }
 
     public setUserId(userId: string): void {
-        this._data.userOAuthId = userId;
+        this._data.userId = userId;
     }
 
     public setServerError(error: ServerError): void {

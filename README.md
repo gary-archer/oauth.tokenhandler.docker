@@ -26,11 +26,10 @@ Add these development domains to your hosts file:
 ::1       localhost
 ````
 
-Then run these commands to build and run the API:
+Then run this commands to build and run the API in Express:
 
 ```bash
-./build.sh
-./run.sh
+./start.sh
 ```
 
 Test Express operations via this command:

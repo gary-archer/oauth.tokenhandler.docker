@@ -369,7 +369,7 @@ JSON=$(cat $RESPONSE_FILE)
 HTTP_STATUS=$(jq -r .statusCode <<< "$JSON")
 MULTI_VALUE_HEADERS=$(jq -r .multiValueHeaders <<< "$JSON")
 BODY=$(jq -r .body <<< "$JSON")
-if [ $HTTP_STATUS -ne '400' ]; then
+if [ $HTTP_STATUS -ne '401' ]; then
   echo "*** Problem encountered invoking the refresh lambda, status: $HTTP_STATUS"
   apiError "$BODY"
   exit

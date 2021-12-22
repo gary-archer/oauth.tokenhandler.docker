@@ -2,7 +2,6 @@ import axios, {AxiosRequestConfig} from 'axios';
 import {URLSearchParams} from 'url';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientConfiguration} from '../configuration/clientConfiguration';
-import {ClientError} from '../errors/clientError';
 import {ErrorUtils} from '../errors/errorUtils';
 import {HttpProxy} from '../utilities/httpProxy';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
@@ -147,9 +146,7 @@ export class OAuthService {
                 if (errorData.error) {
 
                     // Throw an error with Authorization Server details, such as invalid_grant
-                    const description =
-                        errorData.error_description ?? 'An error response was received from the Authorization Server';
-                    throw new ClientError(e.response.status, errorData.error, description);
+                    throw ErrorUtils.fromTokenResponseError(errorData.error, errorData.error_description, options.url);
                 }
             }
 

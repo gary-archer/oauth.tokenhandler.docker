@@ -61,7 +61,15 @@ export class Logger {
 
             // Client errors mean the caller did something wrong
             const clientError = handledError as ClientError;
+
+            // Record details in logs as a child object
             logEntry.setClientError(clientError);
+
+            // In some cases we return a generic error code to the client and log a more specific one
+            if (clientError.logContext && clientError.logContext.code) {
+                logEntry.setErrorCodeOverride(clientError.logContext.code);
+            }
+
             return clientError;
 
         } else {

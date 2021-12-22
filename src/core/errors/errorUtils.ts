@@ -35,47 +35,64 @@ export class ErrorUtils {
             'An unexpected exception occurred in the API',
             exception.stack);
 
-        error.details = this._getExceptionDetails(exception);
+        error.details = {
+            message: this._getExceptionDetails(exception),
+        };
+
         return error;
     }
 
     /*
      * Throw an API exception from a message
      */
-    public static fromMessage(logContext: string): ServerError {
+    public static createGenericError(message: string): ServerError {
 
         const error = new ServerError(
             ErrorCodes.serverError,
             'An unexpected exception occurred in the API');
 
-        error.details = logContext;
+        error.details = {
+            message,
+        };
+
         return error;
     }
 
     /*
      * Throw an exception for the SPA when there is a login response error from the Authorization Server
      */
-    public static fromLoginResponseError(errorCode: string, errorDescription: string): ClientError {
+    public static fromLoginResponseError(errorCode: string, errorDescription: string | null): ClientError {
 
-        let description = errorCode;
-        if (errorDescription) {
-            description += ` : ${errorDescription}`;
-        }
-
-        return new ClientError(400, ErrorCodes.loginResponseError, description);
+        const description = errorDescription || 'A login error response was received from the Authorization Server';
+        return new ClientError(401, errorCode, description);
     }
 
     /*
-     * Indicate a cookie not sent, which could be a browser issue
+     * Throw an exception for the SPA when there is a back channel response error from the Authorization Server
      */
-    public static fromMissingCookieError(name: string): ClientError {
+    public static fromTokenResponseError(errorCode: string, errorDescription: string | null, url: string): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'A required cookie was missing in an incoming request');
+        const description = errorDescription || 'A token error response was received from the Authorization Server';
 
-        error.logContext = name;
+        const error = new ClientError(401, errorCode, description);
+        error.logContext = {
+            url,
+        };
+
+        return error;
+    }
+
+    /*
+     * These occur if a form field or header was not supplied
+     */
+    public static fromRequestDataNotFoundError(fieldName: string): ClientError {
+
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.requestDataNotFoundError,
+            fieldName,
+        };
+
         return error;
     }
 
@@ -84,26 +101,25 @@ export class ErrorUtils {
      */
     public static fromInvalidOriginError(): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'Request data was received with an invalid value');
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.untrustedWebOrigin,
+        };
 
-        error.logContext = 'The origin header contained an untrusted value';
         return error;
     }
 
     /*
-     * These occur if a form field or header was not supplied
+     * Indicate a cookie not sent, which could be a browser issue
      */
-    public static fromMissingFieldError(name: string): ClientError {
+    public static fromMissingCookieError(name: string): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'A required field was missing in an incoming request');
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.cookieNotFoundError,
+            name,
+        };
 
-        error.logContext = name;
         return error;
     }
 
@@ -112,26 +128,24 @@ export class ErrorUtils {
      */
     public static fromInvalidStateError(): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'Request data was received with an invalid value');
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.invalidStateError,
+        };
 
-        error.logContext = 'The end login state parameter did not match the state cookie value';
         return error;
     }
 
     /*
      * This occurs if the anti forgery token does not have the expected value
      */
-    public static fromInvalidAntiForgeryTokenError(): ClientError {
+    public static fromMismatchedAntiForgeryTokenError(): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'Request data was received with an invalid value');
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.mismatchedAntiForgeryTokenError,
+        };
 
-        error.logContext = 'The anti forgery request header does not match the anti forgery cookie value';
         return error;
     }
 
@@ -140,12 +154,13 @@ export class ErrorUtils {
      */
     public static fromCookieDecryptionError(name: string, exception: any): ClientError {
 
-        const error = new ClientError(
-            400,
-            ErrorCodes.invalidData,
-            'Request data was received with an invalid value');
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.cookieDecryptionError,
+            name,
+            details: this._getExceptionDetails(exception),
+        };
 
-        error.logContext = `${name}: ${this._getExceptionDetails(exception)}`;
         return error;
     }
 
@@ -159,8 +174,21 @@ export class ErrorUtils {
             'Problem encountered connecting to the Authorization Server',
             exception.stack);
 
-        serverError.details = `${this._getExceptionDetails(exception)}, URL: ${url}`;
+        serverError.details = {
+            message: `${this._getExceptionDetails(exception)}, URL: ${url}`,
+        };
         return serverError;
+    }
+
+    /*
+     * In many cases we avoid giving away security details by returning this error while logging more useful details
+     */
+    private static _createGeneric401Error(): ClientError {
+
+        return new ClientError(
+            401,
+            ErrorCodes.accessDeniedError,
+            'Access was denied due to invalid request details');
     }
 
     /*

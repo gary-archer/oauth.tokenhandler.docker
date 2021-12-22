@@ -6,7 +6,7 @@ export class ClientError extends Error {
     // Fields in all client errors
     private readonly _statusCode: number;
     private readonly _errorCode: string;
-    private _logContext: string;
+    private _logContext: any;
 
     // Extra fields for 500 errors
     private _area: string;
@@ -38,7 +38,11 @@ export class ClientError extends Error {
         return this._statusCode;
     }
 
-    public set logContext(value: string) {
+    public get logContext(): any {
+        return this._logContext;
+    }
+
+    public set logContext(value: any) {
         this._logContext = value;
     }
 

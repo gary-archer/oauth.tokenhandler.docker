@@ -65,7 +65,7 @@ export class Authorizer {
         // Get the URL posted by the SPA
         const url = request.getJsonField('url');
         if (!url) {
-            throw ErrorUtils.fromMissingFieldError('url');
+            throw ErrorUtils.fromRequestDataNotFoundError('url');
         }
 
         // Get data from the SPA
@@ -103,18 +103,21 @@ export class Authorizer {
 
         const refreshToken = authCodeGrantData.refresh_token;
         if (!refreshToken) {
-            throw ErrorUtils.fromMessage('No refresh token was received in an authorization code grant response');
+            throw ErrorUtils.createGenericError(
+                'No refresh token was received in an authorization code grant response');
         }
 
         const accessToken = authCodeGrantData.access_token;
         if (!accessToken) {
-            throw ErrorUtils.fromMessage('No access token was received in an authorization code grant response');
+            throw ErrorUtils.createGenericError(
+                'No access token was received in an authorization code grant response');
         }
 
         // We do not validate the id token since it is received in a direct HTTPS request
         const idToken = authCodeGrantData.id_token;
         if (!idToken) {
-            throw ErrorUtils.fromMessage('No id token was received in an authorization code grant response');
+            throw ErrorUtils.createGenericError(
+                'No id token was received in an authorization code grant response');
         }
 
         // Include the OAuth User ID in API logs
@@ -260,7 +263,7 @@ export class Authorizer {
 
         const origin = request.getHeader('origin');
         if (!origin) {
-            throw ErrorUtils.fromMissingFieldError('origin');
+            throw ErrorUtils.fromRequestDataNotFoundError('origin');
         }
 
         if (origin.toLowerCase() !== this._apiConfiguration.trustedWebOrigin.toLowerCase()) {
@@ -283,12 +286,12 @@ export class Authorizer {
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {
-            throw ErrorUtils.fromMissingFieldError(headerName);
+            throw ErrorUtils.fromRequestDataNotFoundError(headerName);
         }
 
         // Check that the values match
         if (cookieValue !== headerValue) {
-            throw ErrorUtils.fromInvalidAntiForgeryTokenError();
+            throw ErrorUtils.fromMismatchedAntiForgeryTokenError();
         }
     }
 

@@ -63,6 +63,10 @@ export class LogEntry {
         this._data.errorCode = error.errorCode;
     }
 
+    public setErrorCodeOverride(code: string): void {
+        this._data.errorCode = code;
+    }
+
     public end(statusCode: number): void {
 
         this._data.performance.dispose();

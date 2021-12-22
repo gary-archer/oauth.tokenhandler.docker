@@ -11,17 +11,15 @@ import {LogEntry} from './logEntry';
 export class Logger {
 
     private readonly _isLambda: boolean;
-    private _isDeployed: boolean;
-    private _prettyPrinting: boolean;
     private _apiName: string;
+    private _mode: string;
 
     /*
      * The logger is created during application startup
      */
     public constructor(isLambda: boolean) {
         this._isLambda = isLambda;
-        this._isDeployed = false;
-        this._prettyPrinting = false;
+        this._mode = '';
         this._apiName = 'TokenHandlerApi';
     }
 
@@ -29,8 +27,7 @@ export class Logger {
      * Initialise once the configuration file is loaded
      */
     public initialise(configuration: ApiConfiguration): void {
-        this._isDeployed = configuration.isDeployed;
-        this._prettyPrinting = configuration.prettyPrinting;
+        this._mode = configuration.mode || '';
         this._apiName = configuration.name;
     }
 
@@ -89,12 +86,12 @@ export class Logger {
         const dataToLog = this._formatData(logEntry);
         if (this._isLambda) {
 
-            if (this._isDeployed) {
+            if (this._mode == 'aws') {
 
                 // Ensure that Cloudwatch logs use a bare format
                 this._logToConsoleRaw(dataToLog);
 
-            } else {
+            } else if (this._mode == 'development') {
 
                 // During lambda development write logs to a local file to avoid conflicting with the lambda response
                 this._logToFile(dataToLog);
@@ -113,7 +110,7 @@ export class Logger {
      */
     private _formatData(logEntry: LogEntry): string {
 
-        if (this._prettyPrinting) {
+        if (this._mode == 'development') {
             return JSON.stringify(logEntry.getData(), null, 2);
         } else {
             return JSON.stringify(logEntry.getData());

@@ -17,8 +17,7 @@
         "cookieEncryptionKey": "aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq",
         "trustedWebOrigin": "https://web.authsamples.com",
         "provider": "cognito",
-        "isDeployed": true,
-        "prettyPrinting": false
+        "mode": "aws"
     },
     "client": {
         "clientId": "1hofhrb15jb9adqitlkec9s5ag",

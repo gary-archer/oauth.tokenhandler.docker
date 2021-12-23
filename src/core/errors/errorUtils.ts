@@ -83,14 +83,13 @@ export class ErrorUtils {
     }
 
     /*
-     * These occur if a form field or header was not supplied
+     * All standards based browsers should send an origin header
      */
-    public static fromRequestDataNotFoundError(fieldName: string): ClientError {
+    public static fromMissingOriginError(): ClientError {
 
         const error = ErrorUtils._createGeneric401Error();
         error.logContext = {
-            code: ErrorCodes.requestDataNotFoundError,
-            fieldName,
+            code: ErrorCodes.missingWebOrigin,
         };
 
         return error;
@@ -99,7 +98,7 @@ export class ErrorUtils {
     /*
      * Indicate an untrusted web origin
      */
-    public static fromInvalidOriginError(): ClientError {
+    public static fromUntrustedOriginError(): ClientError {
 
         const error = ErrorUtils._createGeneric401Error();
         error.logContext = {
@@ -137,6 +136,19 @@ export class ErrorUtils {
     }
 
     /*
+     * This occurs if the anti forgery token was not provided
+     */
+    public static fromMissingAntiForgeryTokenError(): ClientError {
+
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.missingAntiForgeryTokenError,
+        };
+
+        return error;
+    }
+
+    /*
      * This occurs if the anti forgery token does not have the expected value
      */
     public static fromMismatchedAntiForgeryTokenError(): ClientError {
@@ -144,6 +156,20 @@ export class ErrorUtils {
         const error = ErrorUtils._createGeneric401Error();
         error.logContext = {
             code: ErrorCodes.mismatchedAntiForgeryTokenError,
+        };
+
+        return error;
+    }
+
+    /*
+     * This occurs if a required field was not found in a form post
+     */
+    public static fromFormFieldNotFoundError(name: string): ClientError {
+
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.formFieldNotFoundError,
+            name,
         };
 
         return error;

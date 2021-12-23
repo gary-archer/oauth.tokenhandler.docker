@@ -65,7 +65,7 @@ export class Authorizer {
         // Get the URL posted by the SPA
         const url = request.getJsonField('url');
         if (!url) {
-            throw ErrorUtils.fromRequestDataNotFoundError('url');
+            throw ErrorUtils.fromFormFieldNotFoundError('url');
         }
 
         // Get data from the SPA
@@ -263,11 +263,11 @@ export class Authorizer {
 
         const origin = request.getHeader('origin');
         if (!origin) {
-            throw ErrorUtils.fromRequestDataNotFoundError('origin');
+            throw ErrorUtils.fromMissingOriginError();
         }
 
         if (origin.toLowerCase() !== this._apiConfiguration.trustedWebOrigin.toLowerCase()) {
-            throw ErrorUtils.fromInvalidOriginError();
+            throw ErrorUtils.fromUntrustedOriginError();
         }
     }
 
@@ -286,7 +286,7 @@ export class Authorizer {
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
         const headerValue = request.getHeader(headerName);
         if (!headerValue) {
-            throw ErrorUtils.fromRequestDataNotFoundError(headerName);
+            throw ErrorUtils.fromMissingAntiForgeryTokenError();
         }
 
         // Check that the values match

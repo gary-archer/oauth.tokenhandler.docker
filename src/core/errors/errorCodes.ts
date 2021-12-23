@@ -12,12 +12,6 @@ export class ErrorCodes {
     // A problem making an HTTP request to the Authorization Server
     public static readonly httpRequestError = 'http_request_error';
 
-    // A 401 error returned to clients with the front channel error details
-    public static readonly loginResponseError = 'login_response_failed';
-
-    // A 401 error returned to clients with the back channel error details
-    public static readonly tokenResponseError = 'token_response_failed';
-
     // A generic 401 error returned to clients who send incorrect data
     public static readonly accessDeniedError = 'access_denied';
 

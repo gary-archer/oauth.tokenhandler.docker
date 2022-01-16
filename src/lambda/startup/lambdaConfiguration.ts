@@ -32,6 +32,7 @@ export class LambdaConfiguration {
             const corsOptions = {
                 origins: [configuration.api.trustedWebOrigin],
                 credentials: true,
+                maxAge: 86400,
             };
 
             // Then wrap the base handler to include CORS processing

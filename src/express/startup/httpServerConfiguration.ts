@@ -57,6 +57,7 @@ export class HttpServerConfiguration {
         const options = {
             origin: this._configuration.api.trustedWebOrigin,
             credentials: true,
+            maxAge: 86400,
         };
         this._expressApp.use('/tokenhandler/*', cors(options) as any);
 

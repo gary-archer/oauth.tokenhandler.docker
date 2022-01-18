@@ -23,43 +23,83 @@ custom:
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 
+  # Tell the API gateway to not reject any requests with these headers
+  allowedHeaders:
+    - Content-Type
+    - Accept
+    - Cookie
+    - X-Amz-Date
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
+    - x-mycompany-csrf
+    - x-mycompany-api-client
+    - x-mycompany-correlation-id
+    - x-mycompany-session-id
+    - x-mycompany-test-exception
+
   # Scripts used when building the AWS deployment package
   scripts:
     hooks:
       'after:package:createDeploymentArtifacts': npm run customPackager
 
+# We have to configure CORS here so that API gateway does not reject OPTIONS requests
 functions:
-  # Get the authorization URL and store state
   startLogin:
     handler: dist/lambda/handlers/startLogin.handler
     events:
       - http: 
           path: /login/start
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+            maxAge: 86400
 
-  # Verify state and send the authorization code grant message
   endLogin:
     handler: dist/lambda/handlers/endLogin.handler
     events:
       - http: 
           path: /login/end
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+            maxAge: 86400
 
-  # Refresh the access token stored in cookies, and usually the refresh token will also be renewed
   refresh:
     handler: dist/lambda/handlers/refresh.handler
     events:
       - http: 
           path: /refresh
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+            maxAge: 86400
 
-  # Get the end session URL and remove cookies
   logout:
     handler: dist/lambda/handlers/logout.handler
     events:
       - http: 
           path: /logout
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+            maxAge: 86400
 
   # An endpoint to expire tokens stored in cookies, for test purposes
   expire:
@@ -68,6 +108,13 @@ functions:
       - http: 
           path: /expire
           method: post
+          cors:
+            origins:
+              - ${self:custom.config.settings.trustedOrigin}
+              - ${self:custom.config.settings.trustedDevOrigin}
+            headers: ${self:custom.allowedHeaders}
+            allowCredentials: true
+            maxAge: 86400
 
 # By default all files are included so remove files we don't need for any lambda
 # The custom packager does further work in code

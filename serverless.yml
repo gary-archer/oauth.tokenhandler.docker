@@ -15,7 +15,7 @@ custom:
   # Each environment can have its own configuration file
   config: ${file(serverless-environments/${opt:stage, 'local'}.yml)}
   
-  # AWS deployed details
+  # API gateway domain details
   customDomain:
     domainName: ${self:custom.config.settings.apiHostName}
     certificateName: '*.${self:custom.config.settings.certificateDomainName}'
@@ -101,7 +101,6 @@ functions:
             allowCredentials: true
             maxAge: 86400
 
-  # An endpoint to expire tokens stored in cookies, for test purposes
   expire:
     handler: dist/lambda/handlers/expire.handler
     events:

@@ -23,21 +23,6 @@ custom:
     stage: ${self:custom.config.settings.stage}
     endpointType: regional
 
-  # Headers that will be accepted by AWS
-  allowedHeaders:
-    - Content-Type
-    - Accept
-    - Cookie
-    - X-Amz-Date
-    - X-Api-Key
-    - X-Amz-Security-Token
-    - X-Amz-User-Agent
-    - x-mycompany-csrf
-    - x-mycompany-api-client
-    - x-mycompany-correlation-id
-    - x-mycompany-session-id
-    - x-mycompany-test-exception
-
   # Scripts used when building the AWS deployment package
   scripts:
     hooks:
@@ -51,12 +36,6 @@ functions:
       - http: 
           path: /login/start
           method: post
-          cors:
-            origins:
-              - ${self:custom.config.settings.trustedOrigin}
-              - ${self:custom.config.settings.trustedDevOrigin}
-            headers: ${self:custom.allowedHeaders}
-            allowCredentials: true
 
   # Verify state and send the authorization code grant message
   endLogin:
@@ -65,12 +44,6 @@ functions:
       - http: 
           path: /login/end
           method: post
-          cors:
-            origins:
-              - ${self:custom.config.settings.trustedOrigin}
-              - ${self:custom.config.settings.trustedDevOrigin}
-            headers: ${self:custom.allowedHeaders}
-            allowCredentials: true
 
   # Refresh the access token stored in cookies, and usually the refresh token will also be renewed
   refresh:
@@ -79,12 +52,6 @@ functions:
       - http: 
           path: /refresh
           method: post
-          cors:
-            origins:
-              - ${self:custom.config.settings.trustedOrigin}
-              - ${self:custom.config.settings.trustedDevOrigin}
-            headers: ${self:custom.allowedHeaders}
-            allowCredentials: true
 
   # Get the end session URL and remove cookies
   logout:
@@ -93,12 +60,6 @@ functions:
       - http: 
           path: /logout
           method: post
-          cors:
-            origins:
-              - ${self:custom.config.settings.trustedOrigin}
-              - ${self:custom.config.settings.trustedDevOrigin}
-            headers: ${self:custom.allowedHeaders}
-            allowCredentials: true
 
   # An endpoint to expire tokens stored in cookies, for test purposes
   expire:
@@ -107,12 +68,6 @@ functions:
       - http: 
           path: /expire
           method: post
-          cors:
-            origins:
-              - ${self:custom.config.settings.trustedOrigin}
-              - ${self:custom.config.settings.trustedDevOrigin}
-            headers: ${self:custom.allowedHeaders}
-            allowCredentials: true
 
 # By default all files are included so remove files we don't need for any lambda
 # The custom packager does further work in code

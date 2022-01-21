@@ -14,7 +14,7 @@
         "cookieDomain": "api.authsamples.com",
         "cookiePath": "/tokenhandler",
         "cookiePrefix": "mycompany",
-        "cookieEncryptionKey": "aPdSgVkYp3s6v9y$B&E)H+MbQeThWmZq",
+        "cookieEncryptionKey": "d26d160214a85a2aa9dc80487e0c24b33d1594bda7b0e1954e99fde54f6486df",
         "trustedWebOrigin": "https://web.authsamples.com",
         "provider": "cognito",
         "mode": "aws"

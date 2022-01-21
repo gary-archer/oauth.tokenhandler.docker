@@ -354,7 +354,7 @@ export class Authorizer {
 
         const decoded = decode(idToken, {complete: true});
         if (decoded && decoded.payload.sub) {
-            request.getLogEntry().setUserId(decoded.payload.sub);
+            request.getLogEntry().setUserId(decoded.payload.sub as string);
         }
     }
 

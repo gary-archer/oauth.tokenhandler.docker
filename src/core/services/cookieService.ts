@@ -1,11 +1,16 @@
+import base64url from 'base64url';
 import {CookieSerializeOptions} from 'cookie';
-import {encryptCookie, decryptCookie} from 'cookie-encrypter';
-import {randomBytes} from 'crypto';
+import crypto from 'crypto';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
 import {AbstractResponse} from '../request/abstractResponse';
+
+const VERSION_SIZE = 1;
+const GCM_IV_SIZE = 12;
+const GCM_TAG_SIZE = 16;
+const CURRENT_VERSION = 1;
 
 const STATE_COOKIE   = 'state';
 const ACCESS_COOKIE  = 'at';
@@ -20,13 +25,11 @@ export class CookieService {
 
     private readonly _apiConfiguration: ApiConfiguration;
     private readonly _clientConfiguration: ClientConfiguration;
-    private readonly _encryptionKey: string;
 
     public constructor(apiConfiguration: ApiConfiguration, clientConfiguration: ClientConfiguration) {
 
         this._apiConfiguration = apiConfiguration;
         this._clientConfiguration = clientConfiguration;
-        this._encryptionKey = this._apiConfiguration.cookieEncryptionKey;
     }
 
     /*
@@ -35,7 +38,7 @@ export class CookieService {
     public writeStateCookie(data: any, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName(STATE_COOKIE);
-        const encryptedData = encryptCookie(JSON.stringify(data), {key: this._encryptionKey});
+        const encryptedData = this._encryptCookie(cookieName, JSON.stringify(data));
         response.addCookie(cookieName, encryptedData, this._getCookieOptions(STATE_COOKIE));
     }
 
@@ -59,7 +62,7 @@ export class CookieService {
      * Generate a field used to protect cookies on data changing requests from the SPA
      */
     public generateAntiForgeryValue(): string {
-        return randomBytes(32).toString('base64');
+        return crypto.randomBytes(32).toString('base64');
     }
 
     /*
@@ -68,7 +71,7 @@ export class CookieService {
     public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName(REFRESH_COOKIE);
-        const encryptedData = encryptCookie(refreshToken, {key: this._encryptionKey});
+        const encryptedData = this._encryptCookie(cookieName, refreshToken);
         response.addCookie(cookieName, encryptedData, this._getCookieOptions(REFRESH_COOKIE));
     }
 
@@ -92,7 +95,7 @@ export class CookieService {
     public writeAccessCookie(accessToken: string, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName(ACCESS_COOKIE);
-        const encryptedData = encryptCookie(accessToken, {key: this._encryptionKey});
+        const encryptedData = this._encryptCookie(cookieName, accessToken);
         response.addCookie(cookieName, encryptedData, this._getCookieOptions(ACCESS_COOKIE));
     }
 
@@ -116,7 +119,7 @@ export class CookieService {
     public writeIdCookie(idToken: string, response: AbstractResponse): void {
 
         const cookieName = this._getCookieName(ID_COOKIE);
-        const encryptedData = encryptCookie(idToken, {key: this._encryptionKey});
+        const encryptedData = this._encryptCookie(cookieName, idToken);
         response.addCookie(cookieName, encryptedData, this._getCookieOptions(ID_COOKIE));
     }
 
@@ -137,10 +140,10 @@ export class CookieService {
     /*
      * Write a cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeAntiForgeryCookie(response: AbstractResponse, value: string): void {
+    public writeAntiForgeryCookie(response: AbstractResponse, csrfValue: string): void {
 
         const cookieName = this._getCookieName(CSRF_COOKIE);
-        const encryptedData = encryptCookie(value, {key: this._encryptionKey});
+        const encryptedData = this._encryptCookie(cookieName, csrfValue);
         response.addCookie(cookieName, encryptedData, this._getCookieOptions(CSRF_COOKIE));
     }
 
@@ -193,18 +196,65 @@ export class CookieService {
     }
 
     /*
-     * A helper method to decrypt a cookie and report errors clearly
+     * Encrypt data using the Curity format, as AES26-GCM bytes and then base64url encode it
      */
-    private _decryptCookie(cookieName: string, encryptedData: string) {
+    private _encryptCookie(cookieName: string, plaintext: string): string {
+
+        const ivBytes = crypto.randomBytes(GCM_IV_SIZE);
+        const encKeyBytes = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'hex');
+
+        const cipher = crypto.createCipheriv('aes-256-gcm', encKeyBytes, ivBytes);
+
+        const encryptedBytes = cipher.update(plaintext);
+        const finalBytes = cipher.final();
+
+        const versionBytes = Buffer.from(new Uint8Array([CURRENT_VERSION]));
+        const ciphertextBytes = Buffer.concat([encryptedBytes, finalBytes]);
+        const tagBytes = cipher.getAuthTag();
+
+        const allBytes = Buffer.concat([versionBytes, ivBytes, ciphertextBytes, tagBytes]);
+        return base64url.encode(allBytes);
+    }
+
+    /*
+     * Decrypt received cookies in the Curity format, which is base64url encoded AES26-GCM bytes
+     */
+    private _decryptCookie(cookieName: string, cookieData: string): string {
+
+        const allBytes = base64url.toBuffer(cookieData);
+
+        const minSize = VERSION_SIZE + GCM_IV_SIZE + 1 + GCM_TAG_SIZE;
+        if (allBytes.length < minSize) {
+            throw ErrorUtils.fromMalformedCookieError(cookieName, 'The received cookie has an invalid length');
+        }
+
+        const version = allBytes[0];
+        if (version != CURRENT_VERSION) {
+            throw ErrorUtils.fromMalformedCookieError(cookieName, 'The received cookie has an invalid format');
+        }
+
+        let offset = VERSION_SIZE;
+        const ivBytes = allBytes.slice(offset, offset + GCM_IV_SIZE);
+
+        offset += GCM_IV_SIZE;
+        const ciphertextBytes = allBytes.slice(offset, allBytes.length - GCM_TAG_SIZE);
+
+        offset = allBytes.length - GCM_TAG_SIZE;
+        const tagBytes = allBytes.slice(offset, allBytes.length);
 
         try {
 
-            // Try the AES decryption
-            return decryptCookie(encryptedData, {key: this._encryptionKey});
+            const encKeyBytes = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'hex');
+            const decipher = crypto.createDecipheriv('aes-256-gcm', encKeyBytes, ivBytes);
+            decipher.setAuthTag(tagBytes);
 
-        } catch (e) {
+            const decryptedBytes = decipher.update(ciphertextBytes);
+            const finalBytes = decipher.final();
 
-            // In the event of crypto errors, log the details but return a generic error to the client
+            const plaintextBytes = Buffer.concat([decryptedBytes, finalBytes]);
+            return plaintextBytes.toString();
+
+        } catch (e: any) {
             throw ErrorUtils.fromCookieDecryptionError(cookieName, e);
         }
     }

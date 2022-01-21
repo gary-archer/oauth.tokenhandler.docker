@@ -178,6 +178,21 @@ export class ErrorUtils {
     /*
      * Handle failed cookie decryption
      */
+    public static fromMalformedCookieError(name: string, message: string): ClientError {
+
+        const error = ErrorUtils._createGeneric401Error();
+        error.logContext = {
+            code: ErrorCodes.cookieDecryptionError,
+            name,
+            details: `Invalid cookie received, name: ${name}, details: ${message}`,
+        };
+
+        return error;
+    }
+
+    /*
+     * Handle failed cookie decryption
+     */
     public static fromCookieDecryptionError(name: string, exception: any): ClientError {
 
         const error = ErrorUtils._createGeneric401Error();

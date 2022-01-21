@@ -198,6 +198,14 @@ ID_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-id" "$MULTI_VALUE_HEADE
 CSRF_COOKIE=$(getLambdaResponseCookieValue "$COOKIE_PREFIX-csrf" "$MULTI_VALUE_HEADERS")
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$BODY")
 
+echo "access"
+echo $ACCESS_COOKIE
+echo "csrf"
+echo $CSRF_COOKIE
+echo "*** Stopping"
+exit
+
+
 #
 # Create the request to call the expire endpoint, then expire the access token
 #

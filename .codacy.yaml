@@ -1,0 +1,10 @@
+---
+exclude_paths: [
+    '*',    
+    'aws/**',
+    'certs/*',
+    'dist/**',
+    'aws-packager/**',
+    'serverless-environments/**',
+    'test/**'
+]

@@ -1,0 +1,8 @@
+.DS_store
+certs
+node_modules
+dist
+request.txt
+response.txt
+logs
+.serverless

@@ -1,9 +1,0 @@
-- Lambda executor is no longer relevant to all lambdas
-  Have a think about responsibilities and naming
-  Compare Express and Lambda processing
-  
-- Lambda configuration needs to call executor.initialize
-  But that feels wrong
-
-- Lambda configuration needs to handle startup errors
-  Feels like an extra level of indirection may help

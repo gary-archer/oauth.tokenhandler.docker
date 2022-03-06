@@ -16,8 +16,7 @@
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "7312725575a3789d43bd41e592d1042226bc0d1a5d9bd9c4e8e58f121a1d5550",
         "trustedWebOrigins": ["https://web.authsamples.com"],
-        "provider": "cognito",
-        "mode": "aws"
+        "provider": "cognito"
     },
     "client": {
         "clientId": "1hofhrb15jb9adqitlkec9s5ag",

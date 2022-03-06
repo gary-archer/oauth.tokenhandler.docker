@@ -22,6 +22,4 @@ export interface ApiConfiguration {
     trustedWebOrigins: string[];
 
     provider: string;
-
-    mode: string;
 }

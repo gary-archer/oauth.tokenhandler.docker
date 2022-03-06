@@ -4,5 +4,5 @@ node_modules
 dist
 request.txt
 response.txt
-logs
+lambdatest.log
 .serverless

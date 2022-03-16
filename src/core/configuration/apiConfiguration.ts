@@ -13,8 +13,6 @@ export interface ApiConfiguration {
 
     cookieDomain: string,
 
-    cookiePath: string,
-
     cookiePrefix: string,
 
     cookieEncryptionKey: string;

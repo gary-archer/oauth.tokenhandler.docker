@@ -12,7 +12,6 @@
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "endSessionEndpoint": "https://login.authsamples.com/logout",
         "cookieDomain": "api.mycompany.com",
-        "cookiePath": "/tokenhandler",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "7312725575a3789d43bd41e592d1042226bc0d1a5d9bd9c4e8e58f121a1d5550",
         "trustedWebOrigins": ["https://web.mycompany.com"],

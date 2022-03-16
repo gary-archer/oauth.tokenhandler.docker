@@ -30,7 +30,7 @@ export class HttpServerConfiguration {
     private readonly _logger: Logger;
 
     /*
-     * Auto wire the main aithorizer class, which is the entry point for processing
+     * Auto wire the main authorizer class, which is the entry point for processing
      */
     public constructor(
         expressApp: Application,

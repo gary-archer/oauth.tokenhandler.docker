@@ -275,8 +275,8 @@ export class CookieService {
             // The cookie written is only used (by default) in the API domain
             domain: this._apiConfiguration.cookieDomain,
 
-            // Access and CSRF cookies are sent to APIs, whereas others are private to the token handler
-            path: (type === ACCESS_COOKIE || type === CSRF_COOKIE) ? '/' : this._apiConfiguration.cookiePath,
+            // Access and CSRF cookies use the root path, whereas others are private to the token handler
+            path: '/',
 
             // Other domains cannot send the cookie, which reduces cross site request forgery risks
             sameSite: 'strict',

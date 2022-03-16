@@ -30,5 +30,5 @@ Then run this command to build and run the API in Express:
 Test API operations via this command:
 
 ```bash
-npm run http
+npm run test
 ```

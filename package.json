@@ -8,17 +8,11 @@
     "build": "rimraf dist && tsc --outDir dist",
     "buildRelease": "rimraf dist && tsc --outDir dist --sourceMap false",
     "startRelease": "node dist/express/app.js",
-    "http": "./test/runHttpWorkflow.sh",
-    "lambda": "./test/runLambdaWorkflow.sh",
-    "package": "npm run buildRelease && rimraf .serverless && sls package --stage deployed",
-    "customPackager": "ts-node aws-packager/customPackager.ts",
-    "deploy": "sls deploy --stage deployed --package .serverless",
-    "remove": "sls remove --stage deployed"
+    "test": "./test/runHttpWorkflow.sh"
   },
   "author": "Gary Archer",
   "license": "MIT",
   "dependencies": {
-    "@middy/core": "^2.5.3",
     "axios": "^0.21.4",
     "base64url": "^3.0.1",
     "cookie": "^0.4.1",
@@ -32,8 +26,6 @@
     "url-parse": "^1.5.1"
   },
   "devDependencies": {
-    "@types/adm-zip": "^0.4.34",
-    "@types/aws-lambda": "^8.10.85",
     "@types/cookie": "^0.4.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/cors": "^2.8.9",
@@ -44,14 +36,9 @@
     "@types/url-parse": "^1.4.3",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
-    "adm-zip": "^0.5.5",
-    "child-process-es6-promise": "^1.2.1",
     "eslint": "^7.32.0",
     "nodemon": "^2.0.3",
     "rimraf": "^3.0.2",
-    "serverless": "^3.0.1",
-    "serverless-domain-manager": "4.1.0",
-    "serverless-plugin-scripts": "^1.0.2",
     "ts-node": "^9.0.0",
     "typescript": "4.5.5"
   }

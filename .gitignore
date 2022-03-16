@@ -2,7 +2,4 @@
 certs
 node_modules
 dist
-request.txt
 response.txt
-lambdatest.log
-.serverless

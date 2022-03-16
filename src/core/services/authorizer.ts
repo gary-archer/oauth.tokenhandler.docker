@@ -8,7 +8,7 @@ import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
 
 /*
- * The entry point class for the Token Handler API's logic, which performs an outline of processing
+ * The entry point class for the OAuth Agent's logic, which performs an outline of processing
  */
 export class Authorizer {
 

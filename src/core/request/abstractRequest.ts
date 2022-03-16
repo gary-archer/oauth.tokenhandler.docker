@@ -1,7 +1,7 @@
 import {LogEntry} from '../logging/logEntry';
 
 /*
- * An abstraction to represent an incoming HTTP request, that works for both AWS lambda and Express
+ * An abstraction to represent an incoming HTTP request
  */
 export interface AbstractRequest {
 

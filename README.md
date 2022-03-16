@@ -14,10 +14,10 @@ It enables my [End-to-end SPA and API](https://github.com/gary-archer/oauth.clou
 
 ## Quick Start
 
-To run this component in isolation, first add the development domain to your hosts file:
+To run this component on a development computer, first add the local development domain to your hosts file:
 
 ```text
-127.0.0.1 tokenhandler.mycompany.com
+127.0.0.1 localtokenhandler.authsamples-dev.com
 ::1       localhost
 ````
 
@@ -27,7 +27,12 @@ Then run this command to build and run the API in Express:
 ./start.sh
 ```
 
-Test API operations via this command:
+Trust the development certificate downloaded to the local computer:
+
+```text
+```
+
+Then test API operations with this command:
 
 ```bash
 npm run test

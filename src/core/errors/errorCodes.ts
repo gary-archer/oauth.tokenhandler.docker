@@ -18,7 +18,7 @@ export class ErrorCodes {
     // No origin header was supplied
     public static readonly missingWebOrigin = 'missing_web_origin';
 
-    // An untrusted browser origin called the token handler
+    // An untrusted browser origin called the API
     public static readonly untrustedWebOrigin = 'untrusted_web_origin';
 
     // An error to indicate a cookie not found, which could possibly be a browser issue

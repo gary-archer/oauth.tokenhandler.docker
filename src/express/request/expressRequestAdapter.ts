@@ -3,7 +3,7 @@ import {LogEntry} from '../../core/logging/logEntry';
 import {AbstractRequest} from '../../core/request/abstractRequest';
 
 /*
- * Adapt Express to our common base interface that also works for AWS Serverless
+ * Adapt Express to our common base interface
  */
 export class ExpressRequestAdapter implements AbstractRequest {
 

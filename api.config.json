@@ -7,7 +7,7 @@
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
-        "name": "TokenHandlerApi",
+        "name": "OAuthAgentApi",
         "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "endSessionEndpoint": "https://login.authsamples.com/logout",

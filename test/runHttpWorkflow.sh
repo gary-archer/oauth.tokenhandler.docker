@@ -1,11 +1,11 @@
 #!/bin/bash
 
-##################################################################
-# A script to test the token handler API's Express HTTP operations
-##################################################################
+##################################################
+# A script to test the OAuth Agent's API endpoints
+##################################################
 
 WEB_BASE_URL='https://web.mycompany.com'
-TOKEN_HANDLER_BASE_URL='https://api.mycompany.com:444/tokenhandler'
+TOKEN_HANDLER_BASE_URL='https://localtokenhandler.authsamples-dev.com:444/oauth-agent'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
@@ -68,7 +68,7 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
 fi
 
 #
-# Act as the SPA by calling the token handler to start a login and get the request URI
+# Act as the SPA by calling the OAuth Agent to start a login and get the request URI
 #
 echo "*** Creating login URL ..."
 HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/start" \

@@ -10,15 +10,13 @@ import {LogEntry} from './logEntry';
  */
 export class Logger {
 
-    private readonly _isLambda: boolean;
     private _apiName: string;
 
     /*
      * The logger is created during application startup
      */
-    public constructor(isLambda: boolean) {
-        this._isLambda = isLambda;
-        this._apiName = 'TokenHandlerApi';
+    public constructor() {
+        this._apiName = 'OAuthAgentApi';
     }
 
     /*
@@ -80,35 +78,17 @@ export class Logger {
      */
     public write(logEntry: LogEntry): void {
 
-        if (this._isLambda) {
+        if (process.env.IS_LOCAL) {
 
-            if (process.env.IS_LOCAL) {
-
-                // During lambda development write logs to a local file to avoid conflicting with the lambda response
-                const data = JSON.stringify(logEntry.getData(), null, 2);
-                fs.appendFileSync('./test/lambdatest.log', data);
-
-            } else {
-
-                // In AWS Cloudwatch we use bare JSON logging that will work best with log shippers
-                const data = JSON.stringify(logEntry.getData());
-                process.stdout.write(data + '\n');
-            }
+            // During Express development use pretty printing
+            const data = JSON.stringify(logEntry.getData(), null, 2);
+            console.log(data);
 
         } else {
 
-            if (process.env.IS_LOCAL) {
-
-                // During Express development use pretty printing
-                const data = JSON.stringify(logEntry.getData(), null, 2);
-                console.log(data);
-
-            } else {
-
-                // In Kubernetes use bare JSON logging
-                const data = JSON.stringify(logEntry.getData());
-                console.log(data);
-            }
+            // In Kubernetes use bare JSON logging
+            const data = JSON.stringify(logEntry.getData());
+            console.log(data);
         }
     }
 }

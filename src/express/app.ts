@@ -9,7 +9,7 @@ import {HttpProxy} from '../core/utilities/httpProxy';
  */
 (async () => {
 
-    const logger = new Logger(false);
+    const logger = new Logger();
     try {
 
         // First load configuration

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-############################################################
-# A convenience script to start the Token Handler in Express
-############################################################
+###############################################
+# A convenience script to start the OAuth Agent
+###############################################
 
 #
 # Set the current folder if this script is called from another script
@@ -26,16 +26,7 @@ fi
 rm -rf node_modules
 npm install
 if [ $? -ne 0 ]; then
-  echo "Problem encountered installing the Token Handler API dependencies"
-  exit 1
-fi
-
-#
-# Build all of the token handler API's code including lambda functions
-#
-npm run build
-if [ $? -ne 0 ]; then
-  echo "Problem encountered building the Token Handler API code"
+  echo "Problem encountered installing the OAuth Agent dependencies"
   exit 1
 fi
 
@@ -44,6 +35,6 @@ fi
 #
 npm start
 if [ $? -ne 0 ]; then
-  echo "Problem encountered starting the Token Handler API"
+  echo "Problem encountered starting the OAuth Agent"
   exit 1
 fi

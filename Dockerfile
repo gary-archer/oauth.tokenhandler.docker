@@ -1,7 +1,7 @@
 #
-# The docker image for the Token Handler API
+# The docker image for the OAuth Agent
 # After building, files in the image can be viewed via the below command:
-# - docker run -it tokenhandler:v1 sh
+# - docker run -it oauthagent:v1 sh
 #
 
 # Use the Node docker image for the lightweight Alpine Linux OS

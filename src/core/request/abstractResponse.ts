@@ -2,7 +2,7 @@ import {CookieSerializeOptions} from 'cookie';
 import {ClientError} from '../errors/clientError';
 
 /*
- * An abstraction to represent an outgoing HTTP response, that works for both AWS lambda and Express
+ * An abstraction to represent an outgoing HTTP response
  */
 export interface AbstractResponse {
 

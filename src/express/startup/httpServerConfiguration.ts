@@ -54,29 +54,29 @@ export class HttpServerConfiguration {
     public async initialiseRoutes(): Promise<void> {
 
         // Configure CORS
-        this._expressApp.use('/tokenhandler/*', cors(this._getCorsOptions()) as any);
+        this._expressApp.use('/oauth-agent/*', cors(this._getCorsOptions()) as any);
 
         // Parse cookies and the request body
-        this._expressApp.use('/tokenhandler/*', cookieParser());
-        this._expressApp.use('/tokenhandler/*', express.json());
+        this._expressApp.use('/oauth-agent/*', cookieParser());
+        this._expressApp.use('/oauth-agent/*', express.json());
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
 
         // Route requests through to the authorizer
-        this._expressApp.post('/tokenhandler/login/start',
+        this._expressApp.post('/oauth-agent/login/start',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.startLogin));
 
-        this._expressApp.post('/tokenhandler/login/end',
+        this._expressApp.post('/oauth-agent/login/end',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.endLogin));
 
-        this._expressApp.post('/tokenhandler/refresh',
+        this._expressApp.post('/oauth-agent/refresh',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.refresh));
 
-        this._expressApp.post('/tokenhandler/expire',
+        this._expressApp.post('/oauth-agent/expire',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.expire));
 
-        this._expressApp.post('/tokenhandler/logout',
+        this._expressApp.post('/oauth-agent/logout',
             (rq, rs) => this._executeMethod(rq, rs, this._authorizer.logout));
     }
 
@@ -97,14 +97,14 @@ export class HttpServerConfiguration {
             // Start listening over HTTPS
             const httpsServer = https.createServer(serverOptions, this._expressApp);
             httpsServer.listen(this._configuration.host.port, () => {
-                console.log(`Token Handler API is listening on HTTPS port ${this._configuration.host.port}`);
+                console.log(`OAuth Agent is listening on HTTPS port ${this._configuration.host.port}`);
             });
 
         } else {
 
             // Otherwise listen over HTTP
             this._expressApp.listen(this._configuration.host.port, () => {
-                console.log(`Token Handler API is listening on HTTP port ${this._configuration.host.port}`);
+                console.log(`OAuth Agent is listening on HTTP port ${this._configuration.host.port}`);
             });
         }
     }

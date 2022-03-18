@@ -1,13 +1,13 @@
 {
     "host": {
         "port": 444,
-        "sslCertificateFileName": "./certs/mycompany.ssl.p12",
+        "sslCertificateFileName": "./certs/authsamples-dev.ssl.p12",
         "sslCertificatePassword": "Password1",
         "useHttpProxy": false,
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
-        "name": "OAuthAgentApi",
+        "name": "OAuthAgent",
         "authorizeEndpoint": "https://login.authsamples.com/oauth2/authorize",
         "tokenEndpoint": "https://login.authsamples.com/oauth2/token",
         "endSessionEndpoint": "https://login.authsamples.com/logout",

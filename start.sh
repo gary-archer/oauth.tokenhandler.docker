@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###############################################
-# A convenience script to build the OAuth Agent
+# A convenience script to start the OAuth Agent
 ###############################################
 
 #
@@ -34,6 +34,15 @@ rm -rf node_modules
 npm install
 if [ $? -ne 0 ]; then
   echo "Problem encountered installing the OAuth Agent dependencies"
+  exit 1
+fi
+
+#
+# Start the Express API
+#
+npm start
+if [ $? -ne 0 ]; then
+  echo "Problem encountered starting the OAuth Agent"
   exit 1
 fi
 

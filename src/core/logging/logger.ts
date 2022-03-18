@@ -16,7 +16,7 @@ export class Logger {
      * The logger is created during application startup
      */
     public constructor() {
-        this._apiName = 'OAuthAgentApi';
+        this._apiName = 'OAuthAgent';
     }
 
     /*

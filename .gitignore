@@ -1,4 +1,5 @@
 .DS_store
+resources
 certs
 node_modules
 dist

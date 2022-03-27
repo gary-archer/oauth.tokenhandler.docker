@@ -21,7 +21,7 @@
         "clientId": "7b1b97q0d7eils1mo0m46oobr3",
         "clientSecret": "bv8mbjf7s04n16o358qg4qe12842md4kdspubts22omfrfqk37e",
         "redirectUri": "https://web.mycompany.com/spa/",
-        "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout.html",
+        "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout",
         "scope": "openid profile email https://api.authsamples.com/api/transactions_read"
     }
 }

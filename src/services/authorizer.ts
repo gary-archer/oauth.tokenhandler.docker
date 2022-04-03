@@ -1,8 +1,11 @@
 import base64url from 'base64url';
+import {Request, Response} from 'express';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
-import {AbstractRequest} from '../request/abstractRequest';
-import {AbstractResponse} from '../request/abstractResponse';
+import {LogEntry} from '../logging/logEntry';
+import {HeaderProcessor} from '../utilities/headerProcessor';
+import {PageLoadResponse} from '../utilities/pageLoadResponse';
+import {ResponseWriter} from '../utilities/responseWriter';
 import {UrlHelper} from '../utilities/urlHelper';
 import {CookieService} from './cookieService';
 import {OAuthService} from './oauthService';
@@ -30,40 +33,41 @@ export class Authorizer {
     /*
      * Calculate the authorization redirect URL and write a state cookie
      */
-    public async startLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async startLogin(request: Request, response: Response): Promise<void> {
 
         // Check incoming details
-        request.getLogEntry().setOperationName('startLogin');
+        this._getLogEntry(response).setOperationName('startLogin');
         this._validateOrigin(request);
 
         // First create a random login state
         const loginState = this._oauthService.generateLoginState();
 
-        // Write the full URL to the response body
-        const data = {} as any;
-        data.authorizationRequestUri = this._oauthService.getAuthorizationRequestUri(loginState);
-        response.setBody(data);
-
-        // Also write a temporary state cookie
+        // Write a temporary state cookie
         const cookieData = {
             state: loginState.state,
             codeVerifier: loginState.codeVerifier,
         };
         this._cookieService.writeStateCookie(cookieData, response);
+
+        // Write the response body
+        const body = {
+            authorizationRequestUri: this._oauthService.getAuthorizationRequestUri(loginState),
+        };
+        ResponseWriter.write(response, 200, body);
     }
 
     /*
      * The SPA sends us the full URL when the page loads, and it may contain an authorization result
      * Complete login if required, by swapping the authorization code for tokens and storing tokens in secure cookies
      */
-    public async endLogin(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async endLogin(request: Request, response: Response): Promise<void> {
 
         // First do basic validation
-        request.getLogEntry().setOperationName('endLogin');
+        this._getLogEntry(response).setOperationName('endLogin');
         this._validateOrigin(request);
 
         // Get the URL posted by the SPA
-        const url = request.getJsonField('url');
+        const url = request.body['url'];
         if (!url) {
             throw ErrorUtils.fromFormFieldNotFoundError('url');
         }
@@ -77,7 +81,8 @@ export class Authorizer {
 
         // Handle normal page loads, which can occur frequently during a user session
         if (!(state && code) && !(state && error)) {
-            this._handlePageLoad(request, response);
+            const body = this._handlePageLoad(request, response);
+            ResponseWriter.write(response, 200, body);
             return;
         }
 
@@ -121,7 +126,7 @@ export class Authorizer {
         }
 
         // Include the OAuth User ID in API logs
-        this._logUserId(request, idToken);
+        this._logUserId(response, idToken);
 
         // Write tokens to separate HTTP only encrypted same site cookies
         this._cookieService.writeRefreshCookie(refreshToken, response);
@@ -132,20 +137,20 @@ export class Authorizer {
         const endLoginData = {
             isLoggedIn: true,
             handled: true,
-        } as any;
+        } as PageLoadResponse;
 
         // Create an anti forgery cookie which will last for the duration of the multi tab browsing session
         this._createAntiForgeryResponseData(request, response, endLoginData);
-        response.setBody(endLoginData);
+        ResponseWriter.write(response, 200, endLoginData);
     }
 
     /*
      * Write a new access token into the access token cookie
      */
-    public async refresh(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async refresh(request: Request, response: Response): Promise<void> {
 
         // Check incoming details
-        request.getLogEntry().setOperationName('refresh');
+        this._getLogEntry(response).setOperationName('refresh');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -162,7 +167,7 @@ export class Authorizer {
         }
 
         // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
+        this._logUserId(response, idToken);
 
         // Send the request for a new access token to the Authorization Server
         const refreshTokenGrantData =
@@ -176,16 +181,16 @@ export class Authorizer {
         this._cookieService.writeIdCookie(newIdToken ?? idToken, response);
 
         // Return an empty response to the browser
-        response.setStatusCode(204);
+        ResponseWriter.write(response, 204, null);
     }
 
     /*
      * Return the logout URL and clear cookies
      */
-    public async logout(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async logout(request: Request, response: Response): Promise<void> {
 
         // Check incoming details
-        request.getLogEntry().setOperationName('logout');
+        this._getLogEntry(response).setOperationName('logout');
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -196,29 +201,29 @@ export class Authorizer {
         }
 
         // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
+        this._logUserId(response, idToken);
 
         // Clear all cookies for the caller
         this._cookieService.clearAll(response);
 
-        // Write the full end session URL to the response body
-        const data = {} as any;
-        data.endSessionRequestUri = this._oauthService.getEndSessionRequestUri(idToken);
-        response.setBody(data);
-        response.setStatusCode(200);
+        // Return the full end session URL
+        const data = {
+            endSessionRequestUri: this._oauthService.getEndSessionRequestUri(idToken),
+        };
+        ResponseWriter.write(response, 200, data);
     }
 
     /*
      * Make the refresh and / or the access token inside secure cookies act expired, for testing purposes
      */
-    public async expire(request: AbstractRequest, response: AbstractResponse): Promise<void> {
+    public async expire(request: Request, response: Response): Promise<void> {
 
         // Get whether to expire the access or refresh token
-        const type = request.getJsonField('type');
+        const type = request.body['type'];
         const operation = type === 'access' ? 'expireAccessToken' : 'expireRefreshToken';
 
         // Check incoming details
-        request.getLogEntry().setOperationName(operation);
+        this._getLogEntry(response).setOperationName(operation);
         this._validateOrigin(request);
         this._validateAntiForgeryCookie(request);
 
@@ -241,7 +246,7 @@ export class Authorizer {
         }
 
         // Include the OAuth user id in API logs
-        this._logUserId(request, idToken);
+        this._logUserId(response, idToken);
 
         // Always make the access cookie act expired to cause an API 401
         const expiredAccessToken = `${accessToken}x`;
@@ -253,15 +258,16 @@ export class Authorizer {
             this._cookieService.writeRefreshCookie(expiredRefreshToken, response);
         }
 
-        response.setStatusCode(204);
+        // Return an empty response to the browser
+        ResponseWriter.write(response, 204, null);
     }
 
     /*
      * Make sure there is a web origin, as supported by the 4 main browsers, and make sure it matches the expected value
      */
-    private _validateOrigin(request: AbstractRequest): void {
+    private _validateOrigin(request: Request): void {
 
-        const origin = request.getHeader('origin');
+        const origin = HeaderProcessor.getHeader(request, 'origin');
         if (!origin) {
             throw ErrorUtils.fromMissingOriginError();
         }
@@ -275,7 +281,7 @@ export class Authorizer {
     /*
      * Extra cookies checks for data changing requests in line with OWASP
      */
-    private _validateAntiForgeryCookie(request: AbstractRequest): void {
+    private _validateAntiForgeryCookie(request: Request): void {
 
         // Get the cookie value
         const cookieValue = this._cookieService.readAntiForgeryCookie(request);
@@ -285,7 +291,7 @@ export class Authorizer {
 
         // Check the client has sent a matching anti forgery request header
         const headerName = this._cookieService.getAntiForgeryRequestHeaderName();
-        const headerValue = request.getHeader(headerName);
+        const headerValue = HeaderProcessor.getHeader(request, headerName);
         if (!headerValue) {
             throw ErrorUtils.fromMissingAntiForgeryTokenError();
         }
@@ -299,7 +305,7 @@ export class Authorizer {
     /*
      * Give the SPA the data it needs when it loads or the page is refreshed or a new browser tab is opened
      */
-    private _handlePageLoad(request: AbstractRequest, response: AbstractResponse): void {
+    private _handlePageLoad(request: Request, response: Response): PageLoadResponse {
 
         // Inform the SPA that this is a normal page load and not a login response
         const pageLoadData = {
@@ -313,7 +319,7 @@ export class Authorizer {
             // Return data for the case where the user is already logged in
             pageLoadData.isLoggedIn = true;
             pageLoadData.antiForgeryToken = antiForgeryToken;
-            this._logUserId(request, existingIdToken);
+            this._logUserId(response, existingIdToken);
 
         } else {
 
@@ -321,13 +327,13 @@ export class Authorizer {
             pageLoadData.isLoggedIn = false;
         }
 
-        response.setBody(pageLoadData);
+        return pageLoadData;
     }
 
     /*
      * Add anti forgery details to the response after signing in
      */
-    private _createAntiForgeryResponseData(request: AbstractRequest, response: AbstractResponse, data: any): void {
+    private _createAntiForgeryResponseData(request: Request, response: Response, data: any): void {
 
         // Get a random value
         const newCookieValue = this._cookieService.generateAntiForgeryValue();
@@ -342,7 +348,7 @@ export class Authorizer {
     /*
      * Parse the id token then include the user id in logs
      */
-    private _logUserId(request: AbstractRequest, idToken: string): void {
+    private _logUserId(response: Response, idToken: string): void {
 
         const parts = idToken.split('.');
         if (parts.length === 3) {
@@ -351,10 +357,17 @@ export class Authorizer {
             if (payload) {
                 const claims = JSON.parse(payload);
                 if (claims.sub) {
-                    request.getLogEntry().setUserId(claims.sub);
+                    this._getLogEntry(response).setUserId(claims.sub);
                 }
             }
         }
+    }
+
+    /*
+     * Get the current log entry
+     */
+    private _getLogEntry(response: Response) {
+        return response.locals.logEntry as LogEntry;
     }
 
     /*

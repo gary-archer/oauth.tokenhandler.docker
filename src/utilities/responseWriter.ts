@@ -11,7 +11,7 @@ export class ResponseWriter {
     public static write(response: Response, statusCode: number, data: any): void {
 
         response.setHeader('Content-Type', 'application/json');
-        response.status(statusCode)
+        response.status(statusCode);
 
         if (data) {
             response.send(JSON.stringify(data));

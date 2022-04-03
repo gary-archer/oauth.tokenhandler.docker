@@ -10,7 +10,7 @@ export class LoggerMiddleware {
      * Process any exceptions and add details to logs
      */
     public logRequest(request: Request, response: Response, next: NextFunction): void {
-        
+
         const logEntry = new LogEntry();
         logEntry.start(request);
         response.locals.logEntry = logEntry;

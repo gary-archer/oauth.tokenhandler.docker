@@ -56,7 +56,7 @@ export class HttpServerConfiguration {
 
         // Do not cache API requests
         this._expressApp.set('etag', false);
-        
+
         // Route requests through to the authorizer
         this._expressApp.post('/oauth-agent/login/start', this._catch(this._authorizer.startLogin));
         this._expressApp.post('/oauth-agent/login/end',   this._catch(this._authorizer.endLogin));

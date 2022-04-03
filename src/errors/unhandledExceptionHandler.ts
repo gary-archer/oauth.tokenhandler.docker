@@ -9,10 +9,10 @@ import {LogEntry} from '../logging/logEntry';
  */
 export class UnhandledExceptionHandler {
 
-   /*
+    /*
      * Handle the server error and return client details
      */
-   public static handleError(exception: any, response: Response): ClientError {
+    public static handleError(exception: any, response: Response): ClientError {
 
         const handledError = ErrorUtils.fromException(exception);
         if (exception instanceof ClientError) {
@@ -22,7 +22,7 @@ export class UnhandledExceptionHandler {
             if (clientError.logContext && clientError.logContext.code) {
                 logEntry.setErrorCodeOverride(clientError.logContext.code);
             }
-            
+
             logEntry.setClientError(clientError);
             return clientError;
 

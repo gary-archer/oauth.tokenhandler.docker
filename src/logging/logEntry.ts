@@ -16,18 +16,18 @@ export class LogEntry {
         this._data = new LogEntryData();
     }
 
-    public start(request: Request) {
-        
+    public start(request: Request): void {
+
         // Start the log entry
         this._data.performance.start();
         this._data.method = request.method;
-        this._data.path = request.path;
+        this._data.path = request.originalUrl;
 
         // Get custom headers if sent
         const clientApplicationName = HeaderProcessor.getHeader(request, 'x-mycompany-api-client');
         const correlationId = HeaderProcessor.getHeader(request, 'x-mycompany-correlation-id');
         const sessionId = HeaderProcessor.getHeader(request, 'x-mycompany-session-id');
-        
+
         // Keep track of which component is calling each API
         if (clientApplicationName) {
             this._data.clientApplicationName = clientApplicationName;

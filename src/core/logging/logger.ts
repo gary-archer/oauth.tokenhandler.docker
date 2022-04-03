@@ -1,4 +1,3 @@
-import fs from 'fs-extra';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ServerError} from '../errors/serverError';
 import {ClientError} from '../errors/clientError';

@@ -1,4 +1,4 @@
-import {decode} from 'jsonwebtoken';
+import base64url from 'base64url';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {AbstractRequest} from '../request/abstractRequest';
@@ -344,9 +344,16 @@ export class Authorizer {
      */
     private _logUserId(request: AbstractRequest, idToken: string): void {
 
-        const decoded = decode(idToken, {complete: true});
-        if (decoded && decoded.payload.sub) {
-            request.getLogEntry().setUserId(decoded.payload.sub as string);
+        const parts = idToken.split('.');
+        if (parts.length === 3) {
+
+            const payload = base64url.decode(parts[1]);
+            if (payload) {
+                const claims = JSON.parse(payload);
+                if (claims.sub) {
+                    request.getLogEntry().setUserId(claims.sub);
+                }
+            }
         }
     }
 

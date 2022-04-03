@@ -264,6 +264,7 @@ export class CookieService {
      */
     private _getCookieOptions(type: string): CookieSerializeOptions {
 
+        const isOAuthOnlyCookie = (type === STATE_COOKIE || type === REFRESH_COOKIE || type === ID_COOKIE);
         return {
 
             // The cookie cannot be read by Javascript code
@@ -275,8 +276,8 @@ export class CookieService {
             // The cookie written is only used (by default) in the API domain
             domain: this._apiConfiguration.cookieDomain,
 
-            // Cookies use the entire API domain
-            path: '/',
+            // OAuth only cookies are restricted to OAuth Agent paths
+            path: isOAuthOnlyCookie ? '/oauth-agent' : '/',
 
             // Other domains cannot send the cookie, which reduces cross site request forgery risks
             sameSite: 'strict',

@@ -1,3 +1,4 @@
+import base64url from 'base64url';
 import {createHash, randomBytes} from 'crypto';
 
 /*
@@ -16,9 +17,9 @@ export class OAuthLoginState {
     public constructor() {
 
         const verifierBytes = this._getBytes();
-        this._state = this._base64UrlEncode(this._getBytes());
-        this._codeVerifier = this._base64UrlEncode(verifierBytes);
-        this._codeChallenge = this._base64UrlEncode(this._sha256(this._codeVerifier));
+        this._state = base64url.encode(this._getBytes());
+        this._codeVerifier = base64url.encode(verifierBytes);
+        this._codeChallenge = base64url.encode(this._sha256(this._codeVerifier));
     }
 
     public get state(): string {
@@ -38,17 +39,6 @@ export class OAuthLoginState {
      */
     private _getBytes(): Buffer {
         return randomBytes(32);
-    }
-
-    /*
-     * Convert a previously generated buffer to a string
-     */
-    private _base64UrlEncode(buffer: Buffer): string {
-
-        return buffer.toString('base64')
-            .replace(/\+/g, '-')
-            .replace(/\//g, '_')
-            .replace(/=/g, '');
     }
 
     /*

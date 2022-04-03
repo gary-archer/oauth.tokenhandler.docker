@@ -3,6 +3,9 @@
  */
 export class ErrorCodes {
 
+    // An API request to an invalid route
+    public static readonly requestNotFound = 'request_not_found';
+
     // A generic server error
     public static readonly serverError = 'server_error';
 

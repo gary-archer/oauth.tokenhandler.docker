@@ -57,7 +57,7 @@ export class ServerError extends Error {
     /*
      * Return an object ready to log, including the stack trace
      */
-    public toLogFormat(apiName: string): any {
+    public toLogFormat(): any {
 
         const serviceError: any = {
             details: this._details,
@@ -77,7 +77,7 @@ export class ServerError extends Error {
 
         return {
             statusCode: this._statusCode,
-            clientError: this.toClientError(apiName).toLogFormat(),
+            clientError: this.toClientError().toLogFormat(),
             serviceError,
         };
     }
@@ -85,10 +85,10 @@ export class ServerError extends Error {
     /*
      * Translate to a supportable error response to return to the API caller
      */
-    public toClientError(apiName: string): ClientError {
+    public toClientError(): ClientError {
 
         const error = new ClientError(this._statusCode, this._errorCode, this.message);
-        error.setExceptionDetails(apiName, this._instanceId, this._utcTime);
+        error.setExceptionDetails('OAuthAgent', this._instanceId, this._utcTime);
         return error;
     }
 }

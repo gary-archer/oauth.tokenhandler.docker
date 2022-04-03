@@ -1,6 +1,8 @@
+import {Request, Response} from 'express';
 import {Guid} from 'guid-typescript';
 import {ServerError} from '../errors/serverError';
 import {ClientError} from '../errors/clientError';
+import {HeaderProcessor} from '../utilities/headerProcessor';
 import {LogEntryData} from './logEntryData';
 
 /*
@@ -10,25 +12,23 @@ export class LogEntry {
 
     private readonly _data: LogEntryData;
 
-    public constructor(apiName: string) {
-        this._data = new LogEntryData(apiName);
+    public constructor() {
+        this._data = new LogEntryData();
     }
 
-    /*
-     * Default log data when logging begins
-     */
-    public start(
-        method: string,
-        path: string,
-        clientApplicationName: string | null,
-        correlationId: string | null,
-        sessionId: string | null): void {
-
+    public start(request: Request) {
+        
+        // Start the log entry
         this._data.performance.start();
-        this._data.method = method;
-        this._data.path = path;
+        this._data.method = request.method;
+        this._data.path = request.path;
 
-        // Our callers can supply a custom header so that we can keep track of who is calling each API
+        // Get custom headers if sent
+        const clientApplicationName = HeaderProcessor.getHeader(request, 'x-mycompany-api-client');
+        const correlationId = HeaderProcessor.getHeader(request, 'x-mycompany-correlation-id');
+        const sessionId = HeaderProcessor.getHeader(request, 'x-mycompany-session-id');
+        
+        // Keep track of which component is calling each API
         if (clientApplicationName) {
             this._data.clientApplicationName = clientApplicationName;
         }
@@ -52,7 +52,7 @@ export class LogEntry {
 
     public setServerError(error: ServerError): void {
 
-        this._data.errorData = error.toLogFormat(this._data.apiName);
+        this._data.errorData = error.toLogFormat();
         this._data.errorCode = error.errorCode;
         this._data.errorId = error.getInstanceId();
     }
@@ -67,14 +67,32 @@ export class LogEntry {
         this._data.errorCode = code;
     }
 
-    public end(statusCode: number): void {
+    public end(response: Response): void {
 
         this._data.performance.dispose();
         this._data.millisecondsTaken = this._data.performance.millisecondsTaken;
-        this._data.statusCode = statusCode;
+        this._data.statusCode = response.statusCode;
+        this._output();
     }
 
-    public getData(): any {
-        return this._data.toLogFormat();
+    public writeStartupError(e: ServerError): void {
+        this.setServerError(e);
+        this._data.statusCode = 500;
+        this._output();
+    }
+
+    private _output(): void {
+
+        const data = this._data.toLogFormat();
+        if (process.env.IS_LOCAL) {
+
+            // During Express development use pretty printing
+            console.log(JSON.stringify(data, null, 2));
+
+        } else {
+
+            // In Kubernetes use bare JSON logging
+            console.log(JSON.stringify(data));
+        }
     }
 }

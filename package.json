@@ -4,7 +4,7 @@
   "description": "An API that performs OAuth work for the final SPA and issues secure SameSite cookies",
   "scripts": {
     "lint": "npx eslint . --ext .ts,.tsx",
-    "start": "nodemon -e ts --exec \"IS_LOCAL=true ts-node --files src/express/app.ts\"",
+    "start": "nodemon -e ts --exec \"IS_LOCAL=true ts-node --files src/app.ts\"",
     "buildRelease": "rimraf dist && tsc --outDir dist --sourceMap false",
     "startRelease": "node dist/express/app.js",
     "test": "./test/runHttpWorkflow.sh"

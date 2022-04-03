@@ -65,12 +65,12 @@ export class LogEntryData {
     /*
      * Give fields default values
      */
-    public constructor(apiName: string) {
+    public constructor() {
 
         // Queryable fields
         this.id = Guid.create().toString();
         this.utcTime = new Date();
-        this.apiName = apiName;
+        this.apiName = 'OAuthAgent';
         this.operationName = '';
         this.hostName = os.hostname();
         this.method = '';

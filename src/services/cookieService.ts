@@ -1,11 +1,9 @@
 import base64url from 'base64url';
 import {CookieSerializeOptions} from 'cookie';
 import crypto from 'crypto';
+import {Request, Response} from 'express';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
-import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
-import {AbstractRequest} from '../request/abstractRequest';
-import {AbstractResponse} from '../request/abstractResponse';
 
 const VERSION_SIZE = 1;
 const GCM_IV_SIZE = 12;
@@ -23,32 +21,29 @@ const CSRF_COOKIE    = 'csrf';
  */
 export class CookieService {
 
-    private readonly _apiConfiguration: ApiConfiguration;
-    private readonly _clientConfiguration: ClientConfiguration;
+    private readonly _configuration: ApiConfiguration;
 
-    public constructor(apiConfiguration: ApiConfiguration, clientConfiguration: ClientConfiguration) {
-
-        this._apiConfiguration = apiConfiguration;
-        this._clientConfiguration = clientConfiguration;
+    public constructor(configuration: ApiConfiguration) {
+        this._configuration = configuration;
     }
 
     /*
      * Write a same site state cookie when a login starts
      */
-    public writeStateCookie(data: any, response: AbstractResponse): void {
+    public writeStateCookie(data: any, response: Response): void {
 
         const cookieName = this._getCookieName(STATE_COOKIE);
-        const encryptedData = this._encryptCookie(cookieName, JSON.stringify(data));
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions(STATE_COOKIE));
+        const encryptedData = this._encryptCookie(JSON.stringify(data));
+        response.cookie(cookieName, encryptedData, this._getCookieOptions(STATE_COOKIE));
     }
 
     /*
      * Read the state cookie when a login ends
      */
-    public readStateCookie(request: AbstractRequest): any {
+    public readStateCookie(request: Request): any {
 
         const cookieName = this._getCookieName(STATE_COOKIE);
-        const encryptedData = request.getCookie(cookieName);
+        const encryptedData = request.cookies[cookieName];
         if (encryptedData) {
 
             const serialized = this._decryptCookie(cookieName, encryptedData);
@@ -68,20 +63,20 @@ export class CookieService {
     /*
      * Write a same site cookie containing the refresh token
      */
-    public writeRefreshCookie(refreshToken: string, response: AbstractResponse): void {
+    public writeRefreshCookie(refreshToken: string, response: Response): void {
 
         const cookieName = this._getCookieName(REFRESH_COOKIE);
-        const encryptedData = this._encryptCookie(cookieName, refreshToken);
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions(REFRESH_COOKIE));
+        const encryptedData = this._encryptCookie(refreshToken);
+        response.cookie(cookieName, encryptedData, this._getCookieOptions(REFRESH_COOKIE));
     }
 
     /*
      * Read the refresh token from the cookie
      */
-    public readRefreshCookie(request: AbstractRequest): string | null {
+    public readRefreshCookie(request: Request): string | null {
 
         const cookieName = this._getCookieName(REFRESH_COOKIE);
-        const encryptedData = request.getCookie(cookieName);
+        const encryptedData = request.cookies[cookieName];
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
         }
@@ -92,20 +87,20 @@ export class CookieService {
     /*
      * Write a same site cookie containing the access token
      */
-    public writeAccessCookie(accessToken: string, response: AbstractResponse): void {
+    public writeAccessCookie(accessToken: string, response: Response): void {
 
         const cookieName = this._getCookieName(ACCESS_COOKIE);
-        const encryptedData = this._encryptCookie(cookieName, accessToken);
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions(ACCESS_COOKIE));
+        const encryptedData = this._encryptCookie(accessToken);
+        response.cookie(cookieName, encryptedData, this._getCookieOptions(ACCESS_COOKIE));
     }
 
     /*
      * Read the access token from the cookie
      */
-    public readAccessCookie(request: AbstractRequest): string | null {
+    public readAccessCookie(request: Request): string | null {
 
         const cookieName = this._getCookieName(ACCESS_COOKIE);
-        const encryptedData = request.getCookie(cookieName);
+        const encryptedData = request.cookies[cookieName];
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
         }
@@ -116,20 +111,20 @@ export class CookieService {
     /*
      * Write a same site cookie containing the id token, in case needed for logout
      */
-    public writeIdCookie(idToken: string, response: AbstractResponse): void {
+    public writeIdCookie(idToken: string, response: Response): void {
 
         const cookieName = this._getCookieName(ID_COOKIE);
-        const encryptedData = this._encryptCookie(cookieName, idToken);
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions(ID_COOKIE));
+        const encryptedData = this._encryptCookie(idToken);
+        response.cookie(cookieName, encryptedData, this._getCookieOptions(ID_COOKIE));
     }
 
     /*
      * Read the id cookie if needed for logout
      */
-    public readIdCookie(request: AbstractRequest): string | null {
+    public readIdCookie(request: Request): string | null {
 
         const cookieName = this._getCookieName(ID_COOKIE);
-        const encryptedData = request.getCookie(cookieName);
+        const encryptedData = request.cookies[cookieName];
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
         }
@@ -140,11 +135,11 @@ export class CookieService {
     /*
      * Write a cookie to make it harder for malicious code to post bogus forms to our token refresh endpoint
      */
-    public writeAntiForgeryCookie(response: AbstractResponse, csrfValue: string): void {
+    public writeAntiForgeryCookie(response: Response, csrfValue: string): void {
 
         const cookieName = this._getCookieName(CSRF_COOKIE);
-        const encryptedData = this._encryptCookie(cookieName, csrfValue);
-        response.addCookie(cookieName, encryptedData, this._getCookieOptions(CSRF_COOKIE));
+        const encryptedData = this._encryptCookie(csrfValue);
+        response.cookie(cookieName, encryptedData, this._getCookieOptions(CSRF_COOKIE));
     }
 
     /*
@@ -159,10 +154,10 @@ export class CookieService {
     /*
      * Read the anti forgery value from the cookie
      */
-    public readAntiForgeryCookie(request: AbstractRequest): string | null {
+    public readAntiForgeryCookie(request: Request): string | null {
 
         const cookieName = this._getCookieName(CSRF_COOKIE);
-        const encryptedData = request.getCookie(cookieName);
+        const encryptedData = request.cookies[cookieName];
         if (encryptedData) {
             return this._decryptCookie(cookieName, encryptedData);
         }
@@ -173,35 +168,35 @@ export class CookieService {
     /*
      * Clear the temporary state cookie used during login
      */
-    public clearStateCookie(response: AbstractResponse): void {
-        response.addCookie(this._getCookieName(STATE_COOKIE), '', this._getExpireCookieOptions(STATE_COOKIE));
+    public clearStateCookie(response: Response): void {
+        response.cookie(this._getCookieName(STATE_COOKIE), '', this._getExpireCookieOptions(STATE_COOKIE));
     }
 
     /*
      * Clear all cookies when the user session expires
      */
-    public clearAll(response: AbstractResponse): void {
+    public clearAll(response: Response): void {
 
-        response.addCookie(this._getCookieName(REFRESH_COOKIE), '', this._getExpireCookieOptions(REFRESH_COOKIE));
-        response.addCookie(this._getCookieName(ACCESS_COOKIE),  '', this._getExpireCookieOptions(ACCESS_COOKIE));
-        response.addCookie(this._getCookieName(ID_COOKIE),      '', this._getExpireCookieOptions(ID_COOKIE));
-        response.addCookie(this._getCookieName(CSRF_COOKIE),    '', this._getExpireCookieOptions(CSRF_COOKIE));
+        response.cookie(this._getCookieName(REFRESH_COOKIE), '', this._getExpireCookieOptions(REFRESH_COOKIE));
+        response.cookie(this._getCookieName(ACCESS_COOKIE),  '', this._getExpireCookieOptions(ACCESS_COOKIE));
+        response.cookie(this._getCookieName(ID_COOKIE),      '', this._getExpireCookieOptions(ID_COOKIE));
+        response.cookie(this._getCookieName(CSRF_COOKIE),    '', this._getExpireCookieOptions(CSRF_COOKIE));
     }
 
     /*
      * Return a cookie of the form 'mycompany-auth-finalspa'
      */
     private _getCookieName(type: string) {
-        return `${this._apiConfiguration.cookiePrefix}-${type}`;
+        return `${this._configuration.cookiePrefix}-${type}`;
     }
 
     /*
      * Encrypt data using the Curity format, as AES26-GCM bytes and then base64url encode it
      */
-    private _encryptCookie(cookieName: string, plaintext: string): string {
+    private _encryptCookie(plaintext: string): string {
 
         const ivBytes = crypto.randomBytes(GCM_IV_SIZE);
-        const encKeyBytes = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'hex');
+        const encKeyBytes = Buffer.from(this._configuration.cookieEncryptionKey, 'hex');
 
         const cipher = crypto.createCipheriv('aes-256-gcm', encKeyBytes, ivBytes);
 
@@ -244,7 +239,7 @@ export class CookieService {
 
         try {
 
-            const encKeyBytes = Buffer.from(this._apiConfiguration.cookieEncryptionKey, 'hex');
+            const encKeyBytes = Buffer.from(this._configuration.cookieEncryptionKey, 'hex');
             const decipher = crypto.createDecipheriv('aes-256-gcm', encKeyBytes, ivBytes);
             decipher.setAuthTag(tagBytes);
 
@@ -274,7 +269,7 @@ export class CookieService {
             secure: true,
 
             // The cookie written is only used (by default) in the API domain
-            domain: this._apiConfiguration.cookieDomain,
+            domain: this._configuration.cookieDomain,
 
             // OAuth only cookies are restricted to OAuth Agent paths
             path: isOAuthOnlyCookie ? '/oauth-agent' : '/',

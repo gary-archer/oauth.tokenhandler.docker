@@ -59,6 +59,17 @@ export class ErrorUtils {
     }
 
     /*
+     * Handle requests to API routes that don't exist
+     */
+    public static fromRequestNotFound(): ClientError {
+
+        return new ClientError(
+            404,
+            ErrorCodes.requestNotFound,
+            'An API request was sent to a route that does not exist');
+    }
+
+    /*
      * Throw an exception for the SPA when there is a login response error from the Authorization Server
      */
     public static fromLoginResponseError(errorCode: string, errorDescription: string | null): ClientError {

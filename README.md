@@ -27,9 +27,11 @@ Then run this command to build and run the API in Express:
 ./start.sh
 ```
 
-Trust the development certificate downloaded to the local computer:
+Trust the root certificate that the build step downloads to your computer, so that SSL works in the browser.
+Add this file to the system keychain on macOS or the Windows certificate trust store for the local computer:
 
 ```text
+./certs/authsamples-dev.ca.pem
 ```
 
 Then test API operations with this command:

@@ -4,7 +4,10 @@
 # A script to test the OAuth Agent's API endpoints
 ##################################################
 
-WEB_BASE_URL='https://web.mycompany.com'
+#
+# Set variables
+#
+WEB_BASE_URL='https://web.authsamples-dev.com'
 TOKEN_HANDLER_BASE_URL='https://localtokenhandler.authsamples-dev.com:444/oauth-agent'
 LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
@@ -12,8 +15,13 @@ TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
 SESSION_ID=$(uuidgen)
 RESPONSE_FILE=test/response.txt
-#export HTTPS_PROXY='http://127.0.0.1:8888'
+LOGIN_COOKIES_FILE='./test/login_cookies.txt'
+SESSION_COOKIES_FILE='./test/session_cookies.txt'
+export https_proxy='http://127.0.0.1:8888'
 
+#
+# Ensure that we are in a known folder
+#
 cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
 
@@ -26,17 +34,6 @@ function getHeaderValue(){
   local _HEADER_VALUE=$(cat $RESPONSE_FILE | grep -i "^$_HEADER_NAME" | sed -r "s/^$_HEADER_NAME: (.*)$/\1/i")
   local _HEADER_VALUE=${_HEADER_VALUE%$'\r'}
   echo $_HEADER_VALUE
-}
-
-#
-# Similar to the above except that we read a cookie value from an HTTP response file
-# This currently only supports a single cookie in each set-cookie header, which is good enough for my purposes
-#
-function getCookieValue(){
-  local _COOKIE_NAME=$1
-  local _COOKIE_VALUE=$(cat $RESPONSE_FILE | grep -i "set-cookie: $_COOKIE_NAME" | sed -r "s/^set-cookie: $_COOKIE_NAME=(.[^;]*)(.*)$/\1/i")
-  local _COOKIE_VALUE=${_COOKIE_VALUE%$'\r'}
-  echo $_COOKIE_VALUE
 }
 
 #
@@ -76,11 +73,13 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/start" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
+-c "$LOGIN_COOKIES_FILE" \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
   echo "*** Problem encountered starting a login, status: $HTTP_STATUS"
   exit
 fi
+exit
 
 #
 # Get data we will use later
@@ -104,7 +103,6 @@ fi
 # The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
 #
 LOGIN_POST_LOCATION=$(getHeaderValue 'location')
-COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 
 #
 # We can now post a password credential, and the form fields used are Cognito specific
@@ -112,7 +110,6 @@ COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 echo "*** Posting credentials to sign in the test user ..."
 HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
 -H "origin: $LOGIN_BASE_URL" \
---cookie "XSRF-TOKEN=$COGNITO_XSRF_TOKEN" \
 --data-urlencode "_csrf=$COGNITO_XSRF_TOKEN" \
 --data-urlencode "username=$TEST_USERNAME" \
 --data-urlencode "password=$TEST_PASSWORD" \
@@ -137,7 +134,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/login/end" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
---cookie "$COOKIE_PREFIX-state=$STATE_COOKIE" \
+-b "$LOGIN_COOKIES_FILE" \
 -d '{"url":"'$AUTHORIZATION_RESPONSE_URL'"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '200' ]; then
@@ -145,19 +142,18 @@ if [ $HTTP_STATUS != '200' ]; then
   apiError
   exit
 fi
+exit
 
 #
 # Get data that we will use later
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
-ACCESS_COOKIE=$(getCookieValue "$COOKIE_PREFIX-at")
-REFRESH_COOKIE=$(getCookieValue "$COOKIE_PREFIX-rt")
-ID_COOKIE=$(getCookieValue "$COOKIE_PREFIX-id")
-CSRF_COOKIE=$(getCookieValue "$COOKIE_PREFIX-csrf")
+exit
 
 #
 # Next expire the access token in the secure cookie, for test purposes
+#;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
 #
 echo "*** Expiring the access token ..."
 HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
@@ -167,7 +163,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$TOKEN_HANDLER_BASE_URL/expire" \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
 -H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
---cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE;$COOKIE_PREFIX-rt=$REFRESH_COOKIE;$COOKIE_PREFIX-id=$ID_COOKIE;$COOKIE_PREFIX-csrf=$CSRF_COOKIE" \
+--cookie "$COOKIE_PREFIX-at=$ACCESS_COOKIE" \
 -d '{"type":"access"}' \
 -o $RESPONSE_FILE -w '%{http_code}')
 if [ $HTTP_STATUS != '204' ]; then

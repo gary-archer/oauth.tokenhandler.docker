@@ -3,7 +3,7 @@
         "port": 444,
         "sslCertificateFileName": "./certs/authsamples-dev.ssl.p12",
         "sslCertificatePassword": "Password1",
-        "useHttpProxy": false,
+        "useHttpProxy": true,
         "httpProxyUrl": "http://127.0.0.1:8888"
     },
     "api": {
@@ -14,14 +14,14 @@
         "cookieDomain": "api.mycompany.com",
         "cookiePrefix": "mycompany",
         "cookieEncryptionKey": "7312725575a3789d43bd41e592d1042226bc0d1a5d9bd9c4e8e58f121a1d5550",
-        "trustedWebOrigins": ["https://web.mycompany.com"],
+        "trustedWebOrigins": ["https://web.authsamples-dev.com"],
         "provider": "cognito"
     },
     "client": {
         "clientId": "3si16kr999m86q3vaus417dhjj",
         "clientSecret": "l6fsih3j6p46n82sho2hh9v2sh8vv5rcl1jdmnjb904t2evc40i",
-        "redirectUri": "https://web.mycompany.com/spa/",
-        "postLogoutRedirectUri": "https://web.mycompany.com/spa/loggedout",
+        "redirectUri": "https://web.authsamples-dev.com/spa/",
+        "postLogoutRedirectUri": "https://web.authsamples-dev.com/spa/loggedout",
         "scope": "openid profile email https://api.authsamples.com/api/transactions_read"
     }
 }

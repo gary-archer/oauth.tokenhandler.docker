@@ -225,7 +225,7 @@ export class Authorizer {
         // Check incoming details
         this._getLogEntry(response).setOperationName(operation);
         this._validateOrigin(request);
-        this._validateAntiForgeryCookie(request);
+        //this._validateAntiForgeryCookie(request);
 
         // Get the current refresh token
         const accessToken = this._cookieService.readAccessCookie(request);

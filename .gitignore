@@ -3,4 +3,4 @@ resources
 certs
 node_modules
 dist
-response.txt
+test/*.txt

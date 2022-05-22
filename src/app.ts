@@ -3,6 +3,7 @@ import {ConfigurationLoader} from './configuration/configurationLoader';
 import {ErrorUtils} from './errors/errorUtils';
 import {LogEntry} from './logging/logEntry';
 import {HttpServerConfiguration} from './startup/httpServerConfiguration';
+import {ExtraCaCerts} from './utilities/extraCaCerts';
 import {HttpProxy} from './utilities/httpProxy';
 
 /*
@@ -11,6 +12,9 @@ import {HttpProxy} from './utilities/httpProxy';
 (async () => {
 
     try {
+
+        // This is needed on Linux
+        ExtraCaCerts.initialize();
 
         // First load configuration
         const configuration = ConfigurationLoader.load();

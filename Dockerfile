@@ -20,10 +20,10 @@ RUN addgroup -g 1001 apigroup
 RUN adduser -u 1001 -G apigroup -h /home/apiuser -D apiuser
 
 # Configure trusted root authorities when making HTTPS calls inside the cluster
-COPY trusted.ca.pem /usr/local/share/ca-certificates/trusted.ca.pem
+COPY trusted.ca.pem /usr/local/share/ca-certificates/trusted.ca.crt
 RUN apk --no-cache add ca-certificates
 RUN update-ca-certificates
-ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/trusted.ca.pem
+ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/trusted.ca.crt
 
 # Run the Express app as the low privilege user
 USER apiuser

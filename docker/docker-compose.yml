@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+
+  oauthagent:
+    image: oauthagent:v1
+    hostname: oauthagent-internal.authsamples-dev.com
+    ports:
+      - 444:8000
+    volumes:
+      - ./api.config.json:/usr/api/api.config.json
+      - ./trusted.ca.pem:/usr/local/share/ca-certificates/trusted.ca.crt
+      - ../certs/authsamples-dev.ssl.p12:/usr/api/certs/authsamples-dev.ssl.p12
+    environment:
+      NODE_EXTRA_CA_CERTS: '/usr/local/share/ca-certificates/trusted.ca.crt'

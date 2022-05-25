@@ -3,4 +3,5 @@ resources
 certs
 node_modules
 dist
+trusted.ca.pem
 test/*.txt

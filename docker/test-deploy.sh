@@ -15,7 +15,7 @@ if [ ! -d 'node_modules' ]; then
   rm -rf node_modules
   npm install
   if [ $? -ne 0 ]; then
-    echo "Problem encountered installing the OAuth Agent dependencies"
+    echo "Problem encountered installing dependencies"
     exit
   fi
 fi
@@ -25,7 +25,7 @@ fi
 #
 npm run buildRelease
 if [ $? -ne 0 ]; then
-  echo 'Problem encountered building the OAuth Agent code'
+  echo 'Problem encountered building Node.js code'
   exit
 fi
 
@@ -34,7 +34,7 @@ fi
 #
 docker build -f docker/Dockerfile --build-arg TRUSTED_CA_CERTS='docker/trusted.ca.pem' -t oauthagent:v1 .
 if [ $? -ne 0 ]; then
-  echo 'Problem encountered building the OAuth Agent docker image'
+  echo 'Problem encountered building the docker image'
   exit
 fi
 

@@ -30,6 +30,11 @@ if [ $? -ne 0 ]; then
 fi
 
 #
+# Prepare root CA certificates that the Docker container will trust
+#
+cp ./certs/authsamples-dev.ca.pem docker/trusted.ca.pem
+
+#
 # Build the docker image
 #
 docker build -f docker/Dockerfile --build-arg TRUSTED_CA_CERTS='docker/trusted.ca.pem' -t oauthagent:v1 .
@@ -37,11 +42,6 @@ if [ $? -ne 0 ]; then
   echo 'Problem encountered building the docker image'
   exit
 fi
-
-#
-# Prepare root CA certificates that the Docker container will trust
-#
-cp ./certs/authsamples-dev.ca.pem docker/trusted.ca.pem
 
 #
 # Run the docker deployment

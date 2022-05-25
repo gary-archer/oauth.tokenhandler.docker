@@ -12,8 +12,8 @@ cd ..
 #
 if [ ! -d 'node_modules' ]; then
   
-  #rm -rf node_modules
-  #npm install
+  rm -rf node_modules
+  npm install
   if [ $? -ne 0 ]; then
     echo "Problem encountered installing the OAuth Agent dependencies"
     exit
@@ -23,7 +23,7 @@ fi
 #
 # Build to the dist folder
 #
-#npm run buildRelease
+npm run buildRelease
 if [ $? -ne 0 ]; then
   echo 'Problem encountered building the OAuth Agent code'
   exit

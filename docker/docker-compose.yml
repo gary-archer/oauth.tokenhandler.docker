@@ -3,7 +3,7 @@ services:
 
   oauthagent:
     image: oauthagent:v1
-    hostname: oauthagent-internal.authsamples-dev.com
+    hostname: localtokenhandler.authsamples-dev.com
     ports:
       - 444:8000
     volumes:

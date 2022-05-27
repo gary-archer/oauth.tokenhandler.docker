@@ -1,8 +1,8 @@
 #!/bin/bash
 
-##################################################
-# A script to test the OAuth Agent's API endpoints
-##################################################
+#############################################################
+# A script to test only the local OAuth Agent's API endpoints
+#############################################################
 
 #
 # Set variables
@@ -61,10 +61,37 @@ function apiError() {
 }
 
 #
+# 1. Verify that an OPTIONS request for an invalid route returns 204
+#
+echo '1. OPTIONS request for an invalid route ...'
+HTTP_STATUS=$(curl -i -s -X OPTIONS "$OAUTH_AGENT_BASE_URL/badpath" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ "$HTTP_STATUS" != '204' ]; then
+  echo "*** A request with an invalid route returned an unexpected HTTP status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
+# 2. Next verify that an OPTIONS request for an untrusted origin does not return CORS headers
+#
+echo '2. OPTIONS request for an untrusted origin ...'
+HTTP_STATUS=$(curl -i -s -X OPTIONS "$OAUTH_AGENT_BASE_URL/api/companies" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ "$HTTP_STATUS" != '204' ]; then
+  echo "*** OPTIONS request for an untrusted origin returned an unexpected HTTP status: $HTTP_STATUS"
+  exit
+fi
+ALLOW_ORIGIN=$(getHeaderValue 'access-control-allow-origin')
+if [ "$ALLOW_ORIGIN" != '' ]; then
+  echo '*** OPTIONS request for an untrusted origin returned CORS headers unexpectedly'
+  exit
+fi
+
+#
 # Act as the SPA by sending an OPTIONS request, then verifying that we get the expected results
 #
-echo "*** Session ID is $SESSION_ID"
-echo "*** Requesting cross origin access"
+echo '3. OPTIONS request for a trusted origin ...'
 HTTP_STATUS=$(curl -i -s -X OPTIONS "$OAUTH_AGENT_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H "access-control-request-headers: x-mycompany-api-client, x-mycompany-session-id" \
@@ -75,9 +102,21 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
 fi
 
 #
+# 4. Verify that a GET request for an invalid route returns a 404 error
+#
+echo '4. GET request with an invalid route ...'
+HTTP_STATUS=$(curl -i -s -X GET "$OAUTH_AGENT_BASE_URL/badpath" \
+-o $RESPONSE_FILE -w '%{http_code}')
+if [ $HTTP_STATUS -ne '404' ]; then
+  echo "*** GET request with an invalid route returned an unexpected HTTP status: $HTTP_STATUS"
+  apiError "$BODY"
+  exit
+fi
+
+#
 # Act as the SPA by calling the OAuth Agent to start a login and get the request URI
 #
-echo "*** Creating login URL ..."
+echo '5. Creating login URL ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/login/start" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
@@ -91,16 +130,14 @@ if [ "$HTTP_STATUS" != '200' ]; then
   exit
 fi
 
-#
-# Get data we will use later
-#
 JSON=$(tail -n 1 $RESPONSE_FILE)
 AUTHORIZATION_REQUEST_URL=$(jq -r .authorizationRequestUri <<< "$JSON")
 
 #
 # Next invoke the redirect URI to start a login
+# The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
 #
-echo "*** Following login redirect ..."
+echo '6. Following login redirect ...'
 HTTP_STATUS=$(curl -i -L -s "$AUTHORIZATION_REQUEST_URL" \
 -c "$LOGIN_COOKIES_FILE" \
 -o "$RESPONSE_FILE" -w '%{http_code}')
@@ -109,17 +146,13 @@ if [ "$HTTP_STATUS" != '200' ]; then
   exit
 fi
 
-#
-# Get data we will use in order to post test credentials and automate a login
-# The Cognito CSRF cookie is written twice due to following the redirect, so get the second occurrence
-#
 LOGIN_POST_LOCATION=$(getHeaderValue 'location')
 COGNITO_XSRF_TOKEN=$(getCookieValue 'XSRF-TOKEN' | cut -d ' ' -f 2)
 
 #
 # We can now post a password credential, and the form fields used are Cognito specific
 #
-echo "*** Posting credentials to sign in the test user ..."
+echo '7. Posting credentials to sign in the test user ...'
 HTTP_STATUS=$(curl -i -s -X POST "$LOGIN_POST_LOCATION" \
 -H "origin: $LOGIN_BASE_URL" \
 -b "$LOGIN_COOKIES_FILE" \
@@ -140,7 +173,7 @@ AUTHORIZATION_RESPONSE_URL=$(getHeaderValue 'location')
 #
 # Next we end the login by asking the server to do an authorization code grant
 #
-echo "*** Finishing the login by processing the authorization code ..."
+echo '8. Finishing the login by processing the authorization code ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/login/end" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
@@ -158,7 +191,7 @@ if [ $HTTP_STATUS != '200' ]; then
 fi
 
 #
-# Get data that we will use later
+# Get the anti forgery token which should be present after a successful login
 #
 JSON=$(tail -n 1 $RESPONSE_FILE)
 ANTI_FORGERY_TOKEN=$(jq -r .antiForgeryToken <<< "$JSON")
@@ -170,7 +203,7 @@ fi
 #
 # Next expire the access token in the secure cookie, for test purposes
 #
-echo "*** Expiring the access token ..."
+echo '9. Expiring the access token ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/expire" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
@@ -190,7 +223,7 @@ fi
 #
 # Next try to refresh the access token
 #
-echo "*** Calling refresh to get a new access token ..."
+echo '10. Calling refresh to get a new access token ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/refresh" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
@@ -209,7 +242,7 @@ fi
 #
 # Next expire both the access token and refresh token in the secure cookies, for test purposes
 #
-echo "*** Expiring the refresh token ..."
+echo '11. Expiring the refresh token ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/expire" \
 -H "origin: $WEB_BASE_URL" \
 -H 'content-type: application/json' \
@@ -230,7 +263,7 @@ fi
 #
 # Next try to refresh the token and we should get an invalid_grant error
 #
-echo "*** Trying to refresh the access token when the session is expired ..."
+echo '12. Trying to refresh the access token when the session is expired ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/refresh" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \
@@ -248,7 +281,7 @@ fi
 #
 # Next make a logout request
 #
-echo "*** Calling logout to clear cookies and get the end session request URL ..."
+echo '13. Calling logout to clear cookies and get the end session request URL ...'
 HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/logout" \
 -H "origin: $WEB_BASE_URL" \
 -H 'accept: application/json' \

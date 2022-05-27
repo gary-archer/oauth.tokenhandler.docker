@@ -100,6 +100,21 @@ if [ "$HTTP_STATUS" != '200'  ] && [ "$HTTP_STATUS" != '204' ]; then
   echo "*** Problem encountered requesting cross origin access, status: $HTTP_STATUS"
   exit
 fi
+ALLOW_ORIGIN=$(getHeaderValue 'access-control-allow-origin')
+if [ "$ALLOW_ORIGIN" != "$WEB_BASE_URL" ]; then
+  echo '*** OPTIONS request for a trusted origin returned an unexpected allow-origin header'
+  exit
+fi
+ALLOW_CREDENTIALS=$(getHeaderValue 'access-control-allow-credentials')
+if [ "$ALLOW_CREDENTIALS" != 'true' ]; then
+  echo '*** OPTIONS request for a trusted origin returned an unexpected allow-credentials header'
+  exit
+fi
+ALLOWED_HEADERS=$(getHeaderValue 'access-control-allow-headers')
+if [ "$ALLOWED_HEADERS" != 'x-mycompany-api-client, x-mycompany-session-id' ]; then
+  echo '*** OPTIONS request for a trusted origin returned an unexpected allow-headers header'
+  exit
+fi
 
 #
 # 4. Verify that a GET request for an invalid route returns a 404 error
@@ -210,6 +225,7 @@ HTTP_STATUS=$(curl -i -s -X POST "$OAUTH_AGENT_BASE_URL/expire" \
 -H 'accept: application/json' \
 -H 'x-mycompany-api-client: httpTest' \
 -H "x-mycompany-session-id: $SESSION_ID" \
+-H "x-$COOKIE_PREFIX-csrf: $ANTI_FORGERY_TOKEN" \
 -b "$MAIN_COOKIES_FILE" \
 -c "$MAIN_COOKIES_FILE" \
 -d '{"type":"access"}' \

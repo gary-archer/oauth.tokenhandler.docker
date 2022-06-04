@@ -8,6 +8,31 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
 
 #
+# Get the platform
+#
+case "$(uname -s)" in
+
+  Darwin)
+    PLATFORM="MACOS"
+ 	;;
+
+  MINGW64*)
+    PLATFORM="WINDOWS"
+	;;
+  Linux)
+    PLATFORM="LINUX"
+	;;
+esac
+
+#
+# Download certificates if required
+#
+./downloadcerts.sh
+if [ $? -ne 0 ]; then
+  exit
+fi
+
+#
 # Install dependencies
 #
 if [ ! -d 'node_modules' ]; then
@@ -33,6 +58,13 @@ fi
 # Prepare root CA certificates that the Docker container will trust
 #
 cp ./certs/authsamples-dev.ca.pem docker/trusted.ca.pem
+
+#
+# On Windows, fix problems with trailing newline characters in Docker scripts
+#
+if [ "$PLATFORM" == 'WINDOWS' ]; then
+  sed -i 's/\r$//' docker/docker-init.sh
+fi
 
 #
 # Build the docker image

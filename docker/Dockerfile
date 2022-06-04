@@ -1,4 +1,4 @@
-FROM node:16.6.0-alpine
+FROM node:16.15.0-alpine
 
 # Run a script from a runtime argument to do initialization of trusted certificates when required
 ARG TRUSTED_CA_CERTS

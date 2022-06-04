@@ -10,24 +10,12 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 rm -rf resources
 
-if [ ! -d 'certs' ]; then
-  
-  #
-  # Download SSL certificates if needed
-  #
-  rm -rf certs
-  git clone https://github.com/gary-archer/oauth.developmentcertificates ./resources
-  if [ $? -ne 0 ]; then
-    echo 'Problem encountered downloading OAuth Agent certificates'
-    exit
-  fi
-
-  #
-  # Move OAuth Agent certificates to this folder
-  #
-  rm -rf certs
-  mv ./resources/authsamples-dev ./certs
-  rm -rf ./resources
+#
+# Download certificates if required
+#
+./downloadcerts.sh
+if [ $? -ne 0 ]; then
+  exit
 fi
 
 #

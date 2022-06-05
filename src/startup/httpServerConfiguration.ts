@@ -52,7 +52,7 @@ export class HttpServerConfiguration {
         this._expressApp.use('/oauth-agent/*', express.json());
 
         // Add logging middleware
-        this._expressApp.use('/oauth-agent/*', new LoggerMiddleware().logRequest);
+        this._expressApp.use('/oauth-agent/*', new LoggerMiddleware(this._configuration.api).logRequest);
 
         // Do not cache API requests
         this._expressApp.set('etag', false);

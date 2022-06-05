@@ -20,4 +20,6 @@ export interface ApiConfiguration {
     trustedWebOrigins: string[];
 
     provider: string;
+
+    prettyPrintLogs: boolean;
 }

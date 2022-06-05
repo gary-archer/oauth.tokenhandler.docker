@@ -31,7 +31,7 @@ import {HttpProxy} from './utilities/httpProxy';
     } catch (e) {
 
         // Log startup errors
-        const logEntry = new LogEntry();
+        const logEntry = new LogEntry(false);
         logEntry.writeStartupError(ErrorUtils.createServerError(e));
     }
 })();

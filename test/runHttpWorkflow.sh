@@ -13,17 +13,43 @@ LOGIN_BASE_URL='https://login.authsamples.com'
 COOKIE_PREFIX=mycompany
 TEST_USERNAME='guestuser@mycompany.com'
 TEST_PASSWORD=GuestPassword1
-SESSION_ID=$(uuidgen)
-RESPONSE_FILE='test/response.txt'
+SESSION_ID='abc'
+RESPONSE_FILE='test//response.txt'
 LOGIN_COOKIES_FILE='test/login_cookies.txt'
 MAIN_COOKIES_FILE='test/main_cookies.txt'
 #export https_proxy='http://127.0.0.1:8888'
 
 #
-# Ensure that we are in a known folder
+# Ensure that we are in the root folder
 #
 cd "$(dirname "${BASH_SOURCE[0]}")"
 cd ..
+
+#
+# Get the platform
+#
+case "$(uname -s)" in
+
+  Darwin)
+    PLATFORM="MACOS"
+ 	;;
+
+  MINGW64*)
+    PLATFORM="WINDOWS"
+	;;
+  Linux)
+    PLATFORM="LINUX"
+	;;
+esac
+
+#
+# Get a random session ID
+#
+if [ "$PLATFORM" == 'WINDOWS' ]; then
+  SESSION_ID=$(powershell -command $"[guid]::NewGuid().ToString()")
+else
+  SESSION_ID=$(uuidgen)
+fi
 
 #
 # A simple routine to get a header value from an HTTP response file

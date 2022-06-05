@@ -11,9 +11,11 @@ import {LogEntryData} from './logEntryData';
 export class LogEntry {
 
     private readonly _data: LogEntryData;
+    private readonly _prettyPrint: boolean;
 
-    public constructor() {
+    public constructor(prettyPrint: boolean) {
         this._data = new LogEntryData();
+        this._prettyPrint = prettyPrint;
     }
 
     public start(request: Request): void {
@@ -84,7 +86,7 @@ export class LogEntry {
     private _output(): void {
 
         const data = this._data.toLogFormat();
-        if (process.env.IS_LOCAL) {
+        if (this._prettyPrint) {
 
             // During Express development use pretty printing
             console.log(JSON.stringify(data, null, 2));

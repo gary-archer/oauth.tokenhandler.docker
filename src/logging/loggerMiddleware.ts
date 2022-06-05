@@ -1,4 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
+import { ApiConfiguration } from '../configuration/apiConfiguration';
 import {LogEntry} from './logEntry';
 
 /*
@@ -6,12 +7,19 @@ import {LogEntry} from './logEntry';
  */
 export class LoggerMiddleware {
 
+    private readonly _configuration: ApiConfiguration;
+
+    public constructor(configuration: ApiConfiguration) {
+        this._configuration = configuration;
+        this._setupCallbacks();
+    }
+
     /*
      * Process any exceptions and add details to logs
      */
     public logRequest(request: Request, response: Response, next: NextFunction): void {
 
-        const logEntry = new LogEntry();
+        const logEntry = new LogEntry(this._configuration.prettyPrintLogs);
         logEntry.start(request);
         response.locals.logEntry = logEntry;
 
@@ -20,5 +28,12 @@ export class LoggerMiddleware {
         });
 
         next();
+    }
+
+    /*
+     * Make the this parameter available for when the API is called
+     */
+    private _setupCallbacks(): void {
+        this.logRequest = this.logRequest.bind(this);
     }
 }

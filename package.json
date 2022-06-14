@@ -4,10 +4,10 @@
   "description": "An API that performs OAuth work for the final SPA and issues secure SameSite cookies",
   "scripts": {
     "lint": "npx eslint . --ext .ts,.tsx",
-    "start": "nodemon -e ts --exec \"ts-node --files src/app.ts\"",
+    "start": "bash ./start.sh",
+    "test": "bash ./test/runHttpWorkflow.sh",
     "buildRelease": "rimraf dist && tsc --outDir dist --sourceMap false",
-    "startRelease": "node dist/app.js",
-    "test": "bash ./test/runHttpWorkflow.sh"
+    "startRelease": "node dist/app.js"
   },
   "author": "Gary Archer",
   "license": "MIT",

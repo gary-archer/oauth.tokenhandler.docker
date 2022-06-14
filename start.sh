@@ -26,19 +26,28 @@ if [ ! -d 'node_modules' ]; then
   rm -rf node_modules
   npm install
   if [ $? -ne 0 ]; then
-    echo "Problem encountered installing the OAuth Agent dependencies"
+    echo 'Problem encountered installing the OAuth Agent dependencies'
     exit
   fi
 fi
 
 #
-# Start the Express API
-# On Linux first ensure that you have first granted Node.js permissions to listen on port 444:
-# - sudo setcap 'cap_net_bind_service=+ep' $(which node)
+# Run code quality checks
 #
-npm start
+npm run lint
 if [ $? -ne 0 ]; then
-  echo "Problem encountered starting the OAuth Agent"
+  echo 'Code quality checks failed'
   exit
 fi
 
+#
+# Start the Express API in watch mode
+# On Linux first ensure that you have first granted Node.js permissions to listen on port 444:
+# - sudo setcap 'cap_net_bind_service=+ep' $(which node)
+#
+RUN_COMMAND="./node_modules/.bin/ts-node --files 'src/app.ts'"
+./node_modules/.bin/nodemon --watch 'src/**/*' -e ts --exec "$RUN_COMMAND"
+if [ $? -ne 0 ]; then
+  echo 'Problem encountered running the OAuth Agent'
+  exit
+fi

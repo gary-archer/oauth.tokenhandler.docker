@@ -12,7 +12,7 @@ The [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curit
 This repo provides an OAuth Agent that can run on a developemnt computer, with some custom expiry testing and logging behavior.\
 Two deployment scenarios are supported:
 
-- The token handler can route local SPA to local API requests, when it runs at https://localtokenhandler.authsamples-dev.com:444
+- The token handler can route local SPA to local API requests, via https://localtokenhandler.authsamples-dev.com:444
 - The token handler can be deployed to Kubernetes as part of an [End-to-end SPA and API](https://github.com/gary-archer/oauth.cloudnative.deployment) setup
 
 ## Local Development Quick Start

@@ -4,15 +4,18 @@
 
 [![Known Vulnerabilities](https://snyk.io/test/github/gary-archer/oauth.tokenhandler.docker/badge.svg?targetFile=package.json)](https://snyk.io/test/github/gary-archer/oauth.tokenhandler.docker?targetFile=package.json)
 
-Utility API support for a Single Page Application, to enable OpenID Connect security and use of secure cookies.\
+API Driven OpenID Connect for Single Page Applications.\
 The [Final SPA](https://github.com/gary-archer/oauth.websample.final) uses Curity's [Token Handler Pattern](https://github.com/curityio/spa-using-token-handler) and calls this API to perform OAuth related work.
 
-## Custom Implementation
+## Overview
 
-This repo provides an OAuth Agent with custom code related to expiry testing and API logging.\
-It enables my [End-to-end SPA and API](https://github.com/gary-archer/oauth.cloudnative.deployment) to run in Kubernetes with the desired behaviour.
+This repo provides an OAuth Agent that can run on a developemnt computer, with some custom expiry testing and logging behavior.\
+Two deployment scenarios are supported:
 
-## Quick Start
+- The token handler can route local SPA to local API requests, when it runs at https://localtokenhandler.authsamples-dev.com:444
+- The token handler can be deployed to Kubernetes as part of an [End-to-end SPA and API](https://github.com/gary-archer/oauth.cloudnative.deployment) setup
+
+## Local Development Quick Start
 
 To run this component on a development computer, first add the local development domain to your hosts file:
 
@@ -34,8 +37,8 @@ Add this file to the system keychain on macOS or the Windows certificate trust s
 ./certs/authsamples-dev.ca.pem
 ```
 
-Then test API operations with this command:
+Then test all OAuth operations with this command:
 
 ```bash
-npm run test
+npm test
 ```

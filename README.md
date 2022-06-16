@@ -21,7 +21,6 @@ To run this component on a development computer, first add the local development
 
 ```text
 127.0.0.1 localtokenhandler.authsamples-dev.com
-::1       localhost
 ````
 
 Then run this command to build and run the API in Express:

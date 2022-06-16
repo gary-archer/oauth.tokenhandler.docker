@@ -45,7 +45,7 @@ fi
 # On Linux first ensure that you have first granted Node.js permissions to listen on port 444:
 # - sudo setcap 'cap_net_bind_service=+ep' $(which node)
 #
-RUN_COMMAND="./node_modules/.bin/ts-node --files 'src/app.ts'"
+RUN_COMMAND="./node_modules/.bin/ts-node --files src/app.ts"
 ./node_modules/.bin/nodemon --watch 'src/**/*' -e ts --exec "$RUN_COMMAND"
 if [ $? -ne 0 ]; then
   echo 'Problem encountered running the OAuth Agent'

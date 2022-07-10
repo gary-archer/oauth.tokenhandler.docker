@@ -33,8 +33,8 @@ fi
 #
 # Trigger deployment of the OAuth Agent to the Kubernetes cluster
 #
-kubectl -n deployed delete -f api.yaml 2>/dev/null
-kubectl -n deployed apply  -f api.yaml
+kubectl -n deployed delete -f ../kubernetes/oauthagent.yaml 2>/dev/null
+kubectl -n deployed apply  -f ../kubernetes/oauthagent.yaml
 if [ $? -ne 0 ]; then
   echo '*** OAuth Agent Kubernetes deployment problem encountered'
   exit 1

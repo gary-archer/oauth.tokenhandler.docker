@@ -3,8 +3,8 @@ import {URLSearchParams} from 'url';
 import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
+import {OAuthErrorStatus} from '../errors/oauthErrorStatus';
 import {HttpProxy} from '../utilities/httpProxy';
-import {OAuthErrorStatus} from '../utilities/oauthErrorStatus';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
 import {UrlHelper} from '../utilities/urlHelper';
 

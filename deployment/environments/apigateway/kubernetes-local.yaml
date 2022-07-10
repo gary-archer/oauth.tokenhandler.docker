@@ -1,0 +1,27 @@
+_format_version: '2.1'
+_transform: true
+services:
+
+# The SPA calls https://tokenhandler.mycompany.com/oauth-agent to perform OAuth requests
+- name: oauthagent
+  url: https://oauthagent-svc:8101/oauth-agent
+  routes:
+  - name: oauth-agent-route
+    paths:
+    - /oauth-agent
+
+  # The SPA calls https://tokenhandler.mycompany.com/api to access business data
+- name: finalapi
+  url: https://finalapi-svc:8101/api
+  routes:
+  - name: finalapi-route
+    paths:
+    - /api
+  plugins:
+  - name: oauth-proxy
+    config:
+      encryption_key: d26d160214a85a2aa9dc80487e0c24b33d1594bda7b0e1954e99fde54f6486df
+      cookie_name_prefix: mycompany
+      trusted_web_origins:
+      - https://web.mycompany.com
+      cors_enabled: true

@@ -1,0 +1,116 @@
+#
+# The Kubernetes resources for our Reverse Proxy, which runs on port 8100
+#
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: kong-cert
+spec:
+  secretName: kong-ssl-cert
+  issuerRef:
+    name: ca-issuer
+    kind: Issuer
+  commonName: kong-proxy-svc.default.svc
+  dnsNames:
+  - kong-proxy-svc
+  - kong-proxy-svc.default.svc
+  - kong-proxy-svc.default.svc.cluster.local
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: kong-proxy
+  labels:
+    app: kong-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong-proxy
+  template:
+    metadata:
+      labels:
+        app: kong-proxy
+    spec:
+      containers:
+      - name: kong-proxy
+        image: custom_kong:2.8.1-alpine
+        env:
+        - name: KONG_DATABASE
+          value: 'off'
+        - name: KONG_DECLARATIVE_CONFIG
+          value: '/usr/local/kong/declarative/kong.yaml'
+        - name: KONG_PROXY_LISTEN
+          value: '0.0.0.0:8100 ssl'
+        - name: KONG_SSL_CERT_KEY
+          value: '/etc/secrets/certs/tls.key'
+        - name: KONG_SSL_CERT
+          value: '/etc/secrets/certs/tls.crt'
+        - name: KONG_SSL_TRUSTED_CERTIFICATE
+          value: '/etc/secrets/certs/ca.crt'
+        - name: KONG_LUA_SSL_TRUSTED_CERTIFICATE
+          value: '/etc/secrets/certs/ca.crt'
+        - name: KONG_LOG_LEVEL
+          value: 'info'
+        - name: KONG_NGINX_PROXY_PROXY_BUFFER_SIZE
+          value: '16k'
+        - name: KONG_NGINX_PROXY_PROXY_BUFFERS
+          value: '8 16k'
+        - name: KONG_NGINX_PROXY_LARGE_CLIENT_HEADER_BUFFERS
+          value: '8 16k'
+        - name: KONG_PLUGINS
+          value: 'bundled,oauth-proxy'
+        volumeMounts:
+          - name: kong-config
+            mountPath: /usr/local/kong/declarative/kong.yaml
+            subPath: kong.yaml
+            readOnly: true
+          - name: kong-ssl-cert
+            mountPath: /etc/secrets/certs
+            readOnly: true
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-config
+        - name: kong-ssl-cert
+          secret:
+            secretName: kong-ssl-cert
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kong-proxy-svc
+spec:
+  selector:
+    app: kong-proxy
+  ports:
+  - protocol: "TCP"
+    port: 8100
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: kong-proxy-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ingress.class: 'nginx'
+    nginx.ingress.kubernetes.io/secure-backends: 'true'
+    nginx.ingress.kubernetes.io/backend-protocol: 'HTTPS'
+    nginx.ingress.kubernetes.io/proxy-buffering: 'on'
+    nginx.ingress.kubernetes.io/proxy-buffer-size: '64k'
+    nginx.ingress.kubernetes.io/proxy-buffers-number: '16'
+spec:
+  tls:
+    - hosts:
+        - tokenhandler.mycompany.com
+      secretName: mycompany-com-tls
+  rules:
+    - host: tokenhandler.mycompany.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kong-proxy-svc
+                port:
+                  number: 8100

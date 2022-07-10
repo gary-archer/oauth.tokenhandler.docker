@@ -71,7 +71,7 @@ fi
 #
 # Build the docker image for the Kong API Gateway, which hosts the OAuth Proxy plugin
 #
-docker build -f deployment/docker/apigateway/Dockerfile -t apigateway:v1 .
+docker build --no-cache -f deployment/docker/apigateway/Dockerfile -t apigateway:v1 .
 if [ $? -ne 0 ]; then
   echo 'Problem encountered building the API Gateway docker image'
   exit 1

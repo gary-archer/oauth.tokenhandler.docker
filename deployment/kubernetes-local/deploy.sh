@@ -14,7 +14,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 # Give configuration files the name expected by code
 #
 cp ../environments/oauthagent/kubernetes-local.config.json api.config.json
-cp ../environments/apigateway/kubernetes-local.yaml        kong.yml
+cp ../environments/apigateway/kubernetes-local.yml         kong.yml
 
 #
 # Create a configmap for the OAuth Agent's JSON configuration file

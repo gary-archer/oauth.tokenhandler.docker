@@ -39,7 +39,7 @@ spec:
         - name: KONG_DATABASE
           value: 'off'
         - name: KONG_DECLARATIVE_CONFIG
-          value: '/usr/local/kong/declarative/kong.yaml'
+          value: '/usr/local/kong/declarative/kong.yml'
         - name: KONG_PROXY_LISTEN
           value: '0.0.0.0:8100 ssl'
         - name: KONG_SSL_CERT_KEY
@@ -62,8 +62,8 @@ spec:
           value: 'bundled,oauth-proxy'
         volumeMounts:
           - name: kong-config
-            mountPath: /usr/local/kong/declarative/kong.yaml
-            subPath: kong.yaml
+            mountPath: /usr/local/kong/declarative/kong.yml
+            subPath: kong.yml
             readOnly: true
           - name: kong-ssl-cert
             mountPath: /etc/secrets/certs

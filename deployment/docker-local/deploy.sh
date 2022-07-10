@@ -9,7 +9,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 #
 # Run the docker deployment
 #
-docker compose --project-name tokenhandler up --force-recreate --detach
+docker compose --project-name localtokenhandler up --force-recreate --detach
 if [ $? -ne 0 ]; then
   echo "Problem encountered running Docker image"
   exit 1

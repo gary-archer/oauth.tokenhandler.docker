@@ -10,4 +10,4 @@ cd ..
 #
 # Run the docker deployment
 #
-docker compose --project-name tokenhandler down
+docker compose --project-name localtokenhandler down

@@ -4,6 +4,7 @@ import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ClientConfiguration} from '../configuration/clientConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {HttpProxy} from '../utilities/httpProxy';
+import {OAuthErrorStatus} from '../utilities/oauthErrorStatus';
 import {OAuthLoginState} from '../utilities/oauthLoginState';
 import {UrlHelper} from '../utilities/urlHelper';
 
@@ -68,7 +69,7 @@ export class OAuthService {
         formData.append('code', code);
         formData.append('redirect_uri', this._clientConfiguration.redirectUri);
         formData.append('code_verifier', codeVerifier);
-        return this._postGrantMessage(formData);
+        return this._postGrantMessage('authorization_code', formData);
     }
 
     /*
@@ -81,7 +82,7 @@ export class OAuthService {
         formData.append('client_id', this._clientConfiguration.clientId);
         formData.append('client_secret', this._clientConfiguration.clientSecret);
         formData.append('refresh_token', refreshToken);
-        return this._postGrantMessage(formData);
+        return this._postGrantMessage('refresh_token', formData);
     }
 
     /*
@@ -116,7 +117,7 @@ export class OAuthService {
     /*
      * Send a grant message to the Authorization Server
      */
-    private async _postGrantMessage(formData: URLSearchParams): Promise<any> {
+    private async _postGrantMessage(grantType: string, formData: URLSearchParams): Promise<any> {
 
         // Define request options
         const options = {
@@ -145,8 +146,17 @@ export class OAuthService {
                 const errorData = e.response.data;
                 if (errorData.error) {
 
-                    // Throw an error with Authorization Server details, such as invalid_grant
-                    throw ErrorUtils.fromTokenResponseError(errorData.error, errorData.error_description, options.url);
+                    // Throw an error with Authorization Server details
+                    const statusCode = OAuthErrorStatus.fromTokenResponseError(
+                        grantType,
+                        e.response.status,
+                        errorData.error);
+
+                    throw ErrorUtils.fromTokenResponseError(
+                        statusCode,
+                        errorData.error,
+                        errorData.error_description,
+                        options.url);
                 }
             }
 

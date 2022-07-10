@@ -72,20 +72,27 @@ export class ErrorUtils {
     /*
      * Throw an exception for the SPA when there is a login response error from the Authorization Server
      */
-    public static fromLoginResponseError(errorCode: string, errorDescription: string | null): ClientError {
+    public static fromLoginResponseError(
+        statusCode: number,
+        errorCode: string,
+        errorDescription: string | null): ClientError {
 
         const description = errorDescription || 'A login error response was received from the Authorization Server';
-        return new ClientError(401, errorCode, description);
+        return new ClientError(statusCode, errorCode, description);
     }
 
     /*
      * Throw an exception for the SPA when there is a back channel response error from the Authorization Server
      */
-    public static fromTokenResponseError(errorCode: string, errorDescription: string | null, url: string): ClientError {
+    public static fromTokenResponseError(
+        statusCode: number,
+        errorCode: string,
+        errorDescription: string | null,
+        url: string): ClientError {
 
         const description = errorDescription || 'A token error response was received from the Authorization Server';
 
-        const error = new ClientError(401, errorCode, description);
+        const error = new ClientError(statusCode, errorCode, description);
         error.logContext = {
             url,
         };

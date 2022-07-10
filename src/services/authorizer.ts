@@ -4,6 +4,7 @@ import {ApiConfiguration} from '../configuration/apiConfiguration';
 import {ErrorUtils} from '../errors/errorUtils';
 import {LogEntry} from '../logging/logEntry';
 import {HeaderProcessor} from '../utilities/headerProcessor';
+import {OAuthErrorStatus} from '../utilities/oauthErrorStatus';
 import {PageLoadResponse} from '../utilities/pageLoadResponse';
 import {ResponseWriter} from '../utilities/responseWriter';
 import {UrlHelper} from '../utilities/urlHelper';
@@ -88,7 +89,8 @@ export class Authorizer {
 
         // Report Authorization Server errors back to the SPA, such as those sending an invalid scope
         if (state && error) {
-            throw ErrorUtils.fromLoginResponseError(error, errorDescription);
+            const statusCode = OAuthErrorStatus.fromAuthorizationResponseError(error);
+            throw ErrorUtils.fromLoginResponseError(statusCode, error, errorDescription);
         }
 
         // Read the state cookie and then clear it

@@ -5,7 +5,7 @@
 ##############################################################
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-cd ..
+cd ../..
 
 #
 # Get the platform
@@ -30,7 +30,7 @@ esac
 #
 ./downloadcerts.sh
 if [ $? -ne 0 ]; then
-  exit
+  exit 1
 fi
 
 #
@@ -42,7 +42,7 @@ if [ ! -d 'node_modules' ]; then
   npm install
   if [ $? -ne 0 ]; then
     echo "Problem encountered installing dependencies"
-    exit
+    exit 1
   fi
 fi
 
@@ -52,45 +52,35 @@ fi
 npm run buildRelease
 if [ $? -ne 0 ]; then
   echo 'Problem encountered building Node.js code'
-  exit
+  exit 1
 fi
 
 #
 # Prepare root CA certificates that the Docker container will trust
 #
-cp ./certs/authsamples-dev.ca.pem docker/trusted.ca.pem
+cp ./certs/authsamples-dev.ca.pem deployment/docker-local/trusted.ca.pem
 
 #
 # On Windows, fix problems with trailing newline characters in Docker scripts
 #
 if [ "$PLATFORM" == 'WINDOWS' ]; then
-  sed -i 's/\r$//' docker/docker-init.sh
+  sed -i 's/\r$//' deployment/docker/oauthagent/docker-init.sh
 fi
 
 #
-# Build the docker image
+# Build the docker image for the Kong API Gateway, which hosts the OAuth Proxy plugin
 #
-docker build -f docker/Dockerfile --build-arg TRUSTED_CA_CERTS='docker/trusted.ca.pem' -t oauthagent:v1 .
+docker build -f deployment/docker/apigateway/Dockerfile -t apigateway:v1 .
 if [ $? -ne 0 ]; then
-  echo 'Problem encountered building the docker image'
-  exit
-fi
-
-#
-# Run the docker deployment
-#
-docker compose --file docker/docker-compose.yml --project-name oauthagent up --force-recreate --detach
-if [ $? -ne 0 ]; then
-  echo "Problem encountered running Docker image"
+  echo 'Problem encountered building the API Gateway docker image'
   exit 1
 fi
 
 #
-# Wait for it to become available
+# Build the docker image for the OAuth Agent
 #
-echo 'Waiting for OAuth Agent to become available ...'
-WEB_ORIGIN='https://web.authsamples-dev.com'
-BASE_URL='https://localtokenhandler.authsamples-dev.com:444'
-while [ "$(curl -k -s -X POST -H "origin:$WEB_ORIGIN" -o /dev/null -w ''%{http_code}'' "$BASE_URL/oauth-agent/login/start")" != '200' ]; do
-  sleep 2
-done
+docker build -f deployment/docker/oauthagent/Dockerfile --build-arg TRUSTED_CA_CERTS='deployment/docker-local/trusted.ca.pem' -t oauthagent:v1 .
+if [ $? -ne 0 ]; then
+  echo 'Problem encountered building the OAuth Agent docker image'
+  exit 1
+fi

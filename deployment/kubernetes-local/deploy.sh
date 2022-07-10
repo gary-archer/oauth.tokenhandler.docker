@@ -11,10 +11,16 @@
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
 #
+# Give configuration files the name expected by code
+#
+cp ../environments/oauthagent/kubernetes-local.config.json api.config.json
+cp ../environments/apigateway/kubernetes-local.yaml        kong.yml
+
+#
 # Create a configmap for the OAuth Agent's JSON configuration file
 #
 kubectl -n deployed delete configmap oauth-agent-config 2>/dev/null
-kubectl -n deployed create configmap oauth-agent-config --from-file=../environments/oauthagent/kubernetes-local.config.json
+kubectl -n deployed create configmap oauth-agent-config --from-file=api.config.json
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered creating the OAuth Agent configmap'
   exit 1
@@ -44,7 +50,7 @@ fi
 # Create the configmap for API gateway routes
 #
 kubectl -n deployed delete configmap kong-config 2>/dev/null
-kubectl -n deployed create configmap kong-config --from-file=../environments/apigateway/kubernetes-local.yaml
+kubectl -n deployed create configmap kong-config --from-file=kong.yml
 if [ $? -ne 0 ]; then
   echo '*** Problem encountered creating the API gateway configmap'
   exit 1

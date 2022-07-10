@@ -1,0 +1,72 @@
+#
+# The Kubernetes resources for the OAuth Agent, which performs OAuth work for the SPA
+#
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: oauthagent-cert
+spec:
+  secretName: oauthagent-pkcs12
+  issuerRef:
+    name: ca-issuer
+    kind: Issuer
+  commonName: oauthagent-svc.default.svc
+  dnsNames:
+  - oauthagent-svc
+  - oauthagent-svc.default.svc
+  - oauthagent-svc.default.svc.cluster.local
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: oauthagent-pkcs12-password
+        key: password
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: oauthagent
+  labels:
+    app: oauthagent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oauthagent
+  template:
+    metadata:
+      labels:
+        app: oauthagent
+    spec:
+      containers:
+      - name: oauthagent
+        image: oauthagent:v1
+        volumeMounts:
+          - name: oauth-agent-config
+            mountPath: /usr/api/api.config.json
+            subPath: api.config.json
+            readOnly: true
+          - name: oauthagent-ssl-cert
+            mountPath: /usr/api/certs
+            readOnly: true
+      volumes:
+        - name: oauth-agent-config
+          configMap:
+            name: oauth-agent-config
+        - name: oauth-agent-ca-cert
+          configMap:
+            name: oauth-agent-ca-cert
+        - name: oauthagent-ssl-cert
+          secret:
+            secretName: oauthagent-pkcs12
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: oauthagent-svc
+spec:
+  selector:
+    app: oauthagent
+  ports:
+  - protocol: "TCP"
+    port: 8101
